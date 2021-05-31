@@ -17,6 +17,8 @@ def PyDOS():
         while not spoll.poll(0):
             time.sleep(.25)
 
+        sys.stdin.read(1)
+
         spoll.unregister(sys.stdin)
 
         return()
