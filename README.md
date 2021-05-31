@@ -1,4 +1,4 @@
-Micropython DOS-like OS for RP2040 microcontroller boards.
+Micropython DOS-like OS for RP2040 microcontroller boards. Check out the demo video at https://www.youtube.com/watch?v=Az_oiq8GE4Y
 
 To start the OS type "import PyDOS" at the micropython REPL prompt.
 
