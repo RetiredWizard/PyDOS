@@ -4,7 +4,7 @@ To start the OS type "import PyDOS" at the micropython REPL prompt.
 
 External programs included:
 
-edit.py - line editor inspireded by DOS edlin. intial program structure of line editor by Joesph Long
+edit.py - line editor inspireded by DOS edlin. Intial program structure of line editor by Joesph Long
     https://github.com/j-osephlong/Python-Text-Editor
 
 fileview.py - scrollable text file viewer
