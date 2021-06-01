@@ -386,6 +386,7 @@ def PyDOS():
     os.chdir("/")
     while True:
         cmdLine = input("\n("+str(gc.mem_free())+") "+os.getcwd()+">")
+        cmdLine = cmdLine.strip()
         args = cmdLine.split(" ")
 
         if len(args) > 1:
@@ -397,8 +398,12 @@ def PyDOS():
                 else:
                     i += 1
 
-        switches = (args[0].upper()).split('/')
-        cmd = switches.pop(0)
+        if cmdLine[0] != '/':
+            switches = (args[0].upper()).split('/')
+            cmd = switches.pop(0)
+        else:
+            switches = ""
+            cmd = args[0]
 
         if cmd == "DIR":
 # Command switches /p/w/a:[d]/o:[[-]n,e,s,d]/s needs to be implemented
@@ -503,15 +508,22 @@ def PyDOS():
         elif cmd == "TYPE":
 
             if len(args) == 2:
+
+                savDir = os.getcwd()
+                args[1] = absolutePath(args[1],savDir)
+
                 aPath = args[1].split("/")
                 newdir = aPath.pop(-1)
+                (validPath, tmpDir) = chkPath(aPath)
+                if tmpDir[-1] != "/":
+                    tmpDir += "/"
 
-                if chkPath(aPath)[0] and newdir in os.listdir(args[1][0:max(0,len(args[1])-len(newdir)-1)]) and os.stat(args[1])[0] & (2**15) != 0:
-                    f = open(args[1])
+                if validPath and newdir in os.listdir(tmpDir[:(-1 if tmpDir != "/" else None)]) and os.stat(tmpDir+newdir)[0] & (2**15) != 0:
+                    f = open(tmpDir+newdir)
                     print(f.read())
                     f.close()
                 else:
-                    print("Unable to display: "+args[1]+". File not found.")
+                    print("Unable to display: "+tmpDir+newdir+". File not found.")
             else:
                 print("Illeagal Path.")
 
@@ -538,12 +550,18 @@ def PyDOS():
             elif len(args) > 2:
                 print("Too many arguments")
             else:
+                savDir = os.getcwd()
+                args[1] = absolutePath(args[1],savDir)
+
                 aPath = args[1].split("/")
                 newdir = aPath.pop(-1)
+                (validPath, tmpDir) = chkPath(aPath)
+                if tmpDir[-1] != "/":
+                    tmpDir += "/"
 
-                if chkPath(aPath)[0]:
-                    if newdir not in os.listdir(args[1][0:max(0,len(args[1])-len(newdir)-1)]):
-                        os.mkdir(args[1])
+                if validPath:
+                    if newdir not in os.listdir(tmpDir[:(-1 if tmpDir != "/" else None)]):
+                        os.mkdir(tmpDir+newdir)
                     else:
                         print("Target name already exists")
                 else:
@@ -555,21 +573,20 @@ def PyDOS():
             elif len(args) > 2:
                 print("Too many arguments")
             else:
+                savDir = os.getcwd()
+                args[1] = absolutePath(args[1],savDir)
+
                 aPath = args[1].split("/")
-                if chkPath(aPath)[0]:
+                (validPath, tmpDir) = chkPath(aPath)
+                if validPath:
 # Directory must be empty to be removed
-                    if os.listdir(args[1]) == []:
-                        savDir = os.getcwd()
-                        os.chdir(args[1])
-                        arg1Dir = os.getcwd()
-                        os.chdir(savDir)
-                        if arg1Dir != "/":
-                            os.rmdir(args[1])
-                            if savDir == arg1Dir:
+                    if os.listdir(tmpDir) == []:
+                        if tmpDir != "/":
+                            os.rmdir(tmpDir)
+                            if savDir == tmpDir:
                                 os.chdir("..")
                         else:
                             print("Can not remove root directory")
-                            os.chdir(savDir)
                     else:
                         print("The directory is not empty")
                 else:
@@ -671,7 +688,9 @@ def PyDOS():
                                             gc.collect()
 
                                 elif newdir in os.listdir(targetPath+newdir2):
-                                    if input("Overwrite "+targetPath+newdir2+("" if newdir2 == "" else "/")+newdir+"? (y/n): ").upper() == "Y":
+                                    if sourcePath == targetPath+newdir2+("" if newdir2 == "" else "/"):
+                                        print("The file cannot be copied onto itself")
+                                    elif input("Overwrite "+targetPath+newdir2+("" if newdir2 == "" else "/")+newdir+"? (y/n): ").upper() == "Y":
                                         os.remove(targetPath+newdir2+("" if newdir2 == "" else "/")+newdir)
                                         filecpy(sourcePath+newdir,targetPath+newdir2+("" if newdir2 == "" else "/")+newdir)
                                         nFiles += 1
@@ -706,8 +725,16 @@ def PyDOS():
             continue
 
         else:
+            savDir = os.getcwd()
+            args[0] = absolutePath(args[0],savDir)
+
             aPath = args[0].split("/")
             newdir = aPath.pop(-1)
+            (validPath, tmpDir) = chkPath(aPath)
+            if tmpDir[-1] != "/":
+                tmpDir += "/"
+
+
             if len(args) == 1:
                 passedIn = ""
             elif len(args) > 1:
@@ -715,26 +742,28 @@ def PyDOS():
 
 #            if args[0] in os.listdir() and os.stat(args[0])[0] & (2**15)!= 0 and ((args[0].split("."))[1]).upper() == "PY":
 
-            if  ((args[0].split("."))[-1]).upper() == "PY":
-                if chkPath(aPath)[0] and newdir in os.listdir(args[0][0:max(0,len(args[0])-len(newdir)-1)]) and os.stat(args[0])[0] & (2**15) != 0:
+            if  ((newdir.split("."))[-1]).upper() == "PY":
+                if validPath and newdir in os.listdir(tmpDir[:(-1 if tmpDir != "/" else None)]) and os.stat(tmpDir+newdir)[0] & (2**15) != 0:
 
 #               __import__((args[0].split("."))[0])
-                    exCmd(args[0],passedIn)
+                    exCmd(tmpDir+newdir,passedIn)
                 else:
                     print("Illegal command:",args[0]+".")
-            elif chkPath(aPath)[0]:
-                if newdir+".py" in os.listdir(args[0][0:max(0,len(args[0])-len(newdir)-1)]) and os.stat(args[0]+".py")[0] & (2**15) != 0:
-                    exCmd(args[0]+".py",passedIn)
-                elif newdir+".PY" in os.listdir(args[0][0:max(0,len(args[0])-len(newdir)-1)]) and os.stat(args[0]+".PY")[0] & (2**15) != 0:
-                    exCmd(args[0]+".PY",passedIn)
-                elif newdir+".Py" in os.listdir(args[0][0:max(0,len(args[0])-len(newdir)-1)]) and os.stat(args[0]+".Py")[0] & (2**15) != 0:
-                    exCmd(args[0]+".Py",passedIn)
-                elif newdir+".pY" in os.listdir(args[0][0:max(0,len(args[0])-len(newdir)-1)]) and os.stat(args[0]+".pY")[0] & (2**15) != 0:
-                    exCmd(args[0]+".pY",passedIn)
+            elif validPath:
+                if newdir+".py" in os.listdir(tmpDir[:(-1 if tmpDir != "/" else None)]) and os.stat(tmpDir+newdir+".py")[0] & (2**15) != 0:
+                    exCmd(tmpDir+newdir+".py",passedIn)
+                elif newdir+".PY" in os.listdir(tmpDir[:(-1 if tmpDir != "/" else None)]) and os.stat(tmpDir+newdir+".PY")[0] & (2**15) != 0:
+                    exCmd(tmpDir+newdir+".PY",passedIn)
+                elif newdir+".Py" in os.listdir(tmpDir[:(-1 if tmpDir != "/" else None)]) and os.stat(tmpDir+newdir+".Py")[0] & (2**15) != 0:
+                    exCmd(tmpDir+newdir+".Py",passedIn)
+                elif newdir+".pY" in os.listdir(tmpDir[:(-1 if tmpDir != "/" else None)]) and os.stat(tmpDir+newdir+".pY")[0] & (2**15) != 0:
+                    exCmd(tmpDir+newdir+".pY",passedIn)
                 else:
                     print("Illegal command:",args[0]+".")
             else:
                 print("Illegal command:",args[0]+".")
+
+            gc.collect()
 
 
 if __name__ == "__PyDOS__":
