@@ -161,7 +161,7 @@ def interperit(command):
     confirmCmd = False
     loop = True
     command_list = parseInput(command)
-    print (lineNum,command_list,parseMap)
+    #print (lineNum,command_list,parseMap)
     if "?" in parseMap:
         confirmCmd = True
         parseMap = parseMap.replace("?","")

@@ -382,10 +382,25 @@ def PyDOS():
         return
 
 
+    activeBAT = False
+    batEcho = True
     cmd = ""
     os.chdir("/")
     while True:
-        cmdLine = input("\n("+str(gc.mem_free())+") "+os.getcwd()+">")
+        if activeBAT:
+            cmdLine = BATfile.readline()
+            batLineNo += 1
+            if cmdLine == "":
+                activeBAT = False
+                batEcho = True
+            elif batEcho and cmdLine[0] !="@":
+                print(cmdLine,end="")
+            elif cmdLine[0] == "@":
+                cmdLine = cmdLine[1:]
+
+        if not activeBAT:
+            cmdLine = input("\n("+str(gc.mem_free())+") "+os.getcwd()+">")
+
         cmdLine = cmdLine.strip()
         args = cmdLine.split(" ")
 
@@ -398,14 +413,16 @@ def PyDOS():
                 else:
                     i += 1
 
-        if cmdLine[0] != '/':
+        if cmdLine != "" and cmdLine[0] != '/':
             switches = (args[0].upper()).split('/')
             cmd = switches.pop(0)
         else:
             switches = ""
             cmd = args[0]
 
-        if cmd == "DIR":
+        if cmd == "":
+            continue
+        elif cmd == "DIR":
 # Command switches /p/w/a:[d]/o:[[-]n,e,s,d]/s needs to be implemented
 
             if len(args) == 1:
@@ -429,6 +446,35 @@ def PyDOS():
             gc.collect()
             gc.threshold(gc.mem_free() // 4 + gc.mem_alloc())
             print("\n%10i Kb free conventional memory" % (int(gc.mem_free()/1000)))
+
+        elif cmd == "ECHO":
+            if len(args) == 1:
+                print("Echo is "+("on." if batEcho else "off."))
+            else:
+                if args[1].upper() == 'ON':
+                    batEcho = True
+                elif args[1].upper() == 'OFF':
+                    batEcho = False
+                else:
+                    print(cmdLine[5:])
+
+        elif cmd == "PAUSE":
+            anyKey()
+
+        elif cmd[0] == ":" and activeBAT:
+            if len(args[0]) <= 1 or len(args) != 1:
+                print("Invalid batch label")
+
+        elif cmd == "GOTO" and activeBAT:
+            if len(args) == 2:
+                try:
+                    BATfile.seek(batLabels[args[1]][1])
+                except:
+                    print("Invalid Goto label")
+
+                batLineNo = batLabels[args[1]][0]
+            else:
+                print("Invalid Goto label")
 
         elif cmd == "RENAME" or cmd == "REN" or cmd == "MOVE" or cmd == "MV":
 # Move command should really work more like copy where source can be file and target can be a directory
@@ -721,9 +767,6 @@ def PyDOS():
         elif cmd == "EXIT":
             break
 
-        elif cmd == "":
-            continue
-
         else:
             savDir = os.getcwd()
             args[0] = absolutePath(args[0],savDir)
@@ -742,26 +785,57 @@ def PyDOS():
 
 #            if args[0] in os.listdir() and os.stat(args[0])[0] & (2**15)!= 0 and ((args[0].split("."))[1]).upper() == "PY":
 
+            batFound = -1
+            curDLst = os.listdir(tmpDir[:(-1 if tmpDir != "/" else None)])
             if  ((newdir.split("."))[-1]).upper() == "PY":
-                if validPath and newdir in os.listdir(tmpDir[:(-1 if tmpDir != "/" else None)]) and os.stat(tmpDir+newdir)[0] & (2**15) != 0:
+                if validPath and newdir in curDLst and os.stat(tmpDir+newdir)[0] & (2**15) != 0:
 
 #               __import__((args[0].split("."))[0])
                     exCmd(tmpDir+newdir,passedIn)
                 else:
-                    print("Illegal command:",args[0]+".")
-            elif validPath:
-                if newdir+".py" in os.listdir(tmpDir[:(-1 if tmpDir != "/" else None)]) and os.stat(tmpDir+newdir+".py")[0] & (2**15) != 0:
-                    exCmd(tmpDir+newdir+".py",passedIn)
-                elif newdir+".PY" in os.listdir(tmpDir[:(-1 if tmpDir != "/" else None)]) and os.stat(tmpDir+newdir+".PY")[0] & (2**15) != 0:
-                    exCmd(tmpDir+newdir+".PY",passedIn)
-                elif newdir+".Py" in os.listdir(tmpDir[:(-1 if tmpDir != "/" else None)]) and os.stat(tmpDir+newdir+".Py")[0] & (2**15) != 0:
-                    exCmd(tmpDir+newdir+".Py",passedIn)
-                elif newdir+".pY" in os.listdir(tmpDir[:(-1 if tmpDir != "/" else None)]) and os.stat(tmpDir+newdir+".pY")[0] & (2**15) != 0:
-                    exCmd(tmpDir+newdir+".pY",passedIn)
+                    print("Illegal command:",args[0])
+            elif ((newdir.split("."))[-1]).upper() == "BAT":
+                if validPath and newdir in curDLst and os.stat(tmpDir+newdir)[0] & (2**15) != 0:
+                    batFound = 0
                 else:
-                    print("Illegal command:",args[0]+".")
+                    print("Illegal command:",args[0])
+            elif validPath:
+                if newdir+".py" in curDLst and os.stat(tmpDir+newdir+".py")[0] & (2**15) != 0:
+                    exCmd(tmpDir+newdir+".py",passedIn)
+                elif newdir+".PY" in curDLst and os.stat(tmpDir+newdir+".PY")[0] & (2**15) != 0:
+                    exCmd(tmpDir+newdir+".PY",passedIn)
+                elif newdir+".Py" in curDLst and os.stat(tmpDir+newdir+".Py")[0] & (2**15) != 0:
+                    exCmd(tmpDir+newdir+".Py",passedIn)
+                elif newdir+".pY" in curDLst and os.stat(tmpDir+newdir+".pY")[0] & (2**15) != 0:
+                    exCmd(tmpDir+newdir+".pY",passedIn)
+                # skipping wierd capitalization combinations (.BAt, .BaT, .bAt, .baT, bAT)
+                elif newdir+".bat" in curDLst and os.stat(tmpDir+newdir+".bat")[0] & (2**15) != 0:
+                    batFound = 1
+                elif newdir+".BAT" in curDLst and os.stat(tmpDir+newdir+".BAT")[0] & (2**15) != 0:
+                    batFound = 2
+                elif newdir+".Bat" in curDLst and os.stat(tmpDir+newdir+".Bat")[0] & (2**15) != 0:
+                    batFound = 3
+                else:
+                    print("Illegal command:",args[0])
             else:
-                print("Illegal command:",args[0]+".")
+                print("Illegal command:",args[0])
+
+            if batFound != -1:
+                if activeBAT:
+                    BATfile.close()
+                BATfile = open(tmpDir+newdir+(["",".bat",".BAT",".Bat"])[batFound])
+                activeBAT = True
+                batEcho = True
+                batLineNo = 0
+                batIndex = [0]
+                batLabels = {}
+                for batLine in BATfile:
+                    batIndex.append(batIndex[batLineNo]+len(batLine))
+                    batLineNo += 1
+                    if batLine.strip()[0] == ":" and len(batLine.strip().split(" ")[0]) > 1:
+                        batLabels[batLine.strip().split(" ")[0][1:]] = [batLineNo,batIndex[batLineNo]]
+                BATfile.seek(0)
+                batLineNo = 0
 
             gc.collect()
 
