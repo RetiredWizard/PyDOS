@@ -17,11 +17,11 @@ def PyDOS():
         while not spoll.poll(0):
             time.sleep(.25)
 
-        sys.stdin.read(1)
+        keyIn = sys.stdin.read(1)
 
         spoll.unregister(sys.stdin)
 
-        return()
+        return(keyIn)
 
 # The main function that checks if two given strings match.
 # The first string may contain wildcard characters
@@ -369,6 +369,7 @@ def PyDOS():
         return
 
     def filecpy(file1,file2):
+        #if (len(file1) >=3 and file1[-3:].upper() == "CON") or (len(file1) >=4 and file1[-4:] == "CON:)":
         gc.collect()
         gc.threshold(gc.mem_free() // 4 + gc.mem_alloc())
         fOrig = open(file1)
@@ -381,27 +382,78 @@ def PyDOS():
         gc.collect()
         return
 
+    def setCondCmd(args,i,condResult):
+        condCmd = ""
+        foundElse = False
+
+        for _ in args[i:]:
+
+            if condResult:
+                if _.upper() == "ELSE":
+                    break
+                condCmd += (_+" ")
+            else:
+                if foundElse:
+                    condCmd += (_+" ")
+                else:
+                    if _.upper() == "ELSE":
+                        foundElse = True
+
+        return condCmd
+
 
     activeBAT = False
     batEcho = True
     cmd = ""
+    condCmd = ""
     os.chdir("/")
+    envVars = {}
     while True:
-        if activeBAT:
-            cmdLine = BATfile.readline()
-            batLineNo += 1
-            if cmdLine == "":
-                activeBAT = False
-                batEcho = True
-            elif batEcho and cmdLine[0] !="@":
-                print(cmdLine,end="")
-            elif cmdLine[0] == "@":
-                cmdLine = cmdLine[1:]
+        if condCmd != "":
+            cmdLine = condCmd
+            condCmd = ""
+        else:
+            if activeBAT:
+                cmdLine = BATfile.readline()
+                i=1
+                for param in batParams:
+                    cmdLine = cmdLine.replace('%'+str(i),param)
+                    i+=1
+                    if i>9:
+                        break
 
-        if not activeBAT:
-            cmdLine = input("\n("+str(gc.mem_free())+") "+os.getcwd()+">")
+                batLineNo += 1
+                if cmdLine == "":
+                    activeBAT = False
+                    batEcho = True
+                elif batEcho and cmdLine[0] !="@":
+                    print(cmdLine,end="")
+                elif cmdLine[0] == "@":
+                    cmdLine = cmdLine[1:]
+
+            if not activeBAT:
+                cmdLine = input("\n("+str(gc.mem_free())+") "+os.getcwd()+">")
 
         cmdLine = cmdLine.strip()
+
+        envFound = False
+        fndVar = ""
+        newCmdLine = ""
+        for _ in cmdLine:
+            if not envFound:
+                if _ == "%":
+                    envFound = True
+                else:
+                    newCmdLine += _
+            else:
+                if _ == "%":
+                    envFound = False
+                    newCmdLine += envVars.get(fndVar,"")
+                    fndVar = ""
+                else:
+                    fndVar += _
+        cmdLine = newCmdLine
+
         args = cmdLine.split(" ")
 
         if len(args) > 1:
@@ -420,7 +472,7 @@ def PyDOS():
             switches = ""
             cmd = args[0]
 
-        if cmd == "":
+        if cmd == "" or cmd == "REM":
             continue
         elif cmd == "DIR":
 # Command switches /p/w/a:[d]/o:[[-]n,e,s,d]/s needs to be implemented
@@ -447,6 +499,9 @@ def PyDOS():
             gc.threshold(gc.mem_free() // 4 + gc.mem_alloc())
             print("\n%10i Kb free conventional memory" % (int(gc.mem_free()/1000)))
 
+        elif cmd == "VER":
+            print("PyDOS [Version 0.5]")
+
         elif cmd == "ECHO":
             if len(args) == 1:
                 print("Echo is "+("on." if batEcho else "off."))
@@ -464,17 +519,178 @@ def PyDOS():
         elif cmd[0] == ":" and activeBAT:
             if len(args[0]) <= 1 or len(args) != 1:
                 print("Invalid batch label")
+                condCmd = "exit"
 
         elif cmd == "GOTO" and activeBAT:
             if len(args) == 2:
                 try:
                     BATfile.seek(batLabels[args[1]][1])
                 except:
-                    print("Invalid Goto label")
+                    print("Invalid Goto label:",args[1])
+                    condCmd = "exit"
 
-                batLineNo = batLabels[args[1]][0]
+                batLineNo = batLabels.get(args[1],[batLineNo+1,0])[0]
             else:
-                print("Invalid Goto label")
+                print("Invalid Goto label:",cmdLine)
+                condCmd = "exit"
+
+        elif cmd == "IF" and activeBAT:
+            condResult = False
+
+            if len(args) < 3:
+                print("Invalid command format:",cmdLine)
+                condCmd = "exit"
+            else:
+                i = 1
+                notlogic = False
+                if args[1].upper() == "NOT":
+                   notlogic = True
+                   i = 2
+
+                if args[i].strip().upper() == 'ERRORLEVEL':
+                    i += 1
+                    if len(args) > i and args[i].isdigit():
+                        if str(envVars.get('errorlevel')).isdigit() and int(envVars.get('errorlevel')) == int(args[i]):
+                            condResult = True
+
+                        if notlogic:
+                            condResult = not condResult
+
+                        i += 1
+                        condCmd = setCondCmd(args,i,condResult)
+                    else:
+                        print("Invalid conditional ERRORLEVEL:",cmdLine)
+                        condCmd = "exit"
+
+                elif args[i].strip().upper() == 'EXIST':
+                    i += 1
+                    if len(args) > i:
+                        savDir = os.getcwd()
+                        args[i] = absolutePath(args[i],savDir)
+
+                        aPath = args[i].split("/")
+                        newdir = aPath.pop(-1)
+                        (validPath, tmpDir) = chkPath(aPath)
+                        if tmpDir == "" or tmpDir[-1] != "/":
+                            tmpDir += "/"
+
+                        if validPath and newdir in os.listdir(tmpDir[:(-1 if tmpDir != "/" else None)]):
+                            condResult = True
+                        if notlogic:
+                            condResult = not condResult
+
+                        i += 1
+                        condCmd = setCondCmd(args,i,condResult)
+
+                    else:
+                        print("Invalid conditional EXIST:",cmdLine)
+                        condCmd = "exit"
+                else:
+                    # string comparison
+                    if len(args) > i:
+                        string1 = args[i]
+                        if "==" in args[i]:
+                            string1 = args[i].split("==")[0]
+                            if args[i][-1] != "=":
+                                string2 = args[i].split("==")[-1]
+                            else:
+                                i += 1
+                                if len(args) > i:
+                                    string2 = args[i]
+                                else:
+                                    print("Invalid string conditional:",cmdLine)
+                                    condCmd = "exit"
+                        elif len(args) > i+1:
+                            i += 1
+                            if "==" in args[i]:
+                                if len(args[i]) > 2:
+                                    string2 = args[i].split("==")[-1]
+                                else:
+                                    i+=1
+                                    if len(args) > i:
+                                        string2 = args[i]
+                                    else:
+                                        print("Invalid string conditional:",cmdLine)
+                                        condCmd = "exit"
+                            else:
+                                print("Invalid string conditional:",cmdLine)
+                                condCmd = "exit"
+                        else:
+                            print("Invalid string conditional:",cmdLine)
+                            condCmd = "exit"
+
+
+                        if condCmd != "exit":
+                            if string1 == string2:
+                                condResult = True
+                            if notlogic:
+                                condResult = not condResult
+
+                            i += 1
+                            condCmd = setCondCmd(args,i,condResult)
+                    else:
+                        print("Invalid string conditional:",cmdLine)
+                        condCmd = "exit"
+
+        elif cmd == "SET":
+            if len(args) == 1:
+                for _ in envVars:
+                    print(_+"=",envVars[_],sep="")
+            else:
+                if len(switches) == 0:
+                    args = cmdLine.split(" ")
+                    args.pop(0)
+                    envCmd = (" ".join(args)).split("=")
+                    envCmdVar = envCmd.pop(0).strip()
+                    tmp = "=".join(envCmd).strip()
+                    if tmp != "":
+                        envVars[envCmdVar] = tmp
+                    else:
+                        if envVars.get(envCmdVar) != None:
+                            envVars.pop(envCmdVar)
+                elif len(switches) == 1:
+                    if switches[0] == 'A':
+                        # Replace all possible environment variables with their values
+                        args = cmdLine.split(" ")
+                        args.pop(0)
+                        envCmd = (" ".join(args)).split("=")
+                        envCmd.pop(0)
+                        envCmd = "=".join(envCmd)
+                        for _ in " %*()-+/":
+                            envCmd = envCmd.replace(_," ")
+                        envCmd = envCmd.split(" ")
+
+                        for _ in envCmd:
+                            if _ != "":
+                                if _[0].isalpha():
+                                    cmdLine = cmdLine.replace(_.strip(),str(envVars.get(_,0)))
+
+                        # Evaluate right sight of = after value substituion
+                        args = cmdLine.split(" ")
+                        args.pop(0)
+                        envCmd = (" ".join(args)).split("=")
+                        envCmdVar = envCmd.pop(0).strip()
+                        print("=".join(envCmd))
+                        try:
+                            envVars[envCmdVar] = str(eval("=".join(envCmd).strip()))
+                        except:
+                            envVars[envCmdVar] = "0"
+                    elif switches[0] == "P":
+                        args = cmdLine.split(" ")
+                        args.pop(0)
+                        envCmd = (" ".join(args)).split("=")
+                        envCmdVar = envCmd.pop(0).strip()
+                        tmp = input("=".join(envCmd).strip()+" ")
+                        if tmp != "":
+                            envVars[envCmdVar] = tmp
+                        else:
+                            if envVars.get(envCmdVar) != None:
+                                envVars.pop(envCmdVar)
+                    else:
+                        print("Illeagal switch:","/".join(switches),"Command Format: SET[/a|/p] [variable = [string|expression]]")
+                else:
+                    print("Illeagal switch:","/".join(switches),"Command Format: SET[/a|/p] [variable = [string|expression]]")
+
 
         elif cmd == "RENAME" or cmd == "REN" or cmd == "MOVE" or cmd == "MV":
 # Move command should really work more like copy where source can be file and target can be a directory
@@ -524,7 +740,7 @@ def PyDOS():
                 aPath = args[1].split("/")
                 newdir = aPath.pop(-1)
                 (validPath, tmpDir) = chkPath(aPath)
-                if tmpDir[-1] != "/":
+                if tmpDir == "" or tmpDir[-1] != "/":
                     tmpDir += "/"
                 if validPath:
                     if "*" in newdir or "?" in newdir:
@@ -561,7 +777,7 @@ def PyDOS():
                 aPath = args[1].split("/")
                 newdir = aPath.pop(-1)
                 (validPath, tmpDir) = chkPath(aPath)
-                if tmpDir[-1] != "/":
+                if tmpDir == "" or tmpDir[-1] != "/":
                     tmpDir += "/"
 
                 if validPath and newdir in os.listdir(tmpDir[:(-1 if tmpDir != "/" else None)]) and os.stat(tmpDir+newdir)[0] & (2**15) != 0:
@@ -602,7 +818,7 @@ def PyDOS():
                 aPath = args[1].split("/")
                 newdir = aPath.pop(-1)
                 (validPath, tmpDir) = chkPath(aPath)
-                if tmpDir[-1] != "/":
+                if tmpDir == "" or tmpDir[-1] != "/":
                     tmpDir += "/"
 
                 if validPath:
@@ -706,9 +922,9 @@ def PyDOS():
 
 # Second argument target is a directory
                             else:
-                                if sourcePath[-1] != "/":
+                                if sourcePath == "" or sourcePath[-1] != "/":
                                     sourcePath += "/"
-                                if targetPath[-1] != "/":
+                                if targetPath == "" or targetPath[-1] != "/":
                                     targetPath += "/"
 
                                 if wildCardOp:
@@ -765,7 +981,11 @@ def PyDOS():
                 print("Wrong number of arguments")
 
         elif cmd == "EXIT":
-            break
+            if activeBAT:
+                activeBAT = False
+                batEcho = True
+            else:
+                break
 
         else:
             savDir = os.getcwd()
@@ -774,14 +994,16 @@ def PyDOS():
             aPath = args[0].split("/")
             newdir = aPath.pop(-1)
             (validPath, tmpDir) = chkPath(aPath)
-            if tmpDir[-1] != "/":
+            if tmpDir == "" or tmpDir[-1] != "/":
                 tmpDir += "/"
 
 
             if len(args) == 1:
                 passedIn = ""
+                batParams = []
             elif len(args) > 1:
                 passedIn = args[1]
+                batParams = args[1:]
 
 #            if args[0] in os.listdir() and os.stat(args[0])[0] & (2**15)!= 0 and ((args[0].split("."))[1]).upper() == "PY":
 
@@ -816,9 +1038,9 @@ def PyDOS():
                 elif newdir+".Bat" in curDLst and os.stat(tmpDir+newdir+".Bat")[0] & (2**15) != 0:
                     batFound = 3
                 else:
-                    print("Illegal command:",args[0])
+                    print("Illegal command:",cmdLine.split(" ")[0])
             else:
-                print("Illegal command:",args[0])
+                print("Illegal command:",cmdLine.split(" ")[0])
 
             if batFound != -1:
                 if activeBAT:
