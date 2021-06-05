@@ -982,6 +982,8 @@ def PyDOS():
 
         elif cmd == "EXIT":
             if activeBAT:
+                if len(args) > 1:
+                    condCmd = "set errorlevel="+args[1]
                 activeBAT = False
                 batEcho = True
             else:
