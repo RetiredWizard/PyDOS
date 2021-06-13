@@ -500,7 +500,7 @@ def PyDOS():
             print("\n%10i Kb free conventional memory" % (int(gc.mem_free()/1000)))
 
         elif cmd == "VER":
-            print("PyDOS [Version 0.5]")
+            print("PyDOS [Version 0.6]")
 
         elif cmd == "ECHO":
             if len(args) == 1:
