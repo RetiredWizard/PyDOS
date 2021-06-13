@@ -26,6 +26,8 @@ from basicparser import BASICParser
 from flowsignal import FlowSignal
 from lexer import Lexer
 import gc
+import os
+from sys import platform
 # import pickle
 
 
@@ -43,7 +45,7 @@ class Program:
         # and loop returns
         self.__return_stack = []
 
-    def list(self, strt_line, end_line):
+    def list(self, strt_line, end_line, infile, tmpfile):
         """Lists the program"""
         line_numbers = self.line_numbers()
 
@@ -51,7 +53,7 @@ class Program:
             if (int(line_number) >= strt_line and int(line_number) <= end_line) or strt_line == -1:
                 print(line_number, end=' ')
 
-                statement = self.__program[line_number]
+                statement = self.getprogram(line_number,infile,tmpfile)
                 for token in statement:
                     # Add in quotes for strings
                     if token.category == Token.STRING:
@@ -63,60 +65,83 @@ class Program:
                 # *DCH* print(flush=True)
                 print()
 
-    def save(self, file):
+    def save(self, file, infile, tmpfile):
         """Save the program
 
         :param file: The name and path of the save file
 
         """
-        try:
-            with open(file, 'w') as outfile:
-#                pickle.dump(self.__program, outfile)
-#                ujson.dump(self.__program, outfile)
-                line_numbers = self.line_numbers()
+        retCode = False
+        answer = "Y"
+        if file in os.listdir():
+            answer = input("Overwrite "+file+" (y/n): ").upper()
 
-                for line_number in line_numbers:
-                    fileLine = str(line_number)
+        if file+".pYb" in os.listdir():
+            print("Can't save "+file+" because temporary work file "+file+".pYb exists in directory")
+            answer = "N"
 
-                    statement = self.__program[line_number]
-                    for token in statement:
-                        # Add in quotes for strings
-                        if token.category == Token.STRING:
-                            fileLine += ' "' + token.lexeme + '"'
+        if answer == "Y":
+            try:
+                with open(file+".pYb", 'w') as outfile:
+                    #pickle.dump(self.__program, outfile)
+                    #ujson.dump(self.__program, outfile)
+                    line_numbers = self.line_numbers()
 
-                        else:
-                            fileLine += " " + token.lexeme
+                    for line_number in line_numbers:
+                        fileLine = str(line_number)
 
-                    outfile.write(fileLine+"\n")
+                        #statement = self.__program[line_number]
+                        statement = self.getprogram(line_number,infile,tmpfile)
+                        for token in statement:
+                            # Add in quotes for strings
+                            if token.category == Token.STRING:
+                                fileLine += ' "' + token.lexeme + '"'
 
+                            else:
+                                fileLine += " " + token.lexeme
 
-                outfile.close()
+                        outfile.write(fileLine+"\n")
+                retCode = True
 
-        except OSError:
-#            raise OSError("Could not save to file")
-            print("Could not save to file")
+            except OSError:
+                #raise OSError("Could not save to file")
+                print("Could not save to file")
 
-    def load(self, file):
+        return retCode
+
+    def load(self, file, tmpfile):
         """Load the program
 
-        :param file: The name and path of the file to be loaded"""
-        try:
-            with open(file, 'r') as infile:
-#                self.__program = pickle.load(infile)
-                self.delete()
-                gc.collect()
-                gc.threshold(gc.mem_free() // 4 + gc.mem_alloc())
-                for fileLine in infile:
-                    if ((fileLine.strip()).replace("\n","")).replace("\r","") != "":
-                        self.add_stmt(Lexer().tokenize((fileLine.replace("\n","")).replace("\r","")))
+        :param file: The name and path of the file to be loaded
+        tmpfile:     File handle for temporary basic workfile"""
 
-                infile.close()
+        infile = None
+
+        try:
+            #with open(file, 'r') as infile:
+            if True:
+                infile = open(file, 'r')
+#                self.__program = pickle.load(infile)
+#                self.delete() This is done in calling program now
+                gc.collect()
+                if platform == 'rp2':
+                    gc.threshold(gc.mem_free() // 4 + gc.mem_alloc())
+                fIndex = 0
+                for fileLine in infile:
+
+                    if ((fileLine.strip()).replace("\n","")).replace("\r","") != "":
+                        self.add_stmt(Lexer().tokenize((fileLine.replace("\n","")).replace("\r","")),fIndex,tmpfile)
+                    fIndex += (len(fileLine) + (0 if platform == 'rp2' else 1))
+
+                #infile.close()
 
         except OSError:
 #            raise OSError("Could not read file")
             print("Could not read file")
 
-    def add_stmt(self, tokenlist):
+        return infile
+
+    def add_stmt(self, tokenlist, fIndex, tmpfile):
         """
         Adds the supplied token list
         to the program. The first token should
@@ -126,11 +151,34 @@ class Program:
 
         :param tokenlist: List of BTokens representing a
         numbered program statement
+        fIndex: if >= 0: location in loaded program file of statment
+                if < 0: Indicates statement was not read and should
+               be added to temporary basic workfile
+        tmpfile: file handle of temporary basic workfile
 
         """
         try:
             line_number = int(tokenlist[0].lexeme)
-            self.__program[line_number] = tokenlist[1:]
+            if fIndex >= 0:
+                self.__program[line_number] = fIndex
+            else:
+                tmpfile.seek(0)
+                #dchtest
+                filelen = 0
+                for lines in tmpfile:
+                    filelen += (len(lines)+(0 if platform == 'rp2' else 1))
+
+                self.__program[line_number] = -(filelen+1)
+                #self.__program[line_number] = -(len(tmpfile.read())+1)
+
+                fileLine = str(line_number)
+                for token in tokenlist[1:]:
+                    # Add in quotes for strings
+                    if token.category == Token.STRING:
+                        fileLine += ' "' + token.lexeme + '"'
+                    else:
+                        fileLine += " " + token.lexeme
+                tmpfile.write(fileLine+"\n")
 
         except TypeError as err:
             raise TypeError("Invalid line number: " +
@@ -149,7 +197,17 @@ class Program:
 
         return line_numbers
 
-    def __execute(self, line_number, last_flowsignal):
+    def getprogram(self, ln, infile, tmpfile):
+        if self.__program[ln] >= 0:
+            infile.seek(self.__program[ln])
+            statement = Lexer().tokenize((infile.readline().replace("\n","")).replace("\r",""))[1:]
+        else:
+            tmpfile.seek(-(self.__program[ln]+1))
+            statement = Lexer().tokenize((tmpfile.readline().replace("\n","")).replace("\r",""))[1:]
+
+        return statement
+
+    def __execute(self, line_number, last_flowsignal,infile,tmpfile):
         """Execute the statement with the
         specified line number
 
@@ -163,7 +221,8 @@ class Program:
             raise RuntimeError("Line number " + line_number +
                                " does not exist")
 
-        statement = self.__program[line_number]
+        #statement = self.__program[line_number]
+        statement = self.getprogram(line_number,infile,tmpfile)
 
         number_of_stmts = 1
         for e in statement:
@@ -172,6 +231,7 @@ class Program:
 
         for cstmt_number in range(0,number_of_stmts):
             try:
+            #if True:
                 tmp_flow = self.__parser.parse(statement, line_number, cstmt_number, last_flowsignal)
 
             except RuntimeError as err:
@@ -183,7 +243,7 @@ class Program:
         return tmp_flow
 
 
-    def execute(self):
+    def execute(self,infile,tmpfile):
         """Execute the program"""
 
         self.__parser = BASICParser()
@@ -197,7 +257,9 @@ class Program:
             # will be incremented by one, unless modified by
             # a jump
             gc.collect()
-            gc.threshold(gc.mem_free() // 4 + gc.mem_alloc())
+            # dchtest
+            if platform == 'rp2':
+                gc.threshold(gc.mem_free() // 4 + gc.mem_alloc())
             index = 0
             last_flowsignal = None
             self.set_next_line_number(line_numbers[index])
@@ -205,7 +267,7 @@ class Program:
             # Run through the program until the
             # has line number has been reached
             while True:
-                flowsignal = self.__execute(self.get_next_line_number(),last_flowsignal)
+                flowsignal = self.__execute(self.get_next_line_number(),last_flowsignal,infile,tmpfile)
                 last_flowsignal = flowsignal
 
 
@@ -285,7 +347,8 @@ class Program:
                         index = index + 1
                         while index < len(line_numbers):
                             next_line_number = line_numbers[index]
-                            temp_tokenlist = self.__program[next_line_number]
+                            #temp_tokenlist = self.__program[next_line_number]
+                            temp_tokenlist = self.getprogram(next_line_number,infile,tmpfile)
 
                             if temp_tokenlist[0].category == Token.NEXT and \
                                len(temp_tokenlist) > 1:

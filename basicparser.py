@@ -85,7 +85,10 @@ class BASICParser:
         self.__tokenindex = None
 
         # Set to keep track of extant loop variables
-        self. __loop_vars = set()
+        self.__loop_vars = set()
+
+        # Set to keep track of print column across multiple print statements
+        self.__prnt_column = 0
 
     def parse(self, tokenlist, line_number, cstmt_number, last_flowsignal):
         """Must be initialised with the list of
@@ -233,16 +236,21 @@ class BASICParser:
 
         # Check there are items to print
         last_token_cat = None
-        if not self.__tokenindex >= len(self.__tokenlist):
+        if not self.__tokenindex >= len(self.__tokenlist) and self.__token.category != Token.COLON:
             last_token_cat = self.__token.category
             self.__logexpr()
 
             if type(self.__operand_stack[-1]) == tuple:
                 if self.__operand_stack[-1][0] == "TAB":
-                    current_pr_column = self.__operand_stack.pop()[1]
-                    print(" "*(current_pr_column-1), end="")
+                    if self.__prnt_column > self.__operand_stack[-1][1]:
+                        print()
+                        self.__prnt_column = 0
+                    current_pr_column = self.__operand_stack[-1][1] - self.__prnt_column
+                    self.__prnt_column = self.__operand_stack.pop()[1] - 1
+                    if current_pr_column > 1:
+                        print(" "*(current_pr_column-1), end="")
             else:
-                current_pr_column = len(str(self.__operand_stack[-1])) + 1
+                self.__prnt_column += len(str(self.__operand_stack[-1]))
                 print(self.__operand_stack.pop(), end='')
 
             while self.__token.category == Token.COMMA or self.__token.category == Token.SEMICOLON:
@@ -255,14 +263,14 @@ class BASICParser:
 
                     if type(self.__operand_stack[-1]) == tuple:
                         if self.__operand_stack[-1][0] == "TAB":
-                            if current_pr_column > self.__operand_stack[-1][1]:
+                            if self.__prnt_column > self.__operand_stack[-1][1]:
                                 print()
-                                current_pr_column = 1
-                            current_pr_column = self.__operand_stack[-1][1] - current_pr_column
-                            print(" "*current_pr_column, end="")
-                            current_pr_column = self.__operand_stack.pop()[1]
+                                self.__prnt_column = 0
+                            current_pr_column = self.__operand_stack[-1][1] - self.__prnt_column
+                            print(" "*(current_pr_column-1), end="")
+                            self.__prnt_column = self.__operand_stack.pop()[1] - 1
                     else:
-                        current_pr_column += len(str(self.__operand_stack[-1]))
+                        self.__prnt_column += len(str(self.__operand_stack[-1]))
                         print(self.__operand_stack.pop(), end='')
 
                 else:
@@ -271,6 +279,7 @@ class BASICParser:
         # Final newline
         if last_token_cat != Token.SEMICOLON:
             print()
+            self.__prnt_column = 0
 
     def __letstmt(self):
         """Parses a LET statement,

@@ -27,7 +27,13 @@ from basictoken import BASICToken as Token
 from lexer import Lexer
 from program import Program
 from sys import stderr
-from sys import print_exception
+from sys import platform
+import os
+
+#dchtest
+if platform == 'rp2':
+    from sys import print_exception
+
 
 
 def main():
@@ -49,10 +55,15 @@ def main():
     lexer = Lexer()
     program = Program()
 
-    if passedIn != "":
-        program.load(passedIn)
-        program.execute()
+    fOpened = False
+    #initialize and open temporary file
+    tmpfile = open('_pybTmp.tmp','w+')
+    infile = tmpfile
 
+    #dchtest
+    if platform == 'rp2' and passedIn != "":
+        infile = program.load(passedIn,tmpfile)
+        program.execute(infile,tmpfile)
 
     # Continuously accept user input and act on it until
     # the user enters 'EXIT'
@@ -61,7 +72,7 @@ def main():
         stmt = input(': ')
 
         try:
-#        if 1 == 1:
+        #if True:
             tokenlist = lexer.tokenize(stmt)
 
             # Execute commands directly, otherwise
@@ -72,13 +83,17 @@ def main():
 
                 # Exit the interpreter
                 if tokenlist[0].category == Token.EXIT:
+                    if fOpened:
+                        infile.close()
+                    tmpfile.close()
+                    os.remove('_pybTmp.tmp')
                     break
 
                 # Add a new program statement, beginning
                 # a line number
                 elif tokenlist[0].category == Token.UNSIGNEDINT\
                      and len(tokenlist) > 1:
-                    program.add_stmt(tokenlist)
+                    program.add_stmt(tokenlist,-1,tmpfile)
 
                 # Delete a statement from the program
                 elif tokenlist[0].category == Token.UNSIGNEDINT \
@@ -88,7 +103,7 @@ def main():
                 # Execute the program
                 elif tokenlist[0].category == Token.RUN:
                     try:
-                        program.execute()
+                        program.execute(infile,tmpfile)
 
                     except KeyboardInterrupt:
                         print("Program terminated")
@@ -96,33 +111,70 @@ def main():
                 # List the program
                 elif tokenlist[0].category == Token.LIST:
                     if len(tokenlist) == 2:
-                        program.list(int(tokenlist[1].lexeme),int(tokenlist[1].lexeme))
+                        program.list(int(tokenlist[1].lexeme),int(tokenlist[1].lexeme),infile,tmpfile)
                     elif len(tokenlist) == 3:
-                        program.list(int(tokenlist[1].lexeme),int(tokenlist[2].lexeme))
+                        program.list(int(tokenlist[1].lexeme),int(tokenlist[2].lexeme),infile,tmpfile)
                     elif len(tokenlist) == 4:
-                        program.list(int(tokenlist[1].lexeme),int(tokenlist[3].lexeme))
+                        program.list(int(tokenlist[1].lexeme),int(tokenlist[3].lexeme),infile,tmpfile)
                     else:
-                        program.list(-1,-1)
+                        program.list(-1,-1,infile,tmpfile)
 
                 # Save the program to disk
                 elif tokenlist[0].category == Token.SAVE:
-                    if len(tokenlist) > 1:
-                        program.save(tokenlist[1].lexeme)
-                        print("Program written to file")
-                    else:
+                    if len(tokenlist) <= 1:
                         print("No filename specified")
-
-                # Load the program from disk
-                elif tokenlist[0].category == Token.LOAD:
-                    if len(tokenlist) > 1:
-                        program.load(tokenlist[1].lexeme)
-                        print("Program read from file")
+                    elif "/" in tokenlist[1].lexeme or "\\" in tokenlist[1].lexeme or ":" in tokenlist[1].lexeme:
+                        print("Can only save to current directory")
                     else:
-                        print("Program file not found")
+                        if program.save(tokenlist[1].lexeme,infile,tmpfile):
+                            # Since we are running the program from the disk file "in place"
+                            # the current program listing is contained only on disk in the
+                            # loaded file (if one has been loaded) and the _pYbTmp.tmp working file
+                            # the program.save function has to save the file to a temporary filename
+                            # and we now have to replace the specified output filename with that
+                            # temporary file. Finally we need to reload the saved file to initialize
+                            # the in place files and index
+                            program.delete()
+                            if fOpened:
+                                infile.close()
 
-                # Delete the program from memory
-                elif tokenlist[0].category == Token.NEW:
+                            if tokenlist[1].lexeme in os.listdir():
+                                os.remove(tokenlist[1].lexeme)
+                            os.rename(tokenlist[1].lexeme+".pYb",tokenlist[1].lexeme)
+
+                            tmpfile.close()
+                            tmpfile = open('_pybTmp.tmp','w+')
+                            infile = program.load(tokenlist[1].lexeme,tmpfile)
+                            if infile != None:
+                                fOpened = True
+                                print("Program written to file")
+                            else:
+                                # This should never happen, but just in case...
+                                fOpened = False
+                                print("Program saved but lost from active memory, enter load command ",end="")
+                                print("to re-load saved work")
+
+                # Load the program from disk and/or delete the program from memory
+                elif tokenlist[0].category == Token.LOAD or tokenlist[0].category == Token.NEW:
                     program.delete()
+                    if fOpened:
+                        infile.close()
+                    fOpened = False
+
+                    tmpfile.close()
+                    tmpfile = open('_pybTmp.tmp','w+')
+
+                    if tokenlist[0].category == Token.LOAD:
+
+                        if len(tokenlist) > 1:
+                            infile = program.load(tokenlist[1].lexeme,tmpfile)
+                            if infile != None:
+                                fOpened = True
+                                print("Program read from file")
+                            else:
+                                fOpened = False
+                        else:
+                            print("Program file not found")
 
                 # Unrecognised input
                 else:
@@ -134,8 +186,10 @@ def main():
         # Trap all exceptions so that interpreter
         # keeps running
         except Exception as e:
-            # print(e, file=stderr, flush=True)
-            print_exception(e)
+            if platform == 'rp2':
+                print_exception(e)
+            else:
+                print(e)
 
 if __name__ == "__main__":
     main()
