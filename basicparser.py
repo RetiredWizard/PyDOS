@@ -17,6 +17,7 @@
 
 from basictoken import BASICToken as Token
 from flowsignal import FlowSignal
+from sys import implementation
 import math
 import random
 import gc
@@ -202,7 +203,8 @@ class BASICParser:
 
         elif self.__token.category == Token.DIM:
             gc.collect()
-            gc.threshold(gc.mem_free() // 4 + gc.mem_alloc())
+            if implementation.name.upper() == 'MICROPYTHON':
+                gc.threshold(gc.mem_free() // 4 + gc.mem_alloc())
             self.__dimstmt()
             return None
 
