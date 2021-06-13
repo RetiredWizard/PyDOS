@@ -14,3 +14,12 @@
 * added support for numbered variable names i.e. a1, num9
 
 
+6/13/21
+
+* modified PyBasic to run Basic program in place on disk rather loading into memory
+* added logic to allow this version of PyBasic to run on Windows platform in cPython as well as micro python
+* added logic to allow tab() function to work across print statements continued with trailing ;
+* added logic to ignore null tokens caused by trailing spaces
+* added logic to prevent text of REM statements being evaluated as tokens and syntax checked
+
+
