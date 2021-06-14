@@ -500,7 +500,7 @@ def PyDOS():
             print("\n%10i Kb free conventional memory" % (int(gc.mem_free()/1000)))
 
         elif cmd == "VER":
-            print("PyDOS [Version 0.6]")
+            print("PyDOS [Version 0.7]")
 
         elif cmd == "ECHO":
             if len(args) == 1:
@@ -1009,6 +1009,8 @@ def PyDOS():
 
 #            if args[0] in os.listdir() and os.stat(args[0])[0] & (2**15)!= 0 and ((args[0].split("."))[1]).upper() == "PY":
 
+            gc.collect()
+            gc.threshold(gc.mem_free() // 4 + gc.mem_alloc())
             batFound = -1
             curDLst = os.listdir(tmpDir[:(-1 if tmpDir != "/" else None)])
             if  ((newdir.split("."))[-1]).upper() == "PY":
