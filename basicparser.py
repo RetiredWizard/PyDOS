@@ -556,7 +556,8 @@ class BASICParser:
         # Gather input from the DATA statement into the variables
         for variable in variables:
             left = variable
-            right = readlist.pop(0)
+            #right = readlist.pop(0)
+            right = self.__data_values.pop(0)
 
             if left.endswith('$'):
                 # Python inserts quotes around input data
