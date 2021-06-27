@@ -103,4 +103,3 @@ class FlowSignal:
 
         self.ftype = ftype
         self.ftarget = ftarget
-

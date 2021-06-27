@@ -23,3 +23,17 @@
 * added logic to prevent text of REM statements being evaluated as tokens and syntax checked
 
 
+6/27/21
+
+* modified mid$(s$,S,L) function so that an 'S' of 1 indicated the first char (not 0) of the substring and 'L' is
+        the length rather than the ending position
+* turned INSTR functionality back on
+* modified INSTR to count the first string position as 1 instead of 0 and return a 0 if not found rather than -1
+* added file I/O ('OPEN fn FOR access-type AS #f ELSE lineno', 'INPUT #f', 'PRINT #f', 'SEEK #f,pos', 'CLOSE #f')
+* added 'RESTORE lineno' command to DATA/read functionality
+* modified the 'ON val GOTO/GOSUB line1,line2,...' to function in a more standard way
+* *** disabled *** added %%memcollect directive which when placed as first token of a REM statement invokes a python memory 
+        garbage collection during a BASIC file load operation *** Currently disabled in code ****
+* added a saved index source code option when saving or loading using the .PGM extension on a program filename
+
+

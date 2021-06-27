@@ -3,6 +3,9 @@ import time
 import sys
 import gc
 import uselect
+import micropython
+gc.collect()
+gc.threshold(gc.mem_free() // 8 + gc.mem_alloc())
 
 
 def PyDOS():
@@ -371,7 +374,7 @@ def PyDOS():
     def filecpy(file1,file2):
         #if (len(file1) >=3 and file1[-3:].upper() == "CON") or (len(file1) >=4 and file1[-4:] == "CON:)":
         gc.collect()
-        gc.threshold(gc.mem_free() // 4 + gc.mem_alloc())
+        #gc.threshold(gc.mem_free() // 4 + gc.mem_alloc())
         fOrig = open(file1)
         gc.collect()
         fCopy = open(file2, "wb")
@@ -496,11 +499,21 @@ def PyDOS():
 
         elif cmd == "MEM":
             gc.collect()
-            gc.threshold(gc.mem_free() // 4 + gc.mem_alloc())
+            #gc.threshold(gc.mem_free() // 4 + gc.mem_alloc())
+
             print("\n%10i Kb free conventional memory" % (int(gc.mem_free()/1000)))
+            print("%10i Kb used conventional memory" % (int(gc.mem_alloc()/1000)))
+            print("%10i Kb current threshold value" % (int(gc.threshold()/1000)))
+
+            for i in range(len(switches)):
+                if switches[i][0] == 'D':
+                    print(micropython.mem_info(1))
+                else:
+                    print("Illeagal switch:",switches[i][0],"Command Format: mem[/d]")
+                    break
 
         elif cmd == "VER":
-            print("PyDOS [Version 0.7]")
+            print("PyDOS [Version 0.75]")
 
         elif cmd == "ECHO":
             if len(args) == 1:
@@ -1010,7 +1023,7 @@ def PyDOS():
 #            if args[0] in os.listdir() and os.stat(args[0])[0] & (2**15)!= 0 and ((args[0].split("."))[1]).upper() == "PY":
 
             gc.collect()
-            gc.threshold(gc.mem_free() // 4 + gc.mem_alloc())
+            #gc.threshold(gc.mem_free() // 4 + gc.mem_alloc())
             batFound = -1
             curDLst = os.listdir(tmpDir[:(-1 if tmpDir != "/" else None)])
             if  ((newdir.split("."))[-1]).upper() == "PY":

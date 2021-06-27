@@ -26,15 +26,15 @@ again.
 from basictoken import BASICToken as Token
 from lexer import Lexer
 from program import Program
+from basicdata import BASICData
 from sys import stderr
-from sys import platform
+from sys import implementation
 import os
-
-#dchtest
-if platform == 'rp2':
+import gc
+gc.collect()
+if implementation.name.upper() == 'MICROPYTHON':
+    gc.threshold(gc.mem_free() // 4 + gc.mem_alloc())
     from sys import print_exception
-
-
 
 def main():
 
@@ -54,16 +54,30 @@ def main():
 
     lexer = Lexer()
     program = Program()
+    datastmts = BASICData()
 
     fOpened = False
     #initialize and open temporary file
     tmpfile = open('_pybTmp.tmp','w+')
     infile = tmpfile
 
-    #dchtest
-    if platform == 'rp2' and passedIn != "":
-        infile = program.load(passedIn,tmpfile)
-        program.execute(infile,tmpfile)
+    if implementation.name.upper() == 'MICROPYTHON' and passedIn != "":
+        if passedIn[0] == "*":
+            if len(passedIn) == 1 or not passedIn[1:].isdigit():
+                alloc = 1550
+            else:
+                alloc = int(passedIn[1:])
+            print("Attempting memory pre-allocation to prepare for large Basic program")
+            gc.collect()
+            for i in range(alloc):
+                if i % 100 == 0:
+                    print(".",end="")
+                program.__program[i] = i
+            print()
+            program.__program.clear()
+        else:
+            infile = program.load(passedIn,tmpfile,datastmts)
+            program.execute(infile,tmpfile,datastmts)
 
     # Continuously accept user input and act on it until
     # the user enters 'EXIT'
@@ -81,6 +95,11 @@ def main():
 
             if len(tokenlist) > 0:
 
+                # remove blank tokens
+                for i in range(len(tokenlist)):
+                    if i>0 and tokenlist[i].lexeme.strip() == "":
+                        tokenlist.pop(i)
+
                 # Exit the interpreter
                 if tokenlist[0].category == Token.EXIT:
                     if fOpened:
@@ -93,17 +112,17 @@ def main():
                 # a line number
                 elif tokenlist[0].category == Token.UNSIGNEDINT\
                      and len(tokenlist) > 1:
-                    program.add_stmt(tokenlist,-1,tmpfile)
+                    program.add_stmt(tokenlist,-1,tmpfile,datastmts)
 
                 # Delete a statement from the program
                 elif tokenlist[0].category == Token.UNSIGNEDINT \
                         and len(tokenlist) == 1:
-                    program.delete_statement(int(tokenlist[0].lexeme))
+                    program.delete_statement(int(tokenlist[0].lexeme),datastmts)
 
                 # Execute the program
                 elif tokenlist[0].category == Token.RUN:
                     try:
-                        program.execute(infile,tmpfile)
+                        program.execute(infile,tmpfile,datastmts)
 
                     except KeyboardInterrupt:
                         print("Program terminated")
@@ -126,7 +145,14 @@ def main():
                     elif "/" in tokenlist[1].lexeme or "\\" in tokenlist[1].lexeme or ":" in tokenlist[1].lexeme:
                         print("Can only save to current directory")
                     else:
-                        if program.save(tokenlist[1].lexeme,infile,tmpfile):
+                        if tokenlist[1].lexeme.split(".")[-1].upper() == "PGM":
+                            filename = tokenlist[1].lexeme+".BAS"
+                            if filename in os.listdir():
+                                os.remove(filename)
+                        else:
+                            filename = tokenlist[1].lexeme
+
+                        if program.save(filename,infile,tmpfile):
                             # Since we are running the program from the disk file "in place"
                             # the current program listing is contained only on disk in the
                             # loaded file (if one has been loaded) and the _pYbTmp.tmp working file
@@ -134,29 +160,67 @@ def main():
                             # and we now have to replace the specified output filename with that
                             # temporary file. Finally we need to reload the saved file to initialize
                             # the in place files and index
+                            #
+                            # PGM files are worse since we use the internal file index keys we have to
+                            # first save as a normal BAS file and reaload to eliminate all code from
+                            # the temporary file
                             program.delete()
+                            datastmts.delete()
                             if fOpened:
                                 infile.close()
 
-                            if tokenlist[1].lexeme in os.listdir():
-                                os.remove(tokenlist[1].lexeme)
-                            os.rename(tokenlist[1].lexeme+".pYb",tokenlist[1].lexeme)
+                            if filename in os.listdir():
+                                os.remove(filename)
+
+                            os.rename(filename+".pYb",filename)
 
                             tmpfile.close()
                             tmpfile = open('_pybTmp.tmp','w+')
-                            infile = program.load(tokenlist[1].lexeme,tmpfile)
+                            infile = program.load(filename,tmpfile,datastmts)
                             if infile != None:
-                                fOpened = True
-                                print("Program written to file")
+
+                                if tokenlist[1].lexeme.split(".")[-1].upper() == "PGM":
+
+                                    filename = tokenlist[1].lexeme
+                                    if program.save(filename,infile,tmpfile):
+
+                                        if filename in os.listdir():
+                                            os.remove(filename)
+
+                                        os.rename(filename+".pYb",filename)
+
+                                        #.PGM.BAS file now being used, need to close .PGM.BAS and reload .pgm file
+                                        program.delete()
+                                        datastmts.delete()
+                                        infile.close()
+                                        infile = program.load(filename,tmpfile,datastmts)
+                                        if infile != None:
+                                            os.remove(filename+".BAS")
+                                            fOpened = True
+                                            print("Program written to file")
+                                        else:
+                                            # This should never happen, but just in case...
+                                            fOpened = False
+                                            print("Program saved but lost from active memory, ",end="")
+                                            print("enter load command to re-load saved work")
+                                else:
+                                    fOpened = True
+                                    print("Program written to file")
                             else:
                                 # This should never happen, but just in case...
                                 fOpened = False
-                                print("Program saved but lost from active memory, enter load command ",end="")
-                                print("to re-load saved work")
+                                if tokenlist[1].lexeme.split(".")[-1].upper() == "PGM":
+                                    os.rename(filename,tokenlist[1].lexeme+".BAS")
+                                    print("Texed program saved as "+tokenlist[1].lexeme+".BAS but lost from active memory, ",end="")
+                                else:
+                                    print("Program saved but lost from active memory, ",end="")
+                                print("enter load command to re-load saved work")
+
 
                 # Load the program from disk and/or delete the program from memory
                 elif tokenlist[0].category == Token.LOAD or tokenlist[0].category == Token.NEW:
                     program.delete()
+                    datastmts.delete()
                     if fOpened:
                         infile.close()
                     fOpened = False
@@ -167,7 +231,7 @@ def main():
                     if tokenlist[0].category == Token.LOAD:
 
                         if len(tokenlist) > 1:
-                            infile = program.load(tokenlist[1].lexeme,tmpfile)
+                            infile = program.load(tokenlist[1].lexeme,tmpfile,datastmts)
                             if infile != None:
                                 fOpened = True
                                 print("Program read from file")
@@ -186,7 +250,7 @@ def main():
         # Trap all exceptions so that interpreter
         # keeps running
         except Exception as e:
-            if platform == 'rp2':
+            if implementation.name.upper() == 'MICROPYTHON':
                 print_exception(e)
             else:
                 print(e)

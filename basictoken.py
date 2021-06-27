@@ -110,6 +110,11 @@ class BASICToken:
         RNDINT          = 77  # RNDINT function
         SEMICOLON       = 78  # ";"
         TAB             = 79  # TAB function
+        OPEN            = 80  # OPEN keyword
+        HASH            = 81  # "#"
+        CLOSE           = 82  # CLOSE keyword
+        FSEEK           = 83  # FSEEK keyword
+        RESTORE         = 84  # RESTORE keyword
 
         # Displayable names for each token category
         catnames = ['EOF', 'LET', 'LIST', 'PRINT', 'RUN',
@@ -126,14 +131,16 @@ class BASICToken:
         'CHR', 'ASC', 'STR', 'MID', 'MODULO', 'TERNARY',
         'VAL', 'LEN', 'UPPER', 'LOWER', 'ROUND',
         'MAX', 'MIN', 'INSTR', 'AND', 'OR', 'NOT', 'PI',
-        'RNDINT', 'SEMICOLON','TAB']
+        'RNDINT', 'SEMICOLON', 'TAB', 'OPEN', 'HASH',
+        'CLOSE', 'FSEEK', 'RESTORE']
 
         smalltokens = {'=': ASSIGNOP, '(': LEFTPAREN, ')': RIGHTPAREN,
                        '+': PLUS, '-': MINUS, '*': TIMES, '/': DIVIDE,
                        '\n': NEWLINE, '<': LESSER,
                        '>': GREATER, '<>': NOTEQUAL,
                        '<=': LESSEQUAL, '>=': GREATEQUAL, ',': COMMA,
-                       ':': COLON, '%': MODULO, '!=': NOTEQUAL, ';': SEMICOLON}
+                       ':': COLON, '%': MODULO, '!=': NOTEQUAL, ';': SEMICOLON,
+                       '#': HASH}
 
         # Dictionary of BASIC reserved words
         keywords = {'LET': LET, 'LIST': LIST, 'PRINT': PRINT,
@@ -157,7 +164,9 @@ class BASICToken:
                     'ROUND': ROUND, 'MAX': MAX, 'MIN': MIN,
                     'INSTR': INSTR, 'END': STOP,
                     'AND': AND, 'OR': OR, 'NOT': NOT,
-                    'PI': PI, 'RNDINT': RNDINT, 'TAB': TAB}
+                    'PI': PI, 'RNDINT': RNDINT, 'TAB': TAB,
+                    'OPEN': OPEN, 'CLOSE': CLOSE, 'FSEEK': FSEEK,
+                    'RESTORE': RESTORE}
 
         # Functions
         functions = {ABS, ATN, COS, EXP, INT, LOG, POW, RND, SIN, SQR, TAN,
