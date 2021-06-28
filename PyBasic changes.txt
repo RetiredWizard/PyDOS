@@ -29,7 +29,7 @@
         the length rather than the ending position
 * turned INSTR functionality back on
 * modified INSTR to count the first string position as 1 instead of 0 and return a 0 if not found rather than -1
-* added file I/O ('OPEN fn FOR access-type AS #f ELSE lineno', 'INPUT #f', 'PRINT #f', 'SEEK #f,pos', 'CLOSE #f')
+* added file I/O ('OPEN fn FOR access-type AS #f ELSE lineno', 'INPUT #f', 'PRINT #f', 'FSEEK #f,pos', 'CLOSE #f')
 * added 'RESTORE lineno' command to DATA/read functionality
 * modified the 'ON val GOTO/GOSUB line1,line2,...' to function in a more standard way
 * *** disabled *** added %%memcollect directive which when placed as first token of a REM statement invokes a python memory 
