@@ -61,23 +61,24 @@ def main():
     tmpfile = open('_pybTmp.tmp','w+')
     infile = tmpfile
 
-    if implementation.name.upper() == 'MICROPYTHON' and passedIn != "":
-        if passedIn[0] == "*":
-            if len(passedIn) == 1 or not passedIn[1:].isdigit():
-                alloc = 1550
-            else:
-                alloc = int(passedIn[1:])
-            print("Attempting memory pre-allocation to prepare for large Basic program")
-            gc.collect()
-            for i in range(alloc):
-                if i % 100 == 0:
-                    print(".",end="")
+    #Attempting memory pre-allocation to prepare for large Basic programs
+    if implementation.name.upper() == 'MICROPYTHON':
+        gc.collect()
+        for i in range(1600):
+            if i % 100 == 0:
+                print(".",end="")
+            try:
                 program.__program[i] = i
-            print()
-            program.__program.clear()
-        else:
-            infile = program.load(passedIn,tmpfile,datastmts)
-            program.execute(infile,tmpfile,datastmts)
+            except:
+                print("\nMemory pre-allocation limit reached at ",i)
+                break
+        print()
+        program.__program.clear()
+
+
+    if implementation.name.upper() == 'MICROPYTHON' and passedIn != "":
+        infile = program.load(passedIn,tmpfile,datastmts)
+        program.execute(infile,tmpfile,datastmts)
 
     # Continuously accept user input and act on it until
     # the user enters 'EXIT'

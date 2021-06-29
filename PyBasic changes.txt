@@ -37,3 +37,7 @@
 * added a saved index source code option when saving or loading using the .PGM extension on a program filename
 
 
+6/28/21
+
+* removed the "*" startup option and made the pre-allocation of memory happen on every load, this seems to reduce the 
+         memory allocation errors when attempting to run large basic programs

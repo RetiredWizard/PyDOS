@@ -11,7 +11,8 @@
 20 rem print "Adventure 3.2 on ";date$;" at ";time$
 21 print "Adventure 3.2"
 22 open "AMESSAGE" for input as #3:open "AMOVING" for input as #4
-23 open "ADESCRIP" for input as #1
+23 open "ADESCRIP" for input as #1:open "AITEMS" for input as #2
+24 open "BITEMS" for input as #10
 44 rem dirs is an array of possible room directions, it replaces file AMOVING
 45 dim dirs(100,10)
 46 dim indx(303)
@@ -96,10 +97,10 @@
 480 next x
 560 rem search a$ for keywords,put kwd code into k(x)
 565 a$=" "+c$+" ":c$=""
-780 restore 10580
+780 fseek #10,0
 800 k(1)=0:k(2)=0:z3 = 0
 810 rem T3=TOTAL NUMBER OF KEYWORDS
-820 read z1,b$
+820 input #10,z1,b$
 830 if z1 > t3 or nkey = numkeys then 900
 850 if instr(a$,b$) > 0 then 861 else 820
 860 rem IF KEYWORD WAS FOUND, NOTE THIS IN K(Z1)
@@ -213,10 +214,13 @@
 1980 rem ITEM BO NO VERB?
 1990 if k(1) >= 1 and k(1) <= 35 then 2000
 1991 if k(2) >= 1 and k(2) <= 35 then 2000 else 2040
-2000 restore 9960
+2000 rem restore 9960
 2001 for x = 1 to 35
-2010  read d$
-2020  if k(1) = x or k(2) = x then 940
+2010  rem read d$
+2020  if k(1) <> x and k(2) <> x then 2030
+2021   restore 9960+x
+2022   read d$
+2023   goto 940
 2030 next x
 2040 restore 2070
 2050 for x = 1 to int(rnd*4)+1
@@ -361,12 +365,13 @@
 3430 NEXT Z0
 3440 GOTO 2200
 3450 REM *** INVENTORY ***
-3460 RESTORE 9960
+3460 rem RESTORE 9960
 3470 Z0=0
 3480 PRINT "You are carrying:";
 3490 FOR X=1 TO T2
-3500  READ B$
+3500  rem READ B$
 3510  IF S(X)<>-1 THEN 3540
+3511  restore 9960+x:read b$
 3520  PRINT B$
 3530  Z0 = Z0 + 1
 3540 NEXT X
@@ -380,15 +385,15 @@
 3650 if z8 > 0 then 3680
 3660 print "Get what?"
 3670 goto 2040
-3680 restore 9960
+3680 rem restore 9960
 3690 for z3 = 1 to t2
-3700 read a$
+3700 rem read a$
 3710 if k(1) = 47 or k(2) = 47 then 3730
 3720 if k(1) <> z3 and k(2) <> z3 then 3900
 3730 if s(z3) <> l1 then 3750
 3740 if s(z3) = l1 then 3790
 3750 if k(1) = 47 or k(2) = 47 then 3900
-3760 print a$;" not here."
+3760 restore 9960+z3:read a$:print a$;" not here."
 3770 goto 3900
 3780 rem MUST CHECK NOW FOR LEGALITY OF TAKING ITEM
 3790 z8 = 0
@@ -402,7 +407,7 @@
 3860 goto 410
 3870 goto 6880
 3880 s(z3) = -1
-3890 print a$;":taken."
+3890 restore 9960+z3:read a$:print a$;":taken."
 3900 next z3
 3910 goto 400
 3920 REM *** DROP ***
@@ -411,19 +416,19 @@
 3960 IF Z8>0 THEN 4000
 3970 PRINT "Drop what?"
 3980 GOTO 2040
-4000 RESTORE 9960
+4000 rem RESTORE 9960
 4010 FOR Z3=1 TO T2
-4020  READ B$
+4020  rem READ B$
 4030  IF K(1) = 47 or k(2) = 47 THEN 4060
 4040  IF K(1) <> Z3 and k(2) <> z3 THEN 4140
 4050  IF S(Z3)=0 THEN 4140
 4060  IF S(Z3)=-1 THEN 4100
 4070  IF K(1)=47 or k(2)=47 THEN 4140
-4080  PRINT "You don't have the ";B$
+4080  restore 9960+z3:read b$:PRINT "You don't have the ";B$
 4090  GOTO 4140
 4100  REM STILL NEED TO ELABORATE ON DROP (BIRD IN CAGE, BOTTLE)
 4110  GOTO 7380
-4120  PRINT B$;":dropped."
+4120  restore 9960+z3:read b$:PRINT B$;":dropped."
 4130  S(Z3)=L1
 4140 NEXT Z3
 4150 GOTO 400
@@ -671,9 +676,9 @@
 6630 NEXT Z0
 6640 RETURN
 6660 rem list items at location l1
-6680 restore 12000
+6680 fseek #2,0
 6690 for z1 = 1 to t2
-6700  read a$
+6700  input #2,a$
 6710  if s(z1) <> l1 then 6720
 6711  print a$
 6720 next z1
@@ -841,12 +846,12 @@
 8260 rem   z8=total # of items found in list
 8270 rem   z3=item code first found
 8280 z8 = 0 : z3 = 0: d$ = ""
-8290 restore 9960
+8290 rem restore 9960
 8300 for z5 = 1 to 45
-8310 read b$
+8310 rem read b$
 8320 if k(1) <> z5 and k(2) <> z5 then 8360
 8330 z8 = z8+1
-8340 d$ = b$
+8340 restore 9960+z5:read b$:d$ = b$
 8350 if k(1) = z5 and z8 = 1 then 8352
 8351 if k(2) = z5 and z8 = 1 then 8352 else 8360
 8352 z3 = z5
@@ -854,13 +859,13 @@
 8370 b$ = d$
 8380 return
 8390 rem FIND FIRST ITEM AT ROOM
-8400 RESTORE 9960
+8400 rem RESTORE 9960
 8405 x1 = 0
 8410 FOR Z1=1 TO 47
 8415  if x1=1 then 8440
-8420  READ D$
+8420  rem READ D$
 8430  IF K(1) = Z1 OR K(2) = Z1 THEN 8431 else 8440
-8431  x1=1
+8431  restore 9960+z1:read d$:x1=1
 8440 NEXT Z1
 8450 RETURN
 8460 REM 
@@ -1007,7 +1012,7 @@
 9740 z5 = 78:gosub 7620
 9750 PRINT "Oh well..."
 9760 GOSUB 6430
-9762 close #1:close #3
+9762 close #1:close #2:close #3:close #10
 9770 STOP
 9780 rem *** PITS ***
 9790 if l1 < 13 THEN 1210
@@ -1033,67 +1038,53 @@
 9940 goto 9870
 9945 return
 9950 rem   ---- SHORT NAMES FOR STUFF ----
-9960 data "large gold nugget","bars of silver","precious jewelry"
-9962 data "many coins","several diamonds","fragile ming vase"
-9964 data "glistening pearl","nest of golden eggs","jewel-encrusted trident"
-9966 data "egg-sized emerald","platinum pyramid","golden chain"
-9968 data "rare spices","persian rug","treasure chest","water","oil"
-9970 data "brass lamp","keys","food","bottle","wicker cage"
-9980 data "3-foot black rod","clam","magazine","bear","axe","velvet pillow"
-9982 data "shards of pottery","oyster","bird","troll","dragon","snake"
-9984 data "dwarf","rock","stairs","steps","house","grate","stream","room","bridge"
-9986 data "pit","volcano","road"
-10570 rem DIRECTIONS
-10580 data 100," N ",101," NE ",102," E ",103," SE ",104," S ",105," SW ",106," W ",107," NW ",108," U ",109," D "
-10590 rem VERBS
-10600 data 110," PLUGH ",111," XYZZY ",112," PLOVER ",113," CROSS ",114," CLIMB ",115," JUMP ",116," FILL ",117," EMPTY ",117," POUR ",118," LOOK ",118," L ",119," LIGHT "
-10610 data 119," ON ",120," EXTINGUISH ",120," OFF ",121," IN ",121," ENTER ",122," LEAVE ",122," OUT ",123," INVENTORY ",123," I ",124," GET ",124," CATCH ",124," TAKE "
-10620 data 125," DROP ",125," DUMP ",126," THROW ",127," ATTACK ",127," KILL ",128," FEED ",129," WATER ",130," LOCK ",131," UNLOCK ",132," FREE ",132," RELEASE ",133," WAVE "
-10630 data 134," OPEN ",135," CLOSE ",136," OIL ",137," EAT ",138," DRINK ",139," FEE FIE FOE FOO ",140," SHORT ",141," LONG ",142," BRIEF ",143," QUIT ",143," STOP ",143," END "
-10640 data 144," SCORE ",145," SAVE ",146," LOAD ",147," READ ",147," EXAMINE ",148," YES ",148," Y ",149," BUG "
-10650 rem items
-10660 data 1," GOLD ",1," NUGGET ",2," BARS ",2," SILVER ",3," JEWELRY ",4," COINS ",5," DIAMONDS ",6," MING ",6," VASE ",7," PEARL ",8," EGGS ",8," NEST ",9," TRIDENT "
-10670 data 10," EMERALD ",11," PLATINUM ",11," PYRAMID ",12," CHAIN ",13," SPICES ",14," PERSIAN ",14," RUG ",15," TREASURE ",15," CHEST ",16," WATER ",17," OIL "
-10680 data 18," LAMP ",18," LANTERN ",19," KEYS ",20," FOOD ",21," BOTTLE ",22," CAGE ",23," ROD ",23," WAND ",24," CLAM ",25," MAGAZINE ",26," BEAR ",27," AXE ",28," VELVET "
-10690 data 28," PILLOW ",29," SHARDS ",30," OYSTER ",31," BIRD ",32," TROLL ",33," DRAGON ",34," SNAKE ",35," DWARF ",36," ROCK ",36," BOULDER ",37," STAIRS ",38," STEPS "
-10700 data 39," HOUSE ",39," BUILDING ",40," GRATE ",41," STREAM ",42," ROOM ",43," BRIDGE ",44," PIT ",45," VOLCANO ",46," ROAD ",47," ALL ",47," EVERYTHING "
-10710 rem LONG DIRECTIONS
-10720 data 100," NORTH ",101," NORTHEAST ",102," EAST ",103," SOUTHEAST ",104," SOUTH ",105," SOUTHWEST ",106," WEST ",107," NORTHWEST ",108," UP ",109," DOWN ",150,"*"
-12000 data "There is a large sparking nugget of gold here!"
-12010 data "There are bars of silver here!"
-12020 data "There is precious jewelry here!"
-12030 data "There are many coins here!"
-12040 data "There are several diamonds here!"
-12050 data "There is a delicate, precious ming vase here!"
-12060 data "To one side lies a glistening Pearl!"
-12070 data "There is a nest here, full of golden eggs!"
-12080 data "There is a jewel-encrusted trident here!"
-12090 data "There is an emerald the size of a plover's egg here!"
-12100 data "There is a platinum pyramid here, eight inches on a side!"
-12110 data "There is a golden chain here!"
-12120 data "There are rare spices here!"
-12130 data "There is a valuable persian rug here!"
-12140 data "There is a chest here, full of various treasures!"
-12150 data "There is a bottle of water here."
-12160 data "There is a small pool of oil here."
-12170 data "There is a brass lantern here."
-12180 data "There is a set of keys here."
-12190 data "There is food here."
-12200 data "There is a glass bottle here."
-12210 data "There is a small wicker cage here."
-12220 data "There is a 3-foot black rod here."
-12230 data "There is an enormous clam here with its shell tightly shut."
-12240 data "There is a recent issue of 'Spelunker Today' here."
-12250 data "There is a bear nearby."
-12260 data "There is a little axe here."
-12270 data "There is a purple velvet pillow here."
-12280 data "There are shards of pottery scattered about."
-12290 data "There is an enormous oyster here with its shell tightly shut."
-12300 data "There is a little bird here."
-12310 data "A burly troll stands in front of you."
-12320 data "A huge fierce green dragon bars the way!"
-12330 data "A huge fierce green snake bars the way!"
-12340 data "There is a threatening little dwarf  in the room with you!"
+9961 data "large gold nugget"
+9962 data "bars of silver"
+9963 data "precious jewelry"
+9964 data "many coins"
+9965 data "several diamonds"
+9966 data "fragile ming vase"
+9967 data "glistening pearl"
+9968 data "nest of golden eggs"
+9969 data "jewel-encrusted trident"
+9970 data "egg-sized emerald"
+9971 data "platinum pyramid"
+9972 data "golden chain"
+9973 data "rare spices"
+9974 data "persian rug"
+9975 data "treasure chest"
+9976 data "water"
+9977 data "oil"
+9978 data "brass lamp"
+9979 data "keys"
+9980 data "food"
+9981 data "bottle"
+9982 data "wicker cage"
+9983 data "3-foot black rod"
+9984 data "clam"
+9985 data "magazine"
+9986 data "bear"
+9987 data "axe"
+9988 data "velvet pillow"
+9989 data "shards of pottery"
+9990 data "oyster"
+9991 data "bird"
+9992 data "troll"
+9993 data "dragon"
+9994 data "snake"
+9995 data "dwarf"
+9996 data "rock"
+9997 data "stairs"
+9998 data "steps"
+9999 data "house"
+10000 data "grate"
+10001 data "stream"
+10002 data "room"
+10003 data "bridge"
+10004 data "pit"
+10005 data "volcano"
+10006 data "road"
+10007 data "everything"
 12500 rem INITIALIZE MESSAGE INDEX
 12501 open "AMESSAGE.IDX" for input as #6 else 12505
 12502 goto 12610
