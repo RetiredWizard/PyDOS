@@ -20,6 +20,11 @@ from flowsignal import FlowSignal
 from sys import implementation
 import math
 import random
+if implementation.name.upper() == 'MICROPYTHON':
+    from machine import Pin, PWM
+    from time import sleep
+else:
+    import winsound
 #import gc
 #gc.collect()
 #if implementation.name.upper() == 'MICROPYTHON':
@@ -97,6 +102,9 @@ class BASICParser:
 
         #file handle list
         self.__file_handles = {}
+
+        if implementation.name.upper() == 'MICROPYTHON':
+            self.__pwm = PWM(Pin(20))
 
     def parse(self, tokenlist, line_number, cstmt_number, last_flowsignal, infile, tmpfile, datastmts):
         """Must be initialised with the list of
@@ -240,6 +248,10 @@ class BASICParser:
 
         elif self.__token.category == Token.RESTORE:
             self.__restorestmt(datastmts)
+            return None
+
+        elif self.__token.category == Token.SOUND:
+            self.__soundstmt()
             return None
 
         else:
@@ -805,6 +817,35 @@ class BASICParser:
                 except ValueError:
                     raise ValueError('String input provided to a numeric variable ' +
                                      'in line ' + str(self.__line_number))
+
+    def __soundstmt(self):
+        """Parses a SOUND statement"""
+
+        self.__advance()  # Advance past SOUND token
+
+        # Acquire the comma separated values
+        self.__expr()
+        freq = self.__operand_stack.pop()
+
+        self.__consume(Token.COMMA)
+        self.__expr()
+        duration = self.__operand_stack.pop()
+
+        if self.__token.category == Token.COMMA:
+            self.__advance()
+            self.__expr()
+            volume = self.__operand_stack.pop()
+        else:
+            volume = 800
+
+        if implementation.name.upper() == 'MICROPYTHON':
+            self.__pwm.freq(freq)
+            self.__pwm.duty_u16(volume)
+            sleep(duration/18.2)
+            self.__pwm.duty_u16(0)
+        else:
+            winsound.Beep(freq,int(self.__operand_stack.pop()*1000/18.2))
+
 
     def __expr(self):
         """Parses a numerical expression consisting

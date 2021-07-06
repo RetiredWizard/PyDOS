@@ -115,6 +115,7 @@ class BASICToken:
         CLOSE           = 82  # CLOSE keyword
         FSEEK           = 83  # FSEEK keyword
         RESTORE         = 84  # RESTORE keyword
+        SOUND           = 85  # SOUND keyword
 
         # Displayable names for each token category
         catnames = ['EOF', 'LET', 'LIST', 'PRINT', 'RUN',
@@ -132,7 +133,7 @@ class BASICToken:
         'VAL', 'LEN', 'UPPER', 'LOWER', 'ROUND',
         'MAX', 'MIN', 'INSTR', 'AND', 'OR', 'NOT', 'PI',
         'RNDINT', 'SEMICOLON', 'TAB', 'OPEN', 'HASH',
-        'CLOSE', 'FSEEK', 'RESTORE']
+        'CLOSE', 'FSEEK', 'RESTORE', 'SOUND']
 
         smalltokens = {'=': ASSIGNOP, '(': LEFTPAREN, ')': RIGHTPAREN,
                        '+': PLUS, '-': MINUS, '*': TIMES, '/': DIVIDE,
@@ -166,7 +167,7 @@ class BASICToken:
                     'AND': AND, 'OR': OR, 'NOT': NOT,
                     'PI': PI, 'RNDINT': RNDINT, 'TAB': TAB,
                     'OPEN': OPEN, 'CLOSE': CLOSE, 'FSEEK': FSEEK,
-                    'RESTORE': RESTORE}
+                    'RESTORE': RESTORE, 'SOUND': SOUND}
 
         # Functions
         functions = {ABS, ATN, COS, EXP, INT, LOG, POW, RND, SIN, SQR, TAN,

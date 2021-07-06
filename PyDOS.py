@@ -5,7 +5,7 @@ import gc
 import uselect
 import micropython
 gc.collect()
-gc.threshold(gc.mem_free() // 8 + gc.mem_alloc())
+gc.threshold(gc.mem_free() // 4 + gc.mem_alloc())
 
 
 def PyDOS():
@@ -258,7 +258,10 @@ def PyDOS():
                                 nLines += 1
 
                     tFSize = 0
-                    availDisk = os.statvfs(tmpDir)[1]*os.statvfs(tmpDir)[4]
+                    try:
+                        availDisk = os.statvfs(tmpDir)[1]*os.statvfs(tmpDir)[4]
+                    except:
+                        availDisk = 0
                     for dir in os.listdir():
                         if os.stat(dPath+dir)[0] & (2**15) != 0 and match(lastDir,dir[:16]):
                             fSize = str(os.stat(dPath+dir)[6])
@@ -321,7 +324,10 @@ def PyDOS():
                                 nLines += 1
 
                     tFSize = 0
-                    availDisk = os.statvfs(dPath)[1]*os.statvfs(dPath)[4]
+                    try:
+                        availDisk = os.statvfs(dPath)[1]*os.statvfs(dPath)[4]
+                    except:
+                        availDisk = 0
                     for dir in os.listdir(lastDir):
                         if os.stat(lastDir+"/"+dir)[0] & (2**15) != 0:
                             fSize = str(os.stat(lastDir+"/"+dir)[6])
@@ -351,7 +357,10 @@ def PyDOS():
                     nDirs = 0
                     nFiles = 1
                     nLines = 1
-                    availDisk = os.statvfs(tmpDir)[1]*os.statvfs(tmpDir)[4]
+                    try:
+                        availDisk = os.statvfs(tmpDir)[1]*os.statvfs(tmpDir)[4]
+                    except:
+                        availDisk = 0
                     print("Directory of",tmpDir)
                     fSize = str(os.stat(lastDir)[6])
                     tFSize = int(fSize)
@@ -374,12 +383,12 @@ def PyDOS():
     def filecpy(file1,file2):
         #if (len(file1) >=3 and file1[-3:].upper() == "CON") or (len(file1) >=4 and file1[-4:] == "CON:)":
         gc.collect()
-        #gc.threshold(gc.mem_free() // 4 + gc.mem_alloc())
         fOrig = open(file1)
-        gc.collect()
         fCopy = open(file2, "wb")
-        gc.collect()
-        fCopy.write(fOrig.read())
+        line = fOrig.readline()
+        while line != "":
+            fCopy.write(line)
+            line = fOrig.readline()
         fOrig.close()
         fCopy.close()
         gc.collect()
@@ -459,12 +468,25 @@ def PyDOS():
 
         args = cmdLine.split(" ")
 
+        quotedArg = False
         if len(args) > 1:
             i = 0
             iEnd = len(args)
-            for e in range(0, iEnd):
+            for _ in range(0, iEnd):
                 if args[i].strip() == "":
                     args.pop(i)
+                elif quotedArg:
+                    if args[i].find('"') > -1 and args[i].find('"') != len(args[i])-1:
+                        break
+                    elif args[i][-1] == '"':
+                        args[i-1] = args[i-1] + " " + args.pop(i)[:-1]
+                        quotedArg = False
+                    else:
+                        args[i-1] = args[i-1] + " " + args.pop(i)
+                elif args[i][0] == '"' and args[i][-1] != '"':
+                    args[i] = args[i][1:]
+                    i += 1
+                    quotedArg = True
                 else:
                     i += 1
 
@@ -474,6 +496,10 @@ def PyDOS():
         else:
             switches = ""
             cmd = args[0]
+
+        if quotedArg:
+            print("Mismatched quotes.")
+            cmd = ""
 
         if cmd == "" or cmd == "REM":
             continue
@@ -513,7 +539,7 @@ def PyDOS():
                     break
 
         elif cmd == "VER":
-            print("PyDOS [Version 0.75]")
+            print("PyDOS [Version 0.8]")
 
         elif cmd == "ECHO":
             if len(args) == 1:

@@ -41,3 +41,7 @@
 
 * removed the "*" startup option and made the pre-allocation of memory happen on every load, this seems to reduce the 
          memory allocation errors when attempting to run large basic programs
+
+7/3/21
+
+* added SOUND freq,duration[,volume] command. The Windows code uses the winsound library and the Micropython implementation          assumes the appropriate speaker circuit is connected to GPIO pin #20 
