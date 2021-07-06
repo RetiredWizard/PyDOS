@@ -17,6 +17,12 @@ setdate.py - initalizes the RP2040 real time clock to an entered date
 
 settime.py - initalizes the RP2040 real time clock to an entered time
 
+diff.py - performs a file comparison
+
+sound.py - outputs a sound to a speaker cicruit connected to GPIO 20
+
+lcdprint.py - displays text on an I2C LCD display
+
 PyBasic.py - a Basic interpreter from https://github.com/richpl/PyBasic. Tweaked and modified to run on Micropython.
 	basicparser.py, basictoken.py, flowsignal.py, lexer.py, program.py
 
