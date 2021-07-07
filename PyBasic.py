@@ -97,9 +97,13 @@ def main():
             if len(tokenlist) > 0:
 
                 # remove blank tokens
-                for i in range(len(tokenlist)):
-                    if i>0 and tokenlist[i].lexeme.strip() == "":
+                i = 0
+                iend = len(tokenlist)
+                for _ in range(iend):
+                    if i>0 and tokenlist[i].lexeme.strip() == "" and tokenlist[i].category != Token.STRING:
                         tokenlist.pop(i)
+                    else:
+                        i+=1
 
                 # Exit the interpreter
                 if tokenlist[0].category == Token.EXIT:

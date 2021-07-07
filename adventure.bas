@@ -77,6 +77,7 @@
 360 if v(l1) <> 0 then 370
 365 v(l1) = 1
 370 gosub 6680
+375 if dead=1 then 9540
 380 gosub 7800
 390 rem INPUT LOOP --- MULTIPLE COMMAANDS, REMOVE JUNK CHARACTERS
 400 if len(c$) > 0 then 500
@@ -887,7 +888,8 @@
 8620 s(27) = l1 : d3 = 1
 8630 goto 8790
 8640 rem SHOULD DWARF ATTACK?
-8650 if L1 < 13 then 8790
+8650 if L1 >= 13 then 8660
+8652 s(35) = 0:goto 8790
 8660 if s(35) <> L1 then 8770
 8670 if rnd > 0.5 then 8790
 8680 rem YES!
@@ -905,6 +907,7 @@
 8770 rem SHOULD WE PUT A DWARF HERE?
 8780 if rnd >= 0.1 then 8790
 8785 s(35) = l1
+8786 z5=31:gosub 7620
 8790 return
 8800 rem *** PIRATE ***
 8810 rem FIRST, DOES HE HAVE ANYTHING WORTH STEALING?

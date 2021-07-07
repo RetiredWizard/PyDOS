@@ -62,16 +62,16 @@
 246 data 3,4,3,3,2
 247 data 5,3,2,3,3
 260 rem ASK IF HE WANTS DIRECTIONS
-263 z5 = 301:gosub 7620
+263 z59 = 301:gosub 7620
 264 gosub 9860
 266 if z0 then 267 else 320
-267 z5 = 302:gosub 7620
+267 z59 = 302:gosub 7620
 280 rem    command input routine
 300 rem print room, items
 310 rem If it's dark don't let him see anything
 320 if l1 < 13 or l1 = 58 then 350
 321 if l = 1 and (s(18) = l1 or s(18) = -1) then 350
-330 z5 = 45:gosub 7620
+330 z59 = 45:gosub 7620
 340 goto 400
 350 on d0+1 gosub 6780,7990,8180
 360 v(l1) = 1
@@ -128,7 +128,7 @@
 1190 if s(35) = l2 then 1191 else 1200
 1191 s(35) = l1
 1200 goto 9780
-1220 z5 = 1
+1220 z59 = 1
 1221 gosub 7620
 1230 goto 400
 1240 rem SPECIAL ROOM DIRECTIONS
@@ -137,26 +137,26 @@
 1261 IF L1 = 11 and (d = 9 or d = 3) then 1280 else 1320
 1270 rem IF GRATE IS OPEN (G=0) MOVE HIM
 1280 if g = 1 then 1180
-1290 z5 = 10:gosub 7620
+1290 z59 = 10:gosub 7620
 1300 goto 400
 1310 rem CAN'T TAKE NUGGET UPPSTAIRS
 1320 if not (l1 = 17 and d = 9 and s(1) = -1) then 1360
-1330 z5 = 38:gosub 7620
+1330 z59 = 38:gosub 7620
 1340 goto 400
 1350 rem CRYSTAL BRIDGE AND FISSURE
 1360 if not (l1 = 19 and d = 7 or l1 = 20 and d = 3) then 1410
 1370 if b2 then 1180
-1380 z5 = 3:gosub 7620
+1380 z59 = 3:gosub 7620
 1390 goto 400
 1400 rem MT. KING & SNAKE
 1410 if not (l1 = 22 and d <> 3 and d <> 9) then 1690
 1420 if sn = 0 then 1180
-1430 z5 = 50:gosub 7620
+1430 z59 = 50:gosub 7620
 1440 goto 400
 1460 rem bedquilt and random directiosn
 1470 if l1 <> 44 then 1590
 1480 if rnd > 0.5 then 1510
-1490 z5 = 52:gosub 7620
+1490 z59 = 52:gosub 7620
 1500 goto 400
 1510 restore 1530
 1520 rem ROOMS TO JU
@@ -170,18 +170,18 @@
 1600 rem SHOULD WE LET HIM OUT?
 1610 if rnd < 0.15 then 1650
 1620 rem NO
-1630 z5 = 52:gosub 7620
+1630 z59 = 52:gosub 7620
 1640 goto 400
 1650 rem YES
 1660 z2 = 38
 1670 goto 1180
 1680 rem Narrow Tunnel
 1690 if not (l1 = 57 or l1 = 58) then 1780
-1691 if k(1) <> 102 and k(2) <> 102 and k(1) <> 106 and k(2) <> 106 then 1770
+1691 if k(1) <> 102 and k(2) <> 102 and k(1) <> 106 and k(2) <> 106 then 1780
 1700 for z3 = 1 to t2
 1710  if z3 = 10 then 1750
 1720  if s(z3) <> -1 then 1750
-1730  z5 = 53:gosub 7620
+1730  z59 = 53:gosub 7620
 1740  goto 400
 1750 next z3
 1760 goto 1180
@@ -189,19 +189,19 @@
 1780 IF L1=60 AND D=2 THEN 1790
 1781 IF L1=61 AND D=6 THEN 1790 ELSE 1860
 1790 on t+1 goto 1180,1800,1820,1840
-1800 z5 = 55:gosub 7620
+1800 z59 = 55:gosub 7620
 1810 goto 400
-1820 z5 = 56:gosub 7620
-1821 z5 = 55:gosub 7620
+1820 z59 = 56:gosub 7620
+1821 z59 = 55:gosub 7620
 1830 T=1:goto 400
 1840 t = 2
 1850 goto 1180
 1860 if not (l1 = 73 and d = 1 and d2 = 0) then 1890
-1870 z5 = 57:gosub 7620
+1870 z59 = 57:gosub 7620
 1880 goto 400
 1890 if not (l1 = 82 and s(33) = l1 and d = 1) then 1180
 1900 rem DRAGON
-1910 z5 = 51:gosub 7620
+1910 z59 = 51:gosub 7620
 1920 goto 400
 1940 rem OTHER COMMANDS
 1950 z1=k(1):if k(1) >= 110 and k(1) <= T3 then 2090
@@ -233,7 +233,7 @@
 2170 IF L1<>26 THEN 2200
 2180 Z2=7
 2190 GOTO 1180
-2200 z5 = 2:gosub 7620
+2200 z59 = 2:gosub 7620
 2210 GOTO 400
 2220 REM *** XYZZY ***
 2230 IF L1<>7 THEN 2270
@@ -257,7 +257,7 @@
 2390 REM *** CROSS ***
 2400 IF L1<>19 THEN 2470
 2410 IF B2<>0 THEN 2440
-2420 z5 = 3:gosub 7620
+2420 z59 = 3:gosub 7620
 2430 GOTO 400
 2440 D=7
 2450 REM JUST GIVE NEW DIRECTION, USE MOVE ROUTINE
@@ -281,7 +281,7 @@
 2630 GOTO 1180
 2640 REM *** JUMP *** STRICTLY SUICIDAL
 2650 IF L1<>16 AND L1<>19 AND L1<>20 AND L1<>27 THEN 2200
-2660 z5 = 4:gosub 7620
+2660 z59 = 4:gosub 7620
 2670 GOTO 9550
 2680 REM FILL
 2690 IF S(21)=-1 THEN 2730
@@ -289,7 +289,7 @@
 2710 print "You don't have the ";b$
 2720 goto 410
 2730 IF B0=0 THEN 2760
-2740 z5 = 5:gosub 7620
+2740 z59 = 5:gosub 7620
 2750 GOTO 410
 2760 IF L1<>7 AND L1<>8 AND L1<>9 AND L1<>35 AND L1<>74 AND L1<>81 THEN 2790
 2770 B0=1:S(16)=-1
@@ -311,7 +311,7 @@
 2930 rem *** LOOK ***
 2940 if l1 < 13 or l1 = 58 then 2970
 2941 if l = 1 and (s(18) = l1 or s(18) = -1) then 2970
-2950 z5 = 45:gosub 7620
+2950 z59 = 45:gosub 7620
 2960 goto 400
 2970 gosub 8050
 2980 gosub 6680
@@ -392,7 +392,7 @@
 3820 next x
 3830 if z8 < 7 then 3870
 3840 rem CARRYING TOO MUCH
-3850 z5 = 54:gosub 7620
+3850 z59 = 54:gosub 7620
 3860 goto 410
 3870 goto 6880
 3880 s(z3) = -1
@@ -427,19 +427,19 @@
 4210 IF S(Z3)<>-1 THEN 2710
 4220 IF NOT (Z3<16 AND S(32)=L1) THEN 4260
 4230 REM THROW TREASURE TO TROLL
-4240 z5 = 27:gosub 7620
+4240 z59 = 27:gosub 7620
 4241 S(Z3)=0:T=3:GOTO 400
 4260 IF NOT (Z3=27 AND S(32)=L1) THEN 4300
 4270 REM TRYING TO BUTCHER TROLL?
-4280 z5 = 26:gosub 7620
+4280 z59 = 26:gosub 7620
 4281 S(27)=L1:GOTO 400
 4300 IF NOT (Z3=27 AND S(35)=L1) THEN 4380
 4310 REM TRYING TO KILL DWARF
 4320 IF rnd>0.5 THEN 4360
-4330 z5 = 29:gosub 7620
+4330 z59 = 29:gosub 7620
 4340 GOSUB 8650
 4350 GOTO 4410
-4360 z5 = 30:gosub 7620
+4360 z59 = 30:gosub 7620
 4361 S(35)=0:GOTO 4410
 4380 REM NOTHING SPECIAL, JUST DROP ITEM
 4390 IF S(35)<>L1 THEN 4400
@@ -452,35 +452,35 @@
 4440 GOSUB 8280
 4450 IF NOT (Z3=33 AND S(Z3)=L1 AND L1=82) THEN 4520
 4460 REM HE CAN KILL DRAGON
-4470 z5 = 68:gosub 7620
+4470 z59 = 68:gosub 7620
 4480 GOTO 410
 4490 IF L1<>82 THEN 2040
-4500 z5 = 69:gosub 7620
+4500 z59 = 69:gosub 7620
 4501 S(33)=0:D1=0:GOTO 400
 4520 IF S(32)<>L1 THEN 4560
 4530 REM TRYING TO MUNGE TROLL
 4540 Z9=FNA(25):GOTO 400
 4560 IF NOT (Z3=26 OR Z3>30) THEN 4600
 4570 REM DANGEROUS TO ATTACK THESE
-4580 z5 = 70:gosub 7620
+4580 z59 = 70:gosub 7620
 4590 GOTO 400
 4600 REM NOTHING TO ATTACK
-4610 z5 = 71:gosub 7620
+4610 z59 = 71:gosub 7620
 4620 GOTO 400
 4630 REM *** FEED ***
 4640 GOSUB 8280
 4650 IF Z3<>35 THEN 4690
 4660 REM CAN'T FEED DWARF!
-4670 z5 = 24:gosub 7620
+4670 z59 = 24:gosub 7620
 4680 GOTO 400
 4690 IF S(20) = -1 THEN 4720
 4700 B$ = "FOOD":GOTO 2710
 4720 IF L1=69 THEN 4760
 4730 PRINT "I can't feed it."
-4740 z5 = 23:gosub 7620
+4740 z59 = 23:gosub 7620
 4750 GOTO 400
 4760 IF S(20)=L1 THEN 7600
-4770 B1=1:S(20)=0:z5 = 6:gosub 7620
+4770 B1=1:S(20)=0:z59 = 6:gosub 7620
 4790 GOTO 400
 4800 REM *** WATER ***
 4810 IF S(16) = -1 THEN 4840
@@ -490,11 +490,11 @@
 4851 IF P1 = 0 THEN 4860
 4852 IF P1 = 1 THEN 4890
 4853 IF P1 = 2 THEN 4920
-4860 z5 = 7:gosub 7620
+4860 z59 = 7:gosub 7620
 4870 P1=1:S(16)=0:B0=0:GOTO 400
-4890 z5 = 8:gosub 7620
+4890 z59 = 8:gosub 7620
 4900 P1=2:S(16)=0:B0=0:GOTO 400
-4920 z5 = 9:gosub 7620
+4920 z59 = 9:gosub 7620
 4930 P1=0:S(16)=0:B0=0:GOTO 400
 4950 REM *** LOCK ***
 4960 IF L1=10 OR L1=11 THEN 4990
@@ -502,25 +502,25 @@
 4980 GOTO 2200
 4990 IF S(19)=-1 THEN 5020
 5000 B$="keys":goto 2710
-5020 G=0:z5 = 10:gosub 7620
+5020 G=0:z59 = 10:gosub 7620
 5040 GOTO 400
 5060 REM *** UNLOCK ***
 5070 IF S(19)<>-1 THEN 5000
 5080 IF L1<>10 AND L1<>11 THEN 5120
-5090 G=1:z5 = 11:gosub 7620
+5090 G=1:z59 = 11:gosub 7620
 5110 GOTO 400
 5120 IF L1<>69 THEN 2200
 5130 IF B1>0 THEN 5160
-5140 z5 = 12:gosub 7620
+5140 z59 = 12:gosub 7620
 5150 goto 400
 5160 IF C<>0 THEN 5170
 5165 C=1:B1=2
-5170 z5 = 13:gosub 7620
+5170 z59 = 13:gosub 7620
 5180 GOTO 400
 5190 REM *** FREE ***
 5200 IF K(1) = 31 or k(2) = 31 THEN 5240
 5210 REM CAN'T FREE ANYTHING BUT BIRD
-5220 z5 = 2:gosub 7620
+5220 z59 = 2:gosub 7620
 5230 GOTO 410
 5240 IF S(31)<>-1 THEN 5220
 5250 S(31) = L1:B3=0
@@ -547,9 +547,9 @@
 5490 REM GOTO B2+1 OF 5500,5530
 5491 IF B2=0 THEN 5500
 5492 IF B2=1 THEN 5530
-5500 z5 = 14:gosub 7620
+5500 z59 = 14:gosub 7620
 5510 B2=1:GOTO 400
-5530 z5 = 15:gosub 7620
+5530 z59 = 15:gosub 7620
 5540 B2=0:GOTO 400
 5560 REM *** OPEN ***
 5570 GOSUB 8280
@@ -561,17 +561,17 @@
 5650 if z3=24 THEN 5680
 5660 PRINT "I don't know how to open a ";B$:GOTO 400
 5680 IF S(9)=-1 THEN 5710
-5690 z5 = 16:gosub 7620
+5690 z59 = 16:gosub 7620
 5700 GOTO 400
 5710 IF S(Z3) = 0 THEN 2200
 5720 REM HE'S OPENED CLAM, SO PRINT DESCRIPTION OF THIS
 5730 REM PUT PEARL IN CUL-DE-SAC
-5740 S(7)=43:S(24)=0:S(30)=L1:z5 = 17:gosub 7620
+5740 S(7)=43:S(24)=0:S(30)=L1:z59 = 17:gosub 7620
 5750 GOTO 400
 5760 REM *** CLOSE ***
 5770 GOSUB 8280
 5780 IF Z3=40 THEN 4960
-5790 z5 = 18:gosub 7620
+5790 z59 = 18:gosub 7620
 5800 GOTO 400
 5810 REM OIL
 5820 IF K(1) <> 17 and k(2) <> 17 THEN 2200
@@ -580,36 +580,36 @@
 5860 IF L1<>73 THEN 2200
 5870 REM IS DOOR STILL RUSTED
 5880 IF D2=1 THEN 2200
-5890 D2=1:S(17)=0:B0=0:z5 = 19:gosub 7620
+5890 D2=1:S(17)=0:B0=0:z59 = 19:gosub 7620
 5900 GOTO 400
 5910 REM *** EAT ***
 5920 IF K(1) = 20 or k(2) = 20 THEN 5950
-5930 z5 = 20:gosub 7620
+5930 z59 = 20:gosub 7620
 5940 GOTO 410
 5950 Z3=20:GOSUB 8490
 5970 IF Z5=0 THEN 410
-5980 z5 = 73:gosub 7620
+5980 z59 = 73:gosub 7620
 5381 S(20)=0:B0=0:GOTO 400
 6000 REM *** DRINK ***
 6010 IF K(1) = 16 or k(2) =16 THEN 6040
-6020 z5 = 21:gosub 7620
+6020 z59 = 21:gosub 7620
 6030 GOTO 410
 6040 Z3=16:GOSUB 8490
 6060 IF Z5=0 THEN 410
-6070 z5 = 22:gosub 7620
+6070 z59 = 22:gosub 7620
 6071 S(17)=0:B0=0:GOTO 400
 6090 REM *** FEE FIE FOE FOO ***
 6100 IF L1=71 THEN 6130
-6110 z5 = 2:gosub 7620
+6110 z59 = 2:gosub 7620
 6120 GOTO 410
 6130 IF S(8)<>L1 THEN 6180
 6140 REM MAKE NEST VANISH
-6150 z5 = 79:gosub 7620
+6150 z59 = 79:gosub 7620
 6160 S(8)=0:GOTO 400
 6180 REM IF S(8)=0 THEN 6110
 6190 S(8)=L1
 6200 rem MAKE NEST RE-APPEAR
-6210 z5 = 81:gosub 7620
+6210 z59 = 81:gosub 7620
 6220 GOTO 400
 6230 REM *** SHORT ***
 6240 PRINT "Short descriptions"
@@ -668,7 +668,7 @@
 6711  print a$
 6720 next z1
 6721 IF S(26)<>-1 THEN 6730
-6722 z5 = 67:gosub 7620
+6722 z59 = 67:gosub 7620
 6730 rem CHECK FOR DWARF,PIRATE
 6740 gosub 8560
 6745 if dead = 1 then 6770
@@ -686,19 +686,19 @@
 6880 rem SPECIAL GETS
 6890 if not (z3 = 24 or z3 = 30 or z3 > 31) then 6930
 6900 rem CAN'T GET THESE FOR SOME REASON
-6910 z5 = 61:gosub 7620
+6910 z59 = 61:gosub 7620
 6920 goto 400
 6930 if not (z3 = 12 and c = 0) then 6970
 6940 rem CHAIN
-6950 z5 = 58:gosub 7620
+6950 z59 = 58:gosub 7620
 6960 goto 3900
 6970 rem BEAR IS HE FED? UNLOCKED?
 6980 if not (z3 = 26 and b1 <> 2) then 7010
-6990 z5 = 61:gosub 7620
+6990 z59 = 61:gosub 7620
 7000 goto 3900
 7010 if not (z3 = 14 and d1 = 1) then 7050
 7020 rem DRAGON AND RUG
-7030 z5 = 59:gosub 7620
+7030 z59 = 59:gosub 7620
 7040 goto 3900
 7050 if not (z3 = 16 or z3 = 17) then 7090
 7060 rem OIL AND WATER DO SAME AS FILL
@@ -718,7 +718,7 @@
 7250 rem OK TO TAKE BIRD
 7260 s(31) = -1 : b3 = 1:goto 3890
 7280 rem ROD SCARES BIRD
-7290 z5 = 37:gosub 7620
+7290 z59 = 37:gosub 7620
 7300 goto 3900
 7310 rem BOTTLE FULL? IF SO, GET CONTENTS
 7320 if not (z3 = 21 and b0) then 7360
@@ -744,20 +744,20 @@
 7520 IF NOT (Z3=16 OR Z3=17) THEN 7541
 7530 PRINT "Try saying 'empty'":goto 4140
 7541 IF Z3<>26 OR T<>1 OR (L1<>60 AND L1<>61) THEN 7550
-7542 z5 = 28:gosub 7620
+7542 z59 = 28:gosub 7620
 7543 T=0:S(26)=L1:S(32)=0:GOTO 400
 7550 IF Z3<>6 THEN 4120
 7560 IF S(28)=L1 THEN 7600
 7570 REM GOODBYE, FRAGILE VASE!
-7580 z5 = 43:gosub 7620
+7580 z59 = 43:gosub 7620
 7581 S(6)=0:S(29)=L1:GOTO 400
-7600 z5 = 60:gosub 7620
+7600 z59 = 60:gosub 7620
 7610 GOTO 4120
 7619 rem PRINT MESSAGE
 7620 if indx(1) >= 0 then 7640
 7630 gosub 12500
-7640 z5 = int(z5):xtmp = indx(z5)
-7645 if z5 <> 2 and z5 <> 61 then 7660
+7640 z59 = int(z59):xtmp = indx(z59)
+7645 if z59 <> 2 and z59 <> 61 then 7660
 7650 xtmp = fraindx(xtmp+min(int(rnd*5),5))
 7660 fseek #3,xtmp
 7670 input #3,b1$
@@ -765,41 +765,41 @@
 7673 b1$ = " "
 7690 if instr(b1$,"#") = 0 then 7670
 7700 z4 = val(mid$(b1$,2))
-7705 if int(z4) = z5 then 7720
-7710 if int(z4) < z5 then 7670
-7712 if int(z4) > z5 then 7760
+7705 if int(z4) = z59 then 7720
+7710 if int(z4) < z59 then 7670
+7712 if int(z4) > z59 then 7760
 7720 input #3,b1$
 7730 if mid$(b1$,1,1) = "#" then 7770
 7740 print b1$
 7750 goto 7720
-7760 print "NO DESC. # ";z5;" IN FILE AMESSAGE"
+7760 print "NO DESC. # ";z59;" IN FILE AMESSAGE"
 7770 return
 7800 rem
 7810 rem SITUATION DESCRIPTIONS
 7820 rem
 7830 rem GRATE
 7840 if l1 = 10 or l1 = 11 then 7842 else 7860
-7842 z5 = (g+10):gosub 7620
+7842 z59 = (g+10):gosub 7620
 7850 rem CRYSTAL BRIDGE
 7860 if (l1 = 19 or l1 = 20) and b2 = 1 then 7861 else 7880
-7861 z5 = 14:gosub 7620
+7861 z59 = 14:gosub 7620
 7870 rem PLUGH NOISE
 7880 if l1 = 26 and rnd > 0.3 then 7881 else 7900
-7881 z5 = 41:gosub 7620
+7881 z59 = 41:gosub 7620
 7890 rem IRON DOOR
 7900 if l1 = 73 and d2 = 0 then 7901 else 7920
-7901 z5 = 57:gosub 7620
+7901 z59 = 57:gosub 7620
 7910 rem TROLL
 7920 if (l1 = 60 or l1 = 61) and t = 1 then 7921 else 7940
-7921 z5 = 63:gosub 7620
+7921 z59 = 63:gosub 7620
 7930 rem BEAR
 7940 if l1 = 69 and b1 = 0 then 7941 else 7950
-7941 z5 = 64:gosub 7620
+7941 z59 = 64:gosub 7620
 7950 if l1 = 69 and b1 = 1 then 7951 else 7970
-7951 z5 = 66:gosub 7620
+7951 z59 = 66:gosub 7620
 7960 rem PLANT IN PIT
 7970 if l1 = 48 or l1 = 50 then 7971 else 7980
-7971 z5 = 47+p1:gosub 7620
+7971 z59 = 47+p1:gosub 7620
 7980 return
 7990 rem
 8000 rem   print long room description from "amessage" file
@@ -808,13 +808,13 @@
 8030 rem set v(l1)=1 so as not to repeat long desc(brief mode
 8040 v(l1) = 1
 8050 if l1 > 4 then 8080
-8060 z5 = 200:gosub 7620
+8060 z59 = 200:gosub 7620
 8070 goto 8130
 8080 if not (l1 > 88 and l1 < 98 or l1 = 99) then 8110
-8090 z5 = 288:gosub 7620
+8090 z59 = 288:gosub 7620
 8100 goto 8130
 8110 rem normal description
-8120 z5 = 200+l1:gosub 7620
+8120 z59 = 200+l1:gosub 7620
 8130 return
 8180 rem always give long descriptio nfor forest and maze
 8190 if l1 < 5 or (l1 > 88 and l1 < 98) or l1 = 99 then 8220
@@ -863,15 +863,16 @@
 8580 if l1 < 13 then 8790
 8590 if rnd > 0.05 then 8790
 8600 rem GIVE AWAY AXE
-8610 z5 = 80:gosub 7620
+8610 z59 = 80:gosub 7620
 8620 s(27) = l1 : d3 = 1
 8630 goto 8790
 8640 rem SHOULD DWARF ATTACK?
-8650 if L1 < 13 then 8790
+8650 if L1 >= 13 then 8660
+8652 s(35) = 0:goto 8790
 8660 if s(35) <> L1 then 8770
 8670 if rnd > 0.5 then 8790
 8680 rem YES!
-8690 z5 = 32:gosub 7620
+8690 z59 = 32:gosub 7620
 8700 rem DOES THE KNIFE KILL THE PLAYER?
 8705 KC = KC - 0.02
 8706 IF KC >= 0.5 THEN 8710
@@ -885,6 +886,7 @@
 8770 rem SHOULD WE PUT A DWARF HERE?
 8780 if rnd >= 0.1 then 8790
 8785 s(35) = l1
+8786 z59=31:gosub 7620
 8790 return
 8800 rem *** PIRATE ***
 8810 rem FIRST, DOES HE HAVE ANYTHING WORTH STEALING?
@@ -897,9 +899,9 @@
 8870 if z3 < int(rnd*4)+1 then 8960
 8880 rem SHOULD WE RIP OFF HIS VALUABLES?
 8890 if rnd < 0.05 then 8920
-8900 z5 = 34:gosub 7620
+8900 z59 = 34:gosub 7620
 8910 goto 8960
-8920 z5 = 33:gosub 7620
+8920 z59 = 33:gosub 7620
 8930 for x = 1 to 15
 8940  if s(x) <> -1 then 8950
 8945  s(x) = 100
@@ -942,13 +944,13 @@
 9220 rem *** READ THE MAGAZINE ***
 9230 GOSUB 8280
 9240 IF Z3=25 THEN 9270
-9250 z5 = 74:gosub 7620
+9250 z59 = 74:gosub 7620
 9260 GOTO 410
 9270 IF S(25)=-1 THEN 9300
 9280 B$="magazine"
 9290 GOTO 2710
 9300 REM OK, LET HIM READ IT
-9310 z5 = 303:gosub 7620
+9310 z59 = 303:gosub 7620
 9320 GOTO 400
 9330 REM *** BUG ***
 9340 A$ = "ADVBUGS.TXT"
@@ -972,13 +974,13 @@
 9561 IF R0=2 THEN 9610
 9562 IF R0=3 THEN 9740
 9570 REM ASK HIM IF HE WANTS TO BE REINCARNATED
-9580 z5 = 75:gosub 7620
+9580 z59 = 75:gosub 7620
 9590 GOSUB 9860
 9600 GOTO 9630
-9610 z5 = 77:gosub 7620
+9610 z59 = 77:gosub 7620
 9620 GOTO 9580
 9630 IF Z0=0 THEN 9750
-9640 z5 = 76:gosub 7620
+9640 z59 = 76:gosub 7620
 9650 REM PUT HIM BACK IN HOUSE, REARRANGE HIS STUFF
 9660 S(18)=7:L=0:DEAD=0:KC=1.03
 9670 FOR X=1 TO T2
@@ -989,7 +991,7 @@
 9710 L1=INT(rnd*4)+1:L2=L1
 9720 GOTO 320
 9730 REM THIRD DEATH--END OF GAME
-9740 z5 = 78:gosub 7620
+9740 z59 = 78:gosub 7620
 9750 PRINT "Oh well..."
 9760 GOSUB 6430
 9762 close #1:close #2:close #3
@@ -1001,7 +1003,7 @@
 9810 if l1 = 16 or l1 = 17 or l1 = 19 or l1 = 20 or l1 = 25 or l1 = 47 or l1 = 48 or l1 = 59 or l1 = 60 or l1 = 61 or l1 = 75 or l1 = 76 or l1 = 98 then 9840
 9820 goto 300
 9830 rem he fell into a pit
-9840 z5 = 44:gosub 7620
+9840 z59 = 44:gosub 7620
 9850 goto 9540
 9860 rem *** SEEK A "YES" OR "NO"
 9870 input a$
