@@ -44,8 +44,10 @@
 
 7/3/21
 
-* added SOUND freq,duration[,volume] command. The Windows code uses the winsound library and the Micropython implementation          assumes the appropriate speaker circuit is connected to GPIO pin #20 
+* added SOUND freq,duration[,volume] command. The Windows code uses the winsound library and the Micropython implementation
+         assumes the appropriate speaker circuit is connected to GPIO pin #20 
 
 7/7/21
 
 * Fixed a bug in the logic that removed null tokens which caused quoted space strings to be ignored
+
