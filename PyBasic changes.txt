@@ -51,3 +51,7 @@
 
 * Fixed a bug in the logic that removed null tokens which caused quoted space strings to be ignored
 
+
+8/3/21
+
+* Added Circuitpython support

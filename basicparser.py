@@ -23,6 +23,10 @@ import random
 if implementation.name.upper() == 'MICROPYTHON':
     from machine import Pin, PWM
     from time import sleep
+elif implementation.name.upper() == 'CIRCUITPYTHON':
+    from time import sleep
+    from board import A5
+    from pwmio import PWMOut
 else:
     import winsound
 #import gc
@@ -104,7 +108,8 @@ class BASICParser:
         self.__file_handles = {}
 
         if implementation.name.upper() == 'MICROPYTHON':
-            self.__pwm = PWM(Pin(20))
+            self.__pwm = PWM(Pin(19))
+
 
     def parse(self, tokenlist, line_number, cstmt_number, last_flowsignal, infile, tmpfile, datastmts):
         """Must be initialised with the list of
@@ -609,7 +614,7 @@ class BASICParser:
             self.__file_handles[filenum].seek(0)
             filelen = 0
             for lines in self.__file_handles[filenum]:
-                filelen += (len(lines)+(0 if implementation.name.upper() == 'MICROPYTHON' else 1))
+                filelen += (len(lines)+(0 if implementation.name.upper()[-6:] == 'PYTHON' else 1))
 
             self.__file_handles[filenum].seek(filelen)
 
@@ -843,6 +848,13 @@ class BASICParser:
             self.__pwm.duty_u16(volume)
             sleep(duration/18.2)
             self.__pwm.duty_u16(0)
+        elif implementation.name.upper() == 'CIRCUITPYTHON':
+            audioPin = PWMOut(A5, duty_cycle=0, frequency=440, variable_frequency=True)
+            audioPin.frequency = freq
+            audioPin.duty_cycle = volume
+            sleep(duration/18.2)
+            audioPin.duty_cycle = 0
+            audioPin.deinit()
         else:
             winsound.Beep(freq,int(self.__operand_stack.pop()*1000/18.2))
 

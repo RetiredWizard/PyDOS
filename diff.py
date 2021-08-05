@@ -1,21 +1,34 @@
 import os
-import uselect, time
+import time
+import sys
+if sys.implementation.name.upper() == "MICROPYTHON":
+    import uselect
 
 def fileDiff(args):
 
     def anyKey():
 
-        print("Press any key to continue . . . .")
+        if sys.implementation.name.upper() == "CIRCUITPYTHON":
 
-        spoll = uselect.poll()
-        spoll.register(sys.stdin,uselect.POLLIN)
+            keyIn = input("Press enter to continue . . . .")
 
-        while not spoll.poll(0):
-            time.sleep(.25)
+        else:
 
-        keyIn = sys.stdin.read(1)
+            spoll = uselect.poll()
+            spoll.register(sys.stdin,uselect.POLLIN)
 
-        spoll.unregister(sys.stdin)
+            while spoll.poll(0):
+                sys.stdin.read(1)
+
+            print("Press any key to continue . . . .",end="")
+
+            keyIn=chr(1)
+            while ord(keyIn) < 30 and ord(keyIn) != 10:
+                spoll.poll(-1)  # [0][1] != uselect.POLLIN
+                keyIn = sys.stdin.read(1)
+
+            spoll.unregister(sys.stdin)
+            print("")
 
         return(keyIn)
 
@@ -100,6 +113,7 @@ def fileDiff(args):
 
             f1 = open(file1)
             f2 = open(file2)
+            filesSame = True
 
             line1 = f1.readline()
             fndDiff = False
@@ -115,6 +129,7 @@ def fileDiff(args):
                 while line2 != "" and line1 != line2:
                     fpos += len(line2)
                     line2 = f2.readline()
+                    filesSame = False
 
                 if line1 == line2:
 
@@ -135,6 +150,7 @@ def fileDiff(args):
                             dispdLns = 0
                         print(line2,end="")
                         lastMatchPos += len(line2)
+                        filesSame = False
 
                     line2 = f2.readline()
                     lastMatchPos = fpos + len(line2)
@@ -142,6 +158,7 @@ def fileDiff(args):
                     fndDiff = False
                     sndDiff = False
                 else:
+                    filesSame = False
                     if not fndDiff:
                         dispdLns += 1
                         if dispdLns >= scrLines:
@@ -160,6 +177,7 @@ def fileDiff(args):
             f2.seek(lastMatchPos)
             line2 = f2.readline()
             while line2 != "":
+                filesSame = False
                 if not sndDiff:
                     dispdLns += 1
                     if dispdLns >= scrLines:
@@ -176,6 +194,9 @@ def fileDiff(args):
 
             f1.close()
             f2.close()
+
+            if filesSame:
+                print("No differences encountered")
 
         else:
             print("File not found: "+file2)

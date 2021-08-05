@@ -75,6 +75,8 @@ def main():
         program.__program.clear()
 
 
+    print("THIS VERSION CAN RUN FROM REPL DIRECTLY")
+    passedIn = ""
     if implementation.name.upper()[-6:] == 'PYTHON' and passedIn != "":
         infile = program.load(passedIn,tmpfile,datastmts)
         program.execute(infile,tmpfile,datastmts)
