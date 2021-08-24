@@ -3,8 +3,24 @@ import sys
 if sys.implementation.name.upper() == 'MICROPYTHON':
     import machine
 elif sys.implementation.name.upper() == 'CIRCUITPYTHON':
-    from board import A5
     from pwmio import PWMOut
+    foundPin = True
+    try:
+        #A5 is GPIO D19 on Nano Connect
+        from board import A5 as sndPin
+    except:
+        foundPin = False
+    if not foundPin:
+        foundPin = True
+        try:
+            #MOSI is D19 on Feather
+            from board import MOSI as sndPin
+        except:
+            foundPin = False
+
+if __name__ != "PyDOS":
+    passedIn = ""
+
 if passedIn=="":
     print("Syntax: sound Frequency,Duration(miliseconds),Volume")
     argv = "1000,0,0"
@@ -26,9 +42,9 @@ if sys.implementation.name.upper() == "MICROPYTHON":
     time.sleep(dur/1000)
     pwm.duty_u16(0)
 elif sys.implementation.name.upper() == "CIRCUITPYTHON":
-    audioPin = PWMOut(A5, duty_cycle=0, frequency=440, variable_frequency=True)
+    audioPin = PWMOut(sndPin, duty_cycle=0, frequency=440, variable_frequency=True)
     audioPin.frequency = freq
-    audioPin.duty_cycle = volume
-    time.sleep(duration/18.2)
+    audioPin.duty_cycle = vol
+    time.sleep(dur/1000)
     audioPin.duty_cycle = 0
     audioPin.deinit()

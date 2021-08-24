@@ -88,7 +88,13 @@ def fileDiff(args):
 
         return(fullPath)
 
-    scrLines = 23
+    if __name__ == "PyDOS":
+        global envVars
+
+        scrLines = int(envVars["_scrHeight"])-1
+    else:
+        scrLines = 23
+
     dispdLns = 0
 
     file1 = args.split(",")[0]
@@ -204,12 +210,13 @@ def fileDiff(args):
     else:
         print("File not found: "+file1)
 
+if __name__ != "PyDOS":
+    passedIn = ""
 
 if passedIn == "":
-    args = input("Enter filenames (file1,file2):")
-else:
-    args = passedIn
-if len(args.split(",")) != 2:
+    passedIn = input("Enter filenames (file1,file2):")
+
+if len(passedIn.split(",")) != 2:
     print("Wrong number of arguments, command syntax: diff file1,file2")
 else:
-    fileDiff(args)
+    fileDiff(passedIn)

@@ -2,14 +2,16 @@ import os
 from time import localtime
 from sys import implementation
 import gc
+gc.collect()
 if implementation.name.upper() == "MICROPYTHON":
     from sys import stdin
     from micropython import mem_info
     import uselect
     gc.threshold(gc.mem_free() // 4 + gc.mem_alloc())
-gc.collect()
 
 def PyDOS():
+
+    global envVars
 
     envVars = {}
     envVars["_scrWidth"] = 80
@@ -583,7 +585,7 @@ def PyDOS():
                         break
 
         elif cmd == "VER":
-            print("PyDOS [Version 0.82c]")
+            print("PyDOS [Version 0.84c]")
 
         elif cmd == "ECHO":
             if len(args) == 1:
@@ -1101,6 +1103,20 @@ def PyDOS():
                 activeBAT = False
                 batEcho = True
             else:
+                threadFound = True
+                try:
+                    testthreadLock = threadLock
+                except:
+                    threadFound = False
+
+                if threadFound:
+                    import _thread
+
+                    if threadLock.locked():
+                        threadLock.release()
+                    else:
+                        threadLock.acquire()
+
                 break
 
         else:
@@ -1178,9 +1194,5 @@ def PyDOS():
                 batLineNo = 0
 
             gc.collect()
-
-
-if __name__ == "__PyDOS__":
-    PyDOS()
 
 PyDOS()

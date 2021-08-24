@@ -369,8 +369,14 @@ def interperit(command):
 
     return(loop)
 
-def main():
+def main(passedIn):
     global filename
+    global text
+    global autosave
+    global lineNum
+    global parseMap
+
+
     if passedIn != "":
         filename = open_text(passedIn)
 
@@ -379,6 +385,17 @@ def main():
     loop = True
     while loop:
         loop = interperit(input(filename+": "))
-        if autosave: filename = save_text()
+        #if autosave:
+            #filename = save_text()
 
-main()
+    del text
+    del filename
+    del autosave
+    del lineNum
+    del parseMap
+
+
+if __name__ != "PyDOS":
+    passedIn = ""
+
+main(passedIn)

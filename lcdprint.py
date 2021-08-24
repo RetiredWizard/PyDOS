@@ -1,25 +1,81 @@
-import machine
 import sys
-import uselect
-import time
-import lcd2004
 
-def lcdPrint():
+if sys.implementation.name.upper() == "CIRCUITPYTHON":
+    import board
+    import busio
+    from circuitpython_i2c_lcd import I2cLcd
+else:
+    import machine
+    import lcd2004
 
-    SCL=7
-    SDA=6
-    ID=1
-    i2c=machine.I2C(ID,scl=machine.Pin(SCL),sda=machine.Pin(SDA),freq=400000)
-    lcd=lcd2004.lcd(ID,39,SCL,SDA)
-    lcd.lcd_backlight(True)
-    lcd.lcd_clear()
-    print(passedIn)
-    argv = passedIn
-    if argv == "":
-        argv = input("Say what?: ")
-    if argv == "":
-        lcd.lcd_backlight(False)
+
+# The PCF8574 has a jumper selectable address: 0x20 - 0x27
+DEFAULT_I2C_ADDR = 0x27
+
+def lcdPrint(passedIn):
+
+    if sys.implementation.name.upper() == "CIRCUITPYTHON":
+        i2c = busio.I2C(board.SCL, board.SDA)
+
+        # circuitpython seems to require locking the i2c bus
+        while i2c.try_lock():
+            pass
+
+        # 2 lines, 16 characters per line
+        lcd = I2cLcd(i2c, DEFAULT_I2C_ADDR, 2, 16)
+
+        # smiley faces as custom characters
+        happy = bytearray([0x00,0x0A,0x00,0x04,0x00,0x11,0x0E,0x00])
+        heart = bytearray([0x00,0x00,0x0A,0X15,0X11,0X0A,0X04,0X00])
+        grin = bytearray([0x00,0x00,0x0A,0x00,0x1F,0x11,0x0E,0x00])
+        lcd.custom_char(0, happy)
+        lcd.custom_char(1, heart)
+        lcd.custom_char(2, grin)
+
     else:
-        lcd.lcd_print(argv,1,0)
 
-lcdPrint()
+        # Sparkfun thingplus QWIC SCL=7 SDA=6
+        SCL=7
+        SDA=6
+        # Raspberry PI Pico SCL = GPIO3,pin5 SDA = GPIO2,pin4
+        #SCL=3
+        #SDA=2
+        ID=1
+        i2c=machine.I2C(ID,scl=machine.Pin(SCL),sda=machine.Pin(SDA),freq=400000)
+        lcd=lcd2004.lcd(ID,39,SCL,SDA)
+        lcd.lcd_backlight(True)
+        lcd.lcd_clear()
+
+    mess = passedIn
+    if mess == "":
+        mess = input("Say what?: ")
+
+    if mess == "":
+        if sys.implementation.name.upper() == "CIRCUITPYTHON":
+            lcd.backlight_off()
+        else:
+            lcd.lcd_backlight(False)
+    else:
+
+        if sys.implementation.name.upper() == "CIRCUITPYTHON":
+            mess = mess.replace("<3",chr(1))
+            mess = mess.replace(":)",chr(0))
+            mess = mess.replace("(:",chr(0))
+            mess = mess.replace(":-)",chr(0))
+            mess = mess.replace("(-:",chr(0))
+            mess = mess.replace(":D",chr(2))
+
+            lcd.move_to(0,0)
+            lcd.putstr(mess)
+        else:
+            lcd.lcd_print(mess,1,0)
+
+    if sys.implementation.name.upper() == "CIRCUITPYTHON":
+        i2c.unlock()
+        i2c.deinit()
+
+
+if __name__ != "PyDOS":
+    passedIn = ""
+
+lcdPrint(passedIn)
