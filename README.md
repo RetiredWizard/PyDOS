@@ -15,6 +15,8 @@ thread.lock to respond to a shutdown request (see the badblink.py for an example
 
 edit.py - line editor inspired by DOS edlin. Intial program structure of line editor by Joesph Long
     https://github.com/j-osephlong/Python-Text-Editor
+    
+fsedit.py - shell to load full screen editor from https://github.com/robert-hh/Micropython-Editor
 
 fileview.py - scrollable text file viewer
 
