@@ -1,4 +1,4 @@
-import os, uselect, time
+import os, uselect, time, sys
 
 def viewFile(args):
 
@@ -72,7 +72,15 @@ def viewFile(args):
 
         return(fullPath)
 
-    scrLines = 24
+
+    if __name__ == "PyDOS":
+        global envVars
+
+        scrLines = int(envVars["_scrHeight"])
+        scrWidth = int(envVars["_scrWidth"])
+    else:
+        scrLines = 24
+        scrWidth = 80
 
     savDir = os.getcwd()
     args = absolutePath(args,savDir)
@@ -92,7 +100,7 @@ def viewFile(args):
             if line != "":
                 index.append(index[i]+len(line))
                 print()
-                print((line[:-1])[:80],end="")
+                print((line[:-1])[:scrWidth],end="")
                 currLineNum += 1
                 maxRead += 1
             else:
@@ -115,7 +123,7 @@ def viewFile(args):
                     currLineNum -= 1
                     print (chr(27)+"[1;1H"+chr(27)+"M",end="")
                     f.seek(index[currLineNum-scrLines])
-                    print((f.readline()[:-1])[:80],end="")
+                    print((f.readline()[:-1])[:scrWidth],end="")
 
             elif ord(cmnd) == 66 and seqCnt == 2:
                 # Down Arrow
@@ -128,7 +136,7 @@ def viewFile(args):
                             index.append(index[currLineNum]+len(line))
                             maxRead += 1
                         print(chr(27)+"["+str(scrLines)+";1H"+chr(27)+"D",end="")
-                        print((line[:-1])[:80],end="")
+                        print((line[:-1])[:scrWidth],end="")
                         currLineNum += 1
                     else:
                         eof = currLineNum
@@ -143,15 +151,15 @@ def viewFile(args):
                 seqCnt = 0
 
 
-        print(chr(27)+'['+str(scrLines)+';1H',end="")
+        print(chr(27)+"["+str(scrLines)+";1H",end="")
         f.close()
     else:
         print("Unable to display: "+args+". File not found.")
 
-
+if __name__ != "PyDOS":
+    passedIn = ""
 
 if passedIn == "":
-    args = input("Enter filename:")
-else:
-    args = passedIn
-viewFile(args)
+    passedIn = input("Enter filename:")
+
+viewFile(passedIn)
