@@ -35,7 +35,7 @@ if %_ans% == M goto other
 copy /cpython/Feather/* /
 if not exist /lib mkdir /lib
 copy /cpython/Feather/lib/* /lib/
-if not exist /lib/adafruit_character_lcd mkdir /lib/adafruit_character_lcd_mkdir
+if not exist /lib/adafruit_character_lcd mkdir /lib/adafruit_character_lcd
 copy /cpython/Feather/lib/adafruit_character_lcd/* /lib/adafruit_character_lcd/
 if not exist /lib/adafruit_mcp230xx mkdir /lib/adafruit_mcp230xx
 copy /cpython/Feather/lib/adafruit_mcp230xx/* /lib/adafruit_mcp230xx/
