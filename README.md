@@ -1,6 +1,6 @@
-Micropython DOS-like OS for RP2040 microcontroller boards. Check out the demo video at https://www.youtube.com/watch?v=Az_oiq8GE4Y
+Micropython DOS-like shell for RP2040 microcontroller boards. Check out the demo video at https://www.youtube.com/watch?v=Az_oiq8GE4Y
 
-To start the OS type "import PyDOS" at the micropython REPL prompt.
+To start the shell type "import PyDOS" at the micropython REPL prompt.
 
 setup.bat in the root folder will prompt the user to indicate Circuit Python or Micropython and then the board they are using.
 The setup batch file will then copy the programs and libraries appropriate for the user's platform to the root folder of the
