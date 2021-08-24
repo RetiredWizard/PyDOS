@@ -32,8 +32,10 @@ from os import listdir,rename,remove
 import gc
 gc.collect()
 if implementation.name.upper() == 'MICROPYTHON':
-    from sys import print_exception
     gc.threshold(gc.mem_free() // 4 + gc.mem_alloc())
+
+#if implementation.name.upper()[-6:] == 'PYTHON':
+    #from sys import print_exception
 
 def main():
 
@@ -74,8 +76,7 @@ def main():
         print()
         program.__program.clear()
 
-
-    if implementation.name.upper()[-6:] == 'PYTHON' and passedIn != "":
+    if passedIn != "":
         infile = program.load(passedIn,tmpfile,datastmts)
         program.execute(infile,tmpfile,datastmts)
 
@@ -254,12 +255,13 @@ def main():
         # Trap all exceptions so that interpreter
         # keeps running
         except Exception as e:
-            if implementation.name.upper()[-6:] == 'MICROPYTHON':
-                print_exception(e)
+            if implementation.name.upper()[-6:] == 'PYTHON':
+                print(e)
+                #print_exception(e)
             else:
                 print(e)
 
-if __name__ == "__main__":
-    main()
+if __name__ == "PyBasic":
+    passedIn = ""
 
 main()

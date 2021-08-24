@@ -25,8 +25,20 @@ if implementation.name.upper() == 'MICROPYTHON':
     from time import sleep
 elif implementation.name.upper() == 'CIRCUITPYTHON':
     from time import sleep
-    from board import A5
     from pwmio import PWMOut
+    foundPin = True
+    try:
+        #A5 is GPIO D19 on Nano Connect
+        from board import A5 as sndPin
+    except:
+        foundPin = False
+    if not foundPin:
+        foundPin = True
+        try:
+            #MOSI is D19 on Feather
+            from board import MOSI as sndPin
+        except:
+            foundPin = False
 else:
     import winsound
 #import gc
@@ -849,7 +861,7 @@ class BASICParser:
             sleep(duration/18.2)
             self.__pwm.duty_u16(0)
         elif implementation.name.upper() == 'CIRCUITPYTHON':
-            audioPin = PWMOut(A5, duty_cycle=0, frequency=440, variable_frequency=True)
+            audioPin = PWMOut(sndPin, duty_cycle=0, frequency=440, variable_frequency=True)
             audioPin.frequency = freq
             audioPin.duty_cycle = volume
             sleep(duration/18.2)
