@@ -1,20 +1,21 @@
-import os, uselect, time, sys
+import os, time, sys
+#import uselect
 
 def viewFile(args):
 
-    def kbdInterrupt():
+    #def kbdInterrupt():
 
-        spoll = uselect.poll()
-        spoll.register(sys.stdin,uselect.POLLIN)
+        #spoll = uselect.poll()
+        #spoll.register(sys.stdin,uselect.POLLIN)
 
-        while not spoll.poll(0):
-            time.sleep(.25)
+        #while not spoll.poll(0):
+            #time.sleep(.25)
 
-        cmnd = sys.stdin.read(1)
+        #cmnd = sys.stdin.read(1)
 
-        spoll.unregister(sys.stdin)
+        #spoll.unregister(sys.stdin)
 
-        return(cmnd)
+        #return(cmnd)
 
     def chkPath(tstPath):
         validPath = True
@@ -110,7 +111,8 @@ def viewFile(args):
         cmnd = ""
         seqCnt = 0
         while cmnd.upper() != "Q":
-            cmnd = kbdInterrupt()
+            #cmnd = kbdInterrupt()
+            cmnd = sys.stdin.read(1)
 
             if ord(cmnd) == 27 and seqCnt == 0:
                 seqCnt = 1
