@@ -12,10 +12,10 @@ if implementation.name.upper() == "CIRCUITPYTHON":
     PyDOSReadOnly = False
 
 # For Gemma M0, Trinket M0, Metro M0/M4 Express, ItsyBitsy M0/M4 Express
-    switch = digitalio.DigitalInOut(board.D2)
+    # switch = digitalio.DigitalInOut(board.D2)
 
 # For Feather M0/M4 Express
-    # switch = digitalio.DigitalInOut(board.D5)
+    switch = digitalio.DigitalInOut(board.D5)
 
 # For Circuit Playground Express, Circuit Playground Bluefruit
     # switch = digitalio.DigitalInOut(board.D7)
