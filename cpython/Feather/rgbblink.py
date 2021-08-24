@@ -42,3 +42,5 @@ while cmnd.upper() != "Q":
     time.sleep(0.5)
     pixels.fill((0, 0, 0))
     time.sleep(0.5)
+
+pixels.deinit()
