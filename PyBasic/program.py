@@ -95,9 +95,9 @@ class Program:
                                 sign = 1
                             fileLine = str(line_number)+","+str(sign*self.__program[line_number])
                             outfile.write(fileLine+"\n")
-                            filelen += (len(fileLine)+(0 if implementation.name.upper()[-6:] == 'PYTHON' else 1))
+                            filelen += (len(fileLine)+(0 if (implementation.name.upper() == 'MICROPYTHON' or implementation.name.upper() == 'CIRCUITPYTHON') else 1))
                         outfile.write("-999,-999\n")
-                        filelen += (10 if implementation.name.upper()[-6:] == 'PYTHON' else 11)
+                        filelen += (10 if (implementation.name.upper() == 'MICROPYTHON' or implementation.name.upper() == 'CIRCUITPYTHON') else 11)
 
                     for line_number in line_numbers:
                         fileLine = str(line_number)
@@ -135,7 +135,7 @@ class Program:
             if file.split(".")[-1].upper() == "PGM":
                 pgmLoad = True
                 for fileLine in infile:
-                    fOffset += (len(fileLine) + (0 if implementation.name.upper()[-6:] == 'PYTHON' else 1))
+                    fOffset += (len(fileLine) + (0 if (implementation.name.upper() == 'MICROPYTHON' or implementation.name.upper() == 'CIRCUITPYTHON') else 1))
                     if len(fileLine) >= 9 and fileLine[0:9] == "-999,-999":
                         break
 
@@ -152,7 +152,7 @@ class Program:
                 else:
                     if ((fileLine.strip()).replace("\n","")).replace("\r","") != "":
                         self.add_stmt(Lexer().tokenize((fileLine.replace("\n","")).replace("\r","")),fIndex+fOffset,tmpfile,datastmts)
-                    fIndex += (len(fileLine) + (0 if implementation.name.upper()[-6:] == 'PYTHON' else 1))
+                    fIndex += (len(fileLine) + (0 if (implementation.name.upper() == 'MICROPYTHON' or implementation.name.upper() == 'CIRCUITPYTHON') else 1))
 
 
         except OSError:
@@ -196,7 +196,7 @@ class Program:
                 tmpfile.seek(0)
                 filelen = 0
                 for lines in tmpfile:
-                    filelen += (len(lines)+(0 if implementation.name.upper()[-6:] == 'PYTHON' else 1))
+                    filelen += (len(lines)+(0 if (implementation.name.upper() == 'MICROPYTHON' or implementation.name.upper() == 'CIRCUITPYTHON') else 1))
 
                 self.__program[line_number] = -(filelen+1)
                 if tokenlist[1].lexeme == "DATA":

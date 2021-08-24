@@ -63,7 +63,7 @@ def main():
     infile = tmpfile
 
     #Attempting memory pre-allocation to prepare for large Basic programs
-    if implementation.name.upper()[-6:] == 'PYTHON':
+    if implementation.name.upper() == 'MICROPYTHON' or implementation.name.upper() == 'CIRCUITPYTHON':
         gc.collect()
         for i in range(1600):
             if i % 100 == 0:
@@ -255,13 +255,13 @@ def main():
         # Trap all exceptions so that interpreter
         # keeps running
         except Exception as e:
-            if implementation.name.upper()[-6:] == 'PYTHON':
+            if implementation.name.upper() == 'MICROPYTHON' or implementation.name.upper() == 'CIRCUITPYTHON':
                 print(e)
                 #print_exception(e)
             else:
                 print(e)
 
-if __name__ == "PyBasic":
+if __name__ != "PyDOS":
     passedIn = ""
 
 main()
