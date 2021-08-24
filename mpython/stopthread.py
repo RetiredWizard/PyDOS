@@ -1,3 +1,3 @@
 import _thread
 threadLock.acquire(0,5.0)
-envVars['stop'] = 'stop'
+envVars['stopthread'] = 'stop'
