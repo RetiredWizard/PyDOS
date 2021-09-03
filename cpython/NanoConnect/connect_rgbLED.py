@@ -82,6 +82,9 @@ while True:
         r += ((abs(transition[icolor]) & 1)/transition[icolor]) * (MAXRED / steps)
         b += ((abs(transition[icolor]) & 2)/transition[icolor]) * (MAXBLUE / steps)
         g += ((abs(transition[icolor]) & 4)/transition[icolor]) * (MAXGREEN / steps)
+        r = max(0,min(MAXRED,r))
+        b = max(0,min(MAXBLUE,b))
+        g = max(0,min(MAXGREEN,g))
 
         esp.set_analog_write(LEDR,(255-int(r))/255)
         esp.set_analog_write(LEDG,(255-int(g))/255)
