@@ -43,6 +43,12 @@ goto other
 :nanoconnect
 if %_ans% == M goto other
 copy /cpython/NanoConnect/* /
+if not exist /lib mkdir /lib
+copy /cpython/NanoConnect/lib/* /lib/
+if not exist /lib/adafruit_esp32spi mkdir /lib/adafruit_esp32spi
+copy /cpython/NanoConnect/lib/adafruit_esp32spi/* /lib/adafruit_esp32spi/
+if not exist /lib/adafruit_bus_device mkdir /lib/adafruit_bus_device
+copy /cpython/NanoConnect/lib/adafruit_bus_device/* /lib/adafruit_bus_device/
 goto other
 :other
 set _ans=
