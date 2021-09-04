@@ -36,5 +36,5 @@ The following changes have been made to the richpl github version:
 * pre-allocation of memory on startup, this seems to reduce the memory allocation errors when attempting to run large basic programs
 
 * added SOUND freq,duration[,volume] command. The Windows code uses the winsound library and the Micropython implementation
-         assumes the appropriate speaker circuit is connected to GPIO pin #20 
+         assumes the appropriate speaker circuit is connected to GPIO pin #19
 
