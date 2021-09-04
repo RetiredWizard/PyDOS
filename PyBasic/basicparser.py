@@ -112,6 +112,7 @@ class BASICParser:
 
         # Set to keep track of extant loop variables
         self.__loop_vars = set()
+        self.last_flowsignal = None
 
         # Set to keep track of print column across multiple print statements
         self.__prnt_column = 0
@@ -123,7 +124,7 @@ class BASICParser:
             self.__pwm = PWM(Pin(19))
 
 
-    def parse(self, tokenlist, line_number, cstmt_number, last_flowsignal, infile, tmpfile, datastmts):
+    def parse(self, tokenlist, line_number, cstmt_number, infile, tmpfile, datastmts):
         """Must be initialised with the list of
         BTokens to be processed. These tokens
         represent a BASIC statement without
@@ -132,7 +133,6 @@ class BASICParser:
         :param tokenlist: The tokenized program statement
         :param line_number: The line number of the statement
         :param cstmt_number: Which statement in a multistatment line
-        :param last_flowsignal: the flowsignal from the previous statement
 
         :return: The FlowSignal to indicate to the program
         how to branch if necessary, None otherwise
@@ -159,7 +159,7 @@ class BASICParser:
         # Assign the first token
         self.__token = self.__tokenlist[self.__tokenindex]
 
-        return self.__stmt(last_flowsignal,infile,tmpfile,datastmts)
+        return self.__stmt(infile,tmpfile,datastmts)
 
     def __advance(self):
         """Advances to the next token
@@ -183,7 +183,7 @@ class BASICParser:
             raise RuntimeError('Expecting ' + Token.catnames[expected_category] +
                                ' in line ' + str(self.__line_number))
 
-    def __stmt(self,last_flowsignal,infile,tmpfile,datastmts):
+    def __stmt(self,infile,tmpfile,datastmts):
         """Parses a program statement
 
         :return: The FlowSignal to indicate to the program
@@ -193,7 +193,7 @@ class BASICParser:
 
         if self.__token.category in [Token.FOR, Token.IF, Token.NEXT,
                                      Token.ON]:
-            return self.__compoundstmt(last_flowsignal)
+            return self.__compoundstmt()
 
         else:
             return self.__simplestmt(infile,tmpfile,datastmts)
@@ -1046,7 +1046,7 @@ class BASICParser:
 
         return arrayval
 
-    def __compoundstmt(self,last_flowsignal):
+    def __compoundstmt(self):
         """Parses compound statements,
         specifically if-then-else and
         loops
@@ -1056,7 +1056,7 @@ class BASICParser:
 
         """
         if self.__token.category == Token.FOR:
-            return self.__forstmt(last_flowsignal)
+            return self.__forstmt()
 
         elif self.__token.category == Token.NEXT:
             return self.__nextstmt()
@@ -1112,7 +1112,7 @@ class BASICParser:
             # No ELSE action
             return None
 
-    def __forstmt(self,last_flowsignal):
+    def __forstmt(self):
         """Parses for loops
 
         :return: The FlowSignal to indicate that
@@ -1187,8 +1187,8 @@ class BASICParser:
         # of the loop
 
         from_next = False
-        if last_flowsignal:
-            if last_flowsignal.ftype == FlowSignal.LOOP_REPEAT:
+        if self.last_flowsignal:
+            if self.last_flowsignal.ftype == FlowSignal.LOOP_REPEAT:
                 from_next = True
 
         if loop_variable not in self.__loop_vars or not from_next:

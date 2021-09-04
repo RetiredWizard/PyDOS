@@ -239,7 +239,7 @@ class Program:
 
         return statement
 
-    def __execute(self, line_number, last_flowsignal,infile,tmpfile,datastmts):
+    def __execute(self, line_number, infile,tmpfile,datastmts):
         """Execute the statement with the
         specified line number
 
@@ -263,7 +263,7 @@ class Program:
         for cstmt_number in range(0,number_of_stmts):
             try:
             #if True:
-                tmp_flow = self.__parser.parse(statement, line_number, cstmt_number, last_flowsignal, infile, tmpfile, datastmts)
+                tmp_flow = self.__parser.parse(statement, line_number, cstmt_number, infile, tmpfile, datastmts)
 
             except RuntimeError as err:
                 raise RuntimeError(str(err))
@@ -293,14 +293,13 @@ class Program:
             #if implementation.name.upper() == 'MICROPYTHON':
                 #gc.threshold(gc.mem_free() // 4 + gc.mem_alloc())
             index = 0
-            last_flowsignal = None
             self.set_next_line_number(line_numbers[index])
 
             # Run through the program until the
             # has line number has been reached
             while True:
-                flowsignal = self.__execute(self.get_next_line_number(),last_flowsignal,infile,tmpfile,datastmts)
-                last_flowsignal = flowsignal
+                flowsignal = self.__execute(self.get_next_line_number(),infile,tmpfile,datastmts)
+                self.__parser.last_flowsignal = flowsignal
 
 
                 if flowsignal:
