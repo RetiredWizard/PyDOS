@@ -1,5 +1,5 @@
 Basic interpreter copied from https://github.com/richpl/PyBasic and modified to run under Micropython, CircuitPython
-cPython under Windows. The interpreter can be launched from PyDOS by typing "PyBasic" or from the REPL by typing "import PyBasic"
+or cPython under Windows. The interpreter can be launched from PyDOS by typing "PyBasic" or from the REPL by typing "import PyBasic"
 
 
 The following changes have been made to the richpl github version:
