@@ -56,9 +56,6 @@ class Lexer:
         # Establish a list of tokens to be
         # derived from the statement
         tokenlist = []
-        firstToken = False
-        firstNumber = True
-        commentStmt = False
 
         # Process every character until we
         # reach the end of the statement string
@@ -74,23 +71,17 @@ class Lexer:
             token = Token(self.__column - 1, None, '')
 
             # Process strings
-            # DCH and Remark Statements
-            if c == '"' or commentStmt:
-                if commentStmt:
-                    token.category = Token.REM
-                else:
-                    token.category = Token.STRING
-                firstToken = False
+            if c == '"':
+                token.category = Token.STRING
 
                 # Consume all of the characters
                 # until we reach the terminating
                 # quote. Do not store the quotes
                 # in the lexeme
-                if not commentStmt:
-                    c = self.__get_next_char()  # Advance past opening quote
+                c = self.__get_next_char()  # Advance past opening quote
 
                 # We explicitly support empty strings
-                if c == '"' and not commentStmt:
+                if c == '"':
                     # String is empty, leave lexeme as ''
                     # and advance past terminating quote
                     c = self.__get_next_char()
@@ -101,11 +92,9 @@ class Lexer:
                         c = self.__get_next_char()
 
                         if c == '':
-                            if not commentStmt:
-                                raise SyntaxError("Mismatched quotes")
-                            break
+                            raise SyntaxError("Mismatched quotes")
 
-                        if c == '"' and not commentStmt:
+                        if c == '"':
                             c = self.__get_next_char()  # Advance past terminating quote
                             break
 
@@ -113,9 +102,6 @@ class Lexer:
             elif c.isdigit():
                 token.category = Token.UNSIGNEDINT
                 found_point = False
-                if firstNumber:
-                    firstToken = True
-                firstNumber = False
 
                 # Consume all of the digits, including any decimal point
                 while True:
@@ -146,8 +132,7 @@ class Lexer:
 
                     # Break if not a letter or a dollar symbol
                     # (the latter is used for string variable names)
-                    # *dch* if not (c.isalnum() or c == '_' or c == '$'):
-                    if not (c.isdigit() or c.isalpha() or c == '_' or c == '$'):
+                    if not (c.isalnum() or c == '_' or c == '$'):
                         break
 
                 # Normalise keywords and names to upper case
@@ -158,17 +143,17 @@ class Lexer:
                 if token.lexeme in Token.keywords:
                     token.category = Token.keywords[token.lexeme]
 
-                    if firstToken and token.lexeme == "REM":
-                        commentStmt = True
-                    firstToken = False
-
                 else:
                     token.category = Token.NAME
-                    firstToken = False
+
+                # Remark Statments - process rest of statement without checks
+                if token.lexeme == "REM":
+                    while c!= '':
+                        token.lexeme += c  # Append the current char to the lexeme
+                        c = self.__get_next_char()
 
             # Process operator symbols
             elif c in Token.smalltokens:
-                firstToken = False
                 save = c
                 c = self.__get_next_char()  # c might be '' (end of stmt)
                 twochar = save + c
@@ -185,13 +170,7 @@ class Lexer:
 
             # We do not recognise this token
             elif c != '':
-                firstToken = False
-#                raise SyntaxError('Syntax error (1)')
-                if len(tokenlist) > 0:
-                    print('Syntax error ('+c+') on line',tokenlist[0].lexeme)
-                else:
-                    print('Syntax error ('+c+')')
-                break
+                raise SyntaxError('Syntax error')
 
             # Append the new token to the list
             tokenlist.append(token)
@@ -215,6 +194,6 @@ class Lexer:
             return ''
 
 
-#if __name__ == "__main__":
-#    import doctest
-#    doctest.testmod()
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()
