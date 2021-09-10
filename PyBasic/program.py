@@ -21,14 +21,15 @@ line number.
 
 """
 
+from basicdata import BASICData
 from basictoken import BASICToken as Token
 from basicparser import BASICParser
-from basicdata import BASICData
 from flowsignal import FlowSignal
 from lexer import Lexer
 import gc
 from os import listdir,remove
 from sys import implementation
+gc.collect()
 
 class Program:
 
@@ -43,6 +44,9 @@ class Program:
         # Initialise return stack for subroutine returns
         # and loop returns
         self.__return_stack = []
+
+        # Setup DATA object
+        self.__data = BASICData()
 
     def list(self, strt_line, end_line, infile, tmpfile):
         """Lists the program"""
@@ -95,9 +99,9 @@ class Program:
                                 sign = 1
                             fileLine = str(line_number)+","+str(sign*self.__program[line_number])
                             outfile.write(fileLine+"\n")
-                            filelen += (len(fileLine)+(0 if (implementation.name.upper() == 'MICROPYTHON' or implementation.name.upper() == 'CIRCUITPYTHON') else 1))
+                            filelen += (len(fileLine)+(0 if implementation.name.upper() in ['MICROPYTHON','CIRCUITPYTHON'] else 1))
                         outfile.write("-999,-999\n")
-                        filelen += (10 if (implementation.name.upper() == 'MICROPYTHON' or implementation.name.upper() == 'CIRCUITPYTHON') else 11)
+                        filelen += (10 if implementation.name.upper() in ['MICROPYTHON','CIRCUITPYTHON'] else 11)
 
                     for line_number in line_numbers:
                         fileLine = str(line_number)
@@ -119,7 +123,7 @@ class Program:
 
         return retCode
 
-    def load(self, file, tmpfile, datastmts):
+    def load(self, file, tmpfile):
         """Load the program
 
         :param file: The name and path of the file to be loaded
@@ -135,7 +139,7 @@ class Program:
             if file.split(".")[-1].upper() == "PGM":
                 pgmLoad = True
                 for fileLine in infile:
-                    fOffset += (len(fileLine) + (0 if (implementation.name.upper() == 'MICROPYTHON' or implementation.name.upper() == 'CIRCUITPYTHON') else 1))
+                    fOffset += (len(fileLine) + (0 if implementation.name.upper() in ['MICROPYTHON','CIRCUITPYTHON'] else 1))
                     if len(fileLine) >= 9 and fileLine[0:9] == "-999,-999":
                         break
 
@@ -148,11 +152,11 @@ class Program:
                         break
                     self.__program[line_number] = abs(fIndex)+fOffset
                     if fIndex < 0:
-                        datastmts.addData(line_number,abs(fIndex)+fOffset)
+                        self.__data.addData(line_number,abs(fIndex)+fOffset)
                 else:
                     if ((fileLine.strip()).replace("\n","")).replace("\r","") != "":
-                        self.add_stmt(Lexer().tokenize((fileLine.replace("\n","")).replace("\r","")),fIndex+fOffset,tmpfile,datastmts)
-                    fIndex += (len(fileLine) + (0 if (implementation.name.upper() == 'MICROPYTHON' or implementation.name.upper() == 'CIRCUITPYTHON') else 1))
+                        self.add_stmt(Lexer().tokenize((fileLine.replace("\n","")).replace("\r","")),fIndex+fOffset,tmpfile)
+                    fIndex += (len(fileLine) + (0 if implementation.name.upper() in ['MICROPYTHON','CIRCUITPYTHON'] else 1))
 
 
         except OSError:
@@ -160,7 +164,7 @@ class Program:
 
         return infile
 
-    def add_stmt(self, tokenlist, fIndex, tmpfile, datastmts):
+    def add_stmt(self, tokenlist, fIndex, tmpfile):
         """
         Adds the supplied token list
         to the program. The first token should
@@ -176,31 +180,21 @@ class Program:
         tmpfile: file handle of temporary basic workfile
 
         """
-        #if len(tokenlist) >= 3:
-            #if tokenlist[2].lexeme.upper() == "%%MEMCOLLECT":
-                #if implementation.name.upper() == 'MICROPYTHON':
-                    #print (gc.mem_free(),end="")
-                #if implementation.name.upper() == 'MICROPYTHON':
-                    #gc.collect()
-                    #print (" -> ",gc.mem_free()," on line: ",tokenlist[0].lexeme)
-                #if implementation.name.upper() == 'MICROPYTHON':
-                    #gc.threshold(gc.mem_free() // 4 + gc.mem_alloc())
-
         try:
             line_number = int(tokenlist[0].lexeme)
             if fIndex >= 0:
                 self.__program[line_number] = fIndex
                 if tokenlist[1].lexeme == "DATA":
-                    datastmts.addData(line_number,fIndex)
+                    self.__data.addData(line_number,fIndex)
             else:
                 tmpfile.seek(0)
                 filelen = 0
                 for lines in tmpfile:
-                    filelen += (len(lines)+(0 if (implementation.name.upper() == 'MICROPYTHON' or implementation.name.upper() == 'CIRCUITPYTHON') else 1))
+                    filelen += (len(lines)+(0 if implementation.name.upper() in ['MICROPYTHON','CIRCUITPYTHON'] else 1))
 
                 self.__program[line_number] = -(filelen+1)
                 if tokenlist[1].lexeme == "DATA":
-                    datastmts.addData(line_number,-(filelen+1))
+                    self.__data.addData(line_number,-(filelen+1))
                 #self.__program[line_number] = -(len(tmpfile.read())+1)
 
                 fileLine = str(line_number)
@@ -239,7 +233,7 @@ class Program:
 
         return statement
 
-    def __execute(self, line_number, infile,tmpfile,datastmts):
+    def __execute(self, line_number, infile,tmpfile):
         """Execute the statement with the
         specified line number
 
@@ -263,7 +257,7 @@ class Program:
         for cstmt_number in range(0,number_of_stmts):
             try:
             #if True:
-                tmp_flow = self.__parser.parse(statement, line_number, cstmt_number, infile, tmpfile, datastmts)
+                tmp_flow = self.__parser.parse(statement, line_number, cstmt_number, infile, tmpfile, self.__data)
 
             except RuntimeError as err:
                 raise RuntimeError(str(err))
@@ -274,12 +268,12 @@ class Program:
         return tmp_flow
 
 
-    def execute(self,infile,tmpfile,datastmts):
+    def execute(self,infile,tmpfile):
         """Execute the program"""
 
         self.__parser = BASICParser()
 
-        datastmts.restore(0) # reset data pointer
+        self.__data.restore(0) # reset data pointer
 
         line_numbers = self.line_numbers()
 
@@ -298,7 +292,7 @@ class Program:
             # Run through the program until the
             # has line number has been reached
             while True:
-                flowsignal = self.__execute(self.get_next_line_number(),infile,tmpfile,datastmts)
+                flowsignal = self.__execute(self.get_next_line_number(),infile,tmpfile)
                 self.__parser.last_flowsignal = flowsignal
 
 
@@ -434,7 +428,7 @@ class Program:
         """Deletes the program by emptying the dictionary"""
         self.__program.clear()
 
-    def delete_statement(self, line_number, datastmts):
+    def delete_statement(self, line_number):
         """Deletes a statement from the program with
         the specified line number, if it exists
 
@@ -442,7 +436,7 @@ class Program:
 
         """
 
-        datastmts.delData(line_number)
+        self.__data.delData(line_number)
 
         try:
             del self.__program[line_number]

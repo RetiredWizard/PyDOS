@@ -64,6 +64,20 @@ Programs may be listed using the **LIST** command:
 >
 ```
 
+The list command can take arguments to refine the line selection listed
+
+`LIST 50` Lists only line 50
+
+`LIST 50-100` Lists lines 50 through 100 inclusive
+
+`LIST 50 100` Also Lists lines 50 through 100 inclusive, almost any delimiter
+works here
+
+`LIST -100` Lists from the start of the program through line 100 inclusive
+
+`LIST 50-` Lists from line 50 to the end of the program
+
+
 A program is executed using the **RUN** command:
 
 ```
@@ -72,7 +86,7 @@ A program is executed using the **RUN** command:
 >
 ```
 
-A program may be saved to disk using the **SAVE** command. Not that the full path must be specified within double quotes:
+A program may be saved to disk using the **SAVE** command. Note that the full path must be specified within double quotes:
 
 ```
 > SAVE "C:\path\to\my\file"
@@ -80,10 +94,7 @@ Program written to file
 >
 ```
 
-Saving is achieved by pickling the Python object that represents the BASIC program, i.e. the saved file is *not* a textual copy of
-the program statements.
-
-The program may be re-loaded (i.e. unpickled) from disk using the **LOAD** command, again specifying the full path using double quotes:
+The program may be re-loaded from disk using the **LOAD** command, again specifying the full path using double quotes:
 
 ```
 > LOAD "C:\path\to\my\file"
@@ -91,8 +102,11 @@ Program read from file
 >
 ```
 
-Since loading is performed by unpickling the program object from a file, only BASIC programs *previously saved
-by the interpreter* may be loaded.
+When loading or saving, the .bas extension is assumed if not provided.  If you are loading a simple name (alpha/numbers only) and in the working dir, quotes can be omitted:
+```
+> LOAD regression
+```
+Will load regression.bas from the current working directory.
 
 Individual program statements may be deleted by entering their line number only:
 
@@ -590,8 +604,7 @@ Input a number - 22
 Multiple items may be input by supplying a comma separated list. Input variables will be assigned
 to as many input values as supplied at run time. If there are more input values supplied than input
 variables, excess commas will be left in place. Conversely, if not enough input values are
-supplied, then the excess input variables will not be initialised (and will trigger an error if
-an attempt is made to evaluate those variables later in the program).
+supplied, an error message will be printed and the user will be asked to re-input the values again.
 
 Further, numeric input values must be valid numbers (integers or floating point).
 
@@ -604,7 +617,8 @@ Num, Str, Num: 22, hello!, 33
 >
 ```
 
-A mismatch between the input value and input variable type will trigger an error.
+A mismatch between the input value and input variable type will trigger an error, and the user will be asked
+to re-input the values again.
 
 It is a limitation of this BASIC dialect that it is not possible to assign constants directly to array variables
 within an **INPUT** statement, only simple variables.
@@ -732,12 +746,6 @@ calculate the corresponding factorial *N!*.
 
 * *rock_scissors_paper.bas* - A BASIC implementation of the rock-paper-scissors game.
 
-*Note that you cannot simply load these programs from the text files. They must
-be entered line by line into the interpreter. The program can then be saved and
-reloaded using the* **SAVE** and **LOAD** *commands as described above. Of course,
-this is no more inconvenient than saving a program to cassette tape and reloading it,
-as we all would have done in the 1980s!*
-
 ## Informal grammar definition
 
 **ABS**(*numerical-expression*) - Calculates the absolute value of the result of *numerical-expression*
@@ -797,7 +805,7 @@ be omitted to get the rest of the string.  If *start-position* or *end-position*
 
 **MIN**(*expression-list*) - Returns the lowest value in *expression-list*
 
-**ON** *expression* **GOSUB** *line-number* - Conditional subroutine call
+**ON** *expression* **GOSUB|GOTO** *line-number1,line-number2,...* - Conditional subroutine call|branch - Program flow will be transferred either through a **GOSUB** subroutine call or a **GOTO** branch to the line number in the list of line numbers corresponding to the ordinal value of the evaluated *expr*. The first line number corresponds with an *expr* value of 1.  *expr* must evaluate to an integer value.
 
 **PI** - Returns the value of pi
 
@@ -876,7 +884,7 @@ control flow changes to the Program object, is used consistently throughout the 
 
 * It is not possible to renumber a program. This would require considerable extra functionality.
 * Negative values are printed with a space (e.g. '- 5') in program listings because of tokenization. This does not affect functionality.
-* Decimal values less than zero must be expressed with a leading zero (i.e. 0.34 rather than .34)
+* Decimal values less than one must be expressed with a leading zero (i.e. 0.34 rather than .34)
 * User input values cannot be directly assigned to array variables in an **INPUT** or **READ** statement
 * Strings representing numbers (e.g. "10") can actually be assigned to numeric variables in **INPUT** and **READ** statements without an
 error, Python will silently convert them to integers.

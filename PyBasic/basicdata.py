@@ -1,9 +1,30 @@
+#! /usr/bin/python
+
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+"""Class representing a BASIC DATA Statements.
+This is a list of DATA statements, ordered by
+line number.
+
+"""
+
 from basictoken import BASICToken as Token
 from lexer import Lexer
 
 class BASICData:
-
-
 
     def __init__(self):
         # Dictionary to represent data
@@ -13,7 +34,6 @@ class BASICData:
         # Data pointer
         self.__next_data = 0
 
-
     def delete(self):
         self.__data.clear()
         self.__next_data = 0
@@ -21,7 +41,6 @@ class BASICData:
     def delData(self,line_number):
         if self.__data.get(line_number) != None:
             del self.__data[line_number]
-
 
     def addData(self,line_number,fIndex):
         """
@@ -42,8 +61,6 @@ class BASICData:
 
         except TypeError as err:
             raise TypeError("Invalid line number: " + str(err))
-
-
 
     def readData(self,read_line_number,infile,tmpfile):
 
@@ -66,7 +83,6 @@ class BASICData:
             raise RuntimeError('No DATA statements available to READ ' +
                                'in line ' + str(read_line_number))
 
-        #print("***",self.__next_data,self.__data[self.__next_data],line_numbers)
         if self.__data[self.__next_data] >= 0:
             infile.seek(self.__data[self.__next_data])
             tokenlist = Lexer().tokenize((infile.readline().replace("\n","")).replace("\r",""))[1:]
@@ -74,26 +90,9 @@ class BASICData:
             tmpfile.seek(-(self.__data[self.__next_data]+1))
             tokenlist = Lexer().tokenize((tmpfile.readline().replace("\n","")).replace("\r",""))[1:]
 
-        #tIndex = 0
-        #sign = 1
-        #subTokenCnt = 0
-        #while tIndex < len(tokenlist):
-            #token = tokenlist[tIndex]
-            #tIndex += 1
-
-            #if token.category == Token.MINUS:
-                #sign = -1
-                #subTokenCnt += 1
-            #elif
-
-            #*******************************
-
-
         sign = 1
         for token in tokenlist[1:]:
             if token.category != Token.COMMA:
-                #data_values.append(token.lexeme)
-
                 if token.category == Token.STRING:
                     data_values.append(token.lexeme)
                 elif token.category == Token.UNSIGNEDINT:

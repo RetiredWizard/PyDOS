@@ -41,8 +41,8 @@ elif implementation.name.upper() == 'CIRCUITPYTHON':
             foundPin = False
 else:
     import winsound
-#import gc
-#gc.collect()
+import gc
+gc.collect()
 #if implementation.name.upper() == 'MICROPYTHON':
     #gc.threshold(gc.mem_free() // 4 + gc.mem_alloc())
 
@@ -567,15 +567,14 @@ class BASICParser:
         # Process the FOR keyword
         self.__consume(Token.FOR)
 
-        if self.__token.category != Token.INPUT and self.__token.lexeme != 'OUTPUT' and self.__token.lexeme != 'APPEND':
-            raise SyntaxError('Invalid Open access mode in line ' + str(self.__line_number))
-
         if self.__token.lexeme == "INPUT":
             accessMode = "r"
         elif self.__token.lexeme == "APPEND":
             accessMode = "r+"
-        else:
+        elif self.__token.lexeme == "OUTPUT":
             accessMode = "w+"
+        else:
+            raise SyntaxError('Invalid Open access mode in line ' + str(self.__line_number))
 
         self.__advance() # Advance past acess type
 
@@ -625,7 +624,7 @@ class BASICParser:
             self.__file_handles[filenum].seek(0)
             filelen = 0
             for lines in self.__file_handles[filenum]:
-                filelen += (len(lines)+(0 if implementation.name.upper()[-6:] == 'PYTHON' else 1))
+                filelen += (len(lines)+(0 if implementation.name.upper() in ['MICROPYTHON','CIRCUITPYTHON'] else 1))
 
             self.__file_handles[filenum].seek(filelen)
 
@@ -768,19 +767,6 @@ class BASICParser:
 
     def __datastmt(self):
         """Parses a DATA statement"""
-
-        self.__advance()  # Advance past DATA token
-
-        # Acquire the comma separated values
-        if not self.__tokenindex >= len(self.__tokenlist):
-            self.__expr()
-            #self.__data_values.append(self.__operand_stack.pop())
-
-            while self.__token.category == Token.COMMA:
-                self.__advance()  # Advance past comma
-                self.__expr()
-                #self.__data_values.append(self.__operand_stack.pop())
-                self.__operand_stack.pop()
 
     def __readstmt(self,infile,tmpfile,datastmts):
         """Parses a READ statement."""

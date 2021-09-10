@@ -26,7 +26,6 @@ again.
 from basictoken import BASICToken as Token
 from lexer import Lexer
 from program import Program
-from basicdata import BASICData
 from sys import stderr,implementation
 from os import listdir,rename,remove
 import gc
@@ -55,7 +54,6 @@ def main():
 
     lexer = Lexer()
     program = Program()
-    datastmts = BASICData()
 
     fOpened = False
     #initialize and open temporary file
@@ -63,7 +61,7 @@ def main():
     infile = tmpfile
 
     #Attempting memory pre-allocation to prepare for large Basic programs
-    if implementation.name.upper() == 'MICROPYTHON' or implementation.name.upper() == 'CIRCUITPYTHON':
+    if implementation.name.upper() in ['MICROPYTHON','CIRCUITPYTHON']:
         gc.collect()
         for i in range(1600):
             if i % 100 == 0:
@@ -77,8 +75,8 @@ def main():
         program.__program.clear()
 
     if passedIn != "":
-        infile = program.load(passedIn,tmpfile,datastmts)
-        program.execute(infile,tmpfile,datastmts)
+        infile = program.load(passedIn,tmpfile)
+        program.execute(infile,tmpfile)
 
     # Continuously accept user input and act on it until
     # the user enters 'EXIT'
@@ -117,17 +115,17 @@ def main():
                 # a line number
                 elif tokenlist[0].category == Token.UNSIGNEDINT\
                      and len(tokenlist) > 1:
-                    program.add_stmt(tokenlist,-1,tmpfile,datastmts)
+                    program.add_stmt(tokenlist,-1,tmpfile)
 
                 # Delete a statement from the program
                 elif tokenlist[0].category == Token.UNSIGNEDINT \
                         and len(tokenlist) == 1:
-                    program.delete_statement(int(tokenlist[0].lexeme),datastmts)
+                    program.delete_statement(int(tokenlist[0].lexeme))
 
                 # Execute the program
                 elif tokenlist[0].category == Token.RUN:
                     try:
-                        program.execute(infile,tmpfile,datastmts)
+                        program.execute(infile,tmpfile)
 
                     except KeyboardInterrupt:
                         print("Program terminated")
@@ -170,7 +168,6 @@ def main():
                             # first save as a normal BAS file and reaload to eliminate all code from
                             # the temporary file
                             program.delete()
-                            datastmts.delete()
                             if fOpened:
                                 infile.close()
 
@@ -181,7 +178,7 @@ def main():
 
                             tmpfile.close()
                             tmpfile = open('_pybTmp.tmp','w+')
-                            infile = program.load(filename,tmpfile,datastmts)
+                            infile = program.load(filename,tmpfile)
                             if infile != None:
 
                                 if tokenlist[1].lexeme.split(".")[-1].upper() == "PGM":
@@ -196,9 +193,8 @@ def main():
 
                                         #.PGM.BAS file now being used, need to close .PGM.BAS and reload .pgm file
                                         program.delete()
-                                        datastmts.delete()
                                         infile.close()
-                                        infile = program.load(filename,tmpfile,datastmts)
+                                        infile = program.load(filename,tmpfile)
                                         if infile != None:
                                             remove(filename+".BAS")
                                             fOpened = True
@@ -225,7 +221,6 @@ def main():
                 # Load the program from disk and/or delete the program from memory
                 elif tokenlist[0].category == Token.LOAD or tokenlist[0].category == Token.NEW:
                     program.delete()
-                    datastmts.delete()
                     if fOpened:
                         infile.close()
                     fOpened = False
@@ -236,7 +231,7 @@ def main():
                     if tokenlist[0].category == Token.LOAD:
 
                         if len(tokenlist) > 1:
-                            infile = program.load(tokenlist[1].lexeme,tmpfile,datastmts)
+                            infile = program.load(tokenlist[1].lexeme,tmpfile)
                             if infile != None:
                                 fOpened = True
                                 print("Program read from file")
@@ -255,7 +250,7 @@ def main():
         # Trap all exceptions so that interpreter
         # keeps running
         except Exception as e:
-            if implementation.name.upper() == 'MICROPYTHON' or implementation.name.upper() == 'CIRCUITPYTHON':
+            if implementation.name.upper() in ['MICROPYTHON','CIRCUITPYTHON']:
                 print(e)
                 #print_exception(e)
             else:
