@@ -9,7 +9,7 @@
 18 rem ADVENTURE WAS PORTED TO THE MACINTOSH PLUS BY THE ELIZABETH AND DAVID HUNTER
 19 rem IN MARCH 1998 AND THEN TO PYBASIC FOR THE RASPBERRY RP2040 IN JUNE 2021
 20 rem print "Adventure 3.2 on ";date$;" at ";time$
-21 print "Adventure 3.2"
+21 print "Adventure 3.2 for micro PyBasic"
 22 open "AMESSAGE" for input as #3:open "AMOVING" for input as #4
 23 open "ADESCRIP" for input as #1:open "AITEMS" for input as #2
 44 rem dirs is an array of possible room directions, it replaces file AMOVING
@@ -27,7 +27,7 @@
 150 l1 = int(rnd*4)+1 : l2 = l1
 160 g = 0 : b0 = 1 : sn = 1 : d1 = 1 : d2 = 0 : t = 1 : b1 = 0 : b2 = 0 : p1 = 0: dead = 0: lastc$=""
 161 l = 0 : c = 0 : d3 = 0 : b3 = 0 : d0 = 2 : t1 = 100 : t2 = 35 : t3 = 149 : r0 = 0 : c0 = 0: c$=""
-162 KC = 1.03
+162 KC = 1.02
 170 for ii = 1 to 99
 171  s(ii) = 0 : v(ii) = 0
 172 next ii
@@ -89,7 +89,7 @@
 449 rem    65-90 = A-Z               48-57 = 0-9         46 = .    
 450 for x = 1 to len(c$)
 460 z5 = asc(mid$(c$,x,1))
-470 if (z5 > 64 and z5 < 91) or (z5 > 47 and z5 < 58) or z5 = 46 then 480 else 471
+470 if (z5 > 64 and z5 < 91) or (z5 > 47 and z5 < 58) then 480 else 471
 471 c$ = mid$(c$,1,x-1)+" "+mid$(c$,x+1)
 480 next x
 490 if instr(c$," ")=0 then 520
@@ -870,13 +870,16 @@
 8650 if L1 >= 13 then 8660
 8652 s(35) = 0:goto 8790
 8660 if s(35) <> L1 then 8770
+8661 if (l1 <> 60 and l1 <> 61) or t <> 1 then 8670
+8662 z59 = 299:gosub 7620
+8663 s(35) = 0: goto 8790
 8670 if rnd > 0.5 then 8790
 8680 rem YES!
 8690 z59 = 32:gosub 7620
 8700 rem DOES THE KNIFE KILL THE PLAYER?
 8705 KC = KC - 0.02
-8706 IF KC >= 0.5 THEN 8710
-8707 KC = 0.5
+8706 IF KC >= 0.75 THEN 8710
+8707 KC = 0.75
 8710 if rnd <= KC then 8750
 8720 rem YES
 8730 print "It gets you!"
@@ -884,7 +887,8 @@
 8750 print "It misses!"
 8760 goto 8790
 8770 rem SHOULD WE PUT A DWARF HERE?
-8780 if rnd >= 0.1 then 8790
+8780 if rnd >= 0.05 then 8790
+8781 if (l1 = 60 or l1 = 61) and t = 1 then 8790
 8785 s(35) = l1
 8786 z59=31:gosub 7620
 8790 return
