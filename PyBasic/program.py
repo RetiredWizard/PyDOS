@@ -155,7 +155,11 @@ class Program:
                         self.__data.addData(line_number,abs(fIndex)+fOffset)
                 else:
                     if ((fileLine.strip()).replace("\n","")).replace("\r","") != "":
-                        self.add_stmt(Lexer().tokenize((fileLine.replace("\n","")).replace("\r","")),fIndex+fOffset,tmpfile)
+                        line_number = int(fileLine.strip().split(" ")[0])
+                        self.__program[line_number] = fIndex+fOffset
+                        if fileLine.strip().upper()[fileLine.strip().find(' '):].strip()[:4] == "DATA":
+                            self.__data.addData(line_number,fIndex)
+                        #self.add_stmt(Lexer().tokenize((fileLine.replace("\n","")).replace("\r","")),fIndex+fOffset,tmpfile)
                     fIndex += (len(fileLine) + (0 if implementation.name.upper() in ['MICROPYTHON','CIRCUITPYTHON'] else 1))
 
 
@@ -226,7 +230,7 @@ class Program:
     def getprogram(self, ln, infile, tmpfile):
         if self.__program[ln] >= 0:
             infile.seek(self.__program[ln])
-            statement = Lexer().tokenize((infile.readline().replace("\n","")).replace("\r",""))[1:]
+            statement = Lexer().tokenize((infile.readline().strip().replace("\n","")).replace("\r",""))[1:]
         else:
             tmpfile.seek(-(self.__program[ln]+1))
             statement = Lexer().tokenize((tmpfile.readline().replace("\n","")).replace("\r",""))[1:]
