@@ -127,4 +127,4 @@ class BASICData:
                     self.__next_data = line_numbers[indexln-1]
         else:
             raise RuntimeError('Attempt to RESTORE but no DATA ' +
-                               'statement at line ' + str(lineno))
+                               'statement at line ' + str(restoreLineNo))

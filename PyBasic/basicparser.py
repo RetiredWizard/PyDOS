@@ -514,7 +514,7 @@ class BASICParser:
             BASICarray = self.__symbol_table[name + '_array']
 
         except KeyError:
-            raise KeyError('Array could not be found in line ' +
+            raise KeyError('Array - ' + name + ' could not be found in line ' +
                            str(self.__line_number))
 
         if BASICarray.dims != len(indexvars):
@@ -998,8 +998,8 @@ class BASICParser:
             self.__operand_stack.append(self.__evaluate_function(self.__token.category))
 
         else:
-            raise RuntimeError('Expecting factor in numeric expression' +
-                               ' in line ' + str(self.__line_number))
+            raise RuntimeError('Expecting factor in numeric expression (' +
+                               self.__token.lexeme+ ') in line ' + str(self.__line_number))
 
     def __get_array_val(self, BASICarray, indexvars):
         """Extracts the value from the given BASICArray at the specified indexes
