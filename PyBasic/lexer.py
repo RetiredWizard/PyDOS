@@ -170,11 +170,9 @@ class Lexer:
 
             # We do not recognise this token
             elif c != '':
-                print("Unrecognized Token: ->"+c+"<-")
                 raise SyntaxError('Syntax error: Unrecognized Token')
 
             # Append the new token to the list
-            # dch if token.lexeme != " " and token.lexeme !="":
             tokenlist.append(token)
 
         return tokenlist
