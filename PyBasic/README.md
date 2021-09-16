@@ -12,7 +12,8 @@ The PyDOS version of PyBasic still has the following difference from the richpl 
 * commas can be used in addition to semi-colons as print statment delimeters
 * TAB() function places print cursor at specified column rather than inserting specified number of spaces
 * starting array element 1 rather than 0, so that dim(10) created a 10 element array
-* PI, RNDINT, TERNARY, LEFT$, RIGHT$ functions not supported in PyDOS version
+* PI, RNDINT, TERNARY, LEFT$, RIGHT$ functions not supported in the PyDOS version
+* The RND function does not take any arguments or even empty parenthesis in the PyDOS version
 
 * PyDOS version runs Basic program in place on disk rather than loading into memory
 * added a saved index source code option when saving or loading using the .PGM extension on a program filename, this vastly speeds up subsequent program load times
