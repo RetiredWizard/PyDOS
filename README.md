@@ -34,7 +34,7 @@ thread.lock to respond to a shutdown request (see the badblink.py for an example
 
 **diff.py** - performs a file comparison
 
-**sound.py** - outputs a sound to a speaker cicruit connected to GPIO 20
+**sound.py** - outputs a sound to a speaker cicruit connected to GPIO 19
 
 **lcdprint.py** - displays text on an I2C LCD display
 
