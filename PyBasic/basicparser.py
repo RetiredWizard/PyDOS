@@ -308,15 +308,20 @@ class BASICParser:
         last_token_cat = None
         if not self.__tokenindex >= len(self.__tokenlist) and self.__token.category != Token.COLON:
             last_token_cat = self.__token.category
+            prntTab = (self.__token.category == Token.TAB)
             self.__logexpr()
 
-            if type(self.__operand_stack[-1]) == tuple and self.__operand_stack[-1][0] == "TAB":
-                if self.__prnt_column > self.__operand_stack[-1][1]:
-                    print()
+            #if type(self.__operand_stack[-1]) == tuple and self.__operand_stack[-1][0] == "TAB":
+            if prntTab:
+                if self.__prnt_column > len(self.__operand_stack[-1]):
+                    if fileIO:
+                        self.__file_handles[filenum].write("\n")
+                    else:
+                        print()
                     self.__prnt_column = 0
 
-                current_pr_column = self.__operand_stack[-1][1] - self.__prnt_column
-                self.__prnt_column = self.__operand_stack.pop()[1] - 1
+                current_pr_column = len(self.__operand_stack[-1]) - self.__prnt_column
+                self.__prnt_column = len(self.__operand_stack.pop()) - 1
                 if current_pr_column > 1:
                     if fileIO:
                         self.__file_handles[filenum].write(" "*(current_pr_column-1))
@@ -332,24 +337,25 @@ class BASICParser:
             while self.__token.category == Token.COMMA or self.__token.category == Token.SEMICOLON:
                 last_token_cat = self.__token.category
                 self.__advance()
+                prntTab = (self.__token.category == Token.TAB)
                 if not self.__tokenindex >= len(self.__tokenlist) and self.__token.category != Token.COLON:
                     last_token_cat = None
                     self.__logexpr()
 
-
-                    if type(self.__operand_stack[-1]) == tuple and self.__operand_stack[-1][0] == "TAB":
-                        if self.__prnt_column > self.__operand_stack[-1][1]:
+                    #if type(self.__operand_stack[-1]) == tuple and self.__operand_stack[-1][0] == "TAB":
+                    if prntTab:
+                        if self.__prnt_column > len(self.__operand_stack[-1]):
                             if fileIO:
                                 self.__file_handles[filenum].write("\n")
                             else:
                                 print()
                             self.__prnt_column = 0
-                        current_pr_column = self.__operand_stack[-1][1] - self.__prnt_column
+                        current_pr_column = len(self.__operand_stack[-1]) - self.__prnt_column
                         if fileIO:
                             self.__file_handles[filenum].write(" "*(current_pr_column-1))
                         else:
                             print(" "*(current_pr_column-1), end="")
-                        self.__prnt_column = self.__operand_stack.pop()[1] - 1
+                        self.__prnt_column = len(self.__operand_stack.pop()) - 1
                     else:
                         self.__prnt_column += len(str(self.__operand_stack[-1]))
                         if fileIO:
@@ -1641,7 +1647,7 @@ class BASICParser:
 
         elif category == Token.TAB:
             if type(value) == int:
-                return ("TAB", value)
+                return " " * value
 
             else:
                 raise TypeError("Invalid type supplied to TAB in line " +
