@@ -431,6 +431,7 @@ class Program:
     def delete(self):
         """Deletes the program by emptying the dictionary"""
         self.__program.clear()
+        self.__data.delete()
 
     def delete_statement(self, line_number):
         """Deletes a statement from the program with
