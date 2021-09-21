@@ -313,7 +313,7 @@ class BASICParser:
 
             #if type(self.__operand_stack[-1]) == tuple and self.__operand_stack[-1][0] == "TAB":
             if prntTab:
-                if self.__prnt_column > len(self.__operand_stack[-1]):
+                if self.__prnt_column >= len(self.__operand_stack[-1]):
                     if fileIO:
                         self.__file_handles[filenum].write("\n")
                     else:
@@ -344,7 +344,7 @@ class BASICParser:
 
                     #if type(self.__operand_stack[-1]) == tuple and self.__operand_stack[-1][0] == "TAB":
                     if prntTab:
-                        if self.__prnt_column > len(self.__operand_stack[-1]):
+                        if self.__prnt_column >= len(self.__operand_stack[-1]):
                             if fileIO:
                                 self.__file_handles[filenum].write("\n")
                             else:
