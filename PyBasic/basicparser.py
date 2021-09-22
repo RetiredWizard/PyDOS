@@ -18,13 +18,12 @@
 from basictoken import BASICToken as Token
 from flowsignal import FlowSignal
 from sys import implementation
+from time import localtime,sleep
 import math
 import random
 if implementation.name.upper() == 'MICROPYTHON':
     from machine import Pin, PWM
-    from time import sleep
 elif implementation.name.upper() == 'CIRCUITPYTHON':
-    from time import sleep
     from pwmio import PWMOut
     foundPin = True
     try:
@@ -1667,8 +1666,7 @@ class BASICParser:
         if not self.__tokenindex >= len(self.__tokenlist):
             self.__expr()  # Process the seed
             seed = self.__operand_stack.pop()
-
-            random.seed(seed)
-
         else:
-            random.seed()
+            seed = localtime()[2]*1000000+localtime()[3]*10000+localtime()[4]*100+localtime()[5]
+
+        random.seed(seed)
