@@ -31,7 +31,7 @@
 810 rem RANDOMIZE 120*(VAL(RIGHT$(TIME$,2)) + VAL(MID$(TIME$,4,2)) )
 811 RANDOMIZE
 820 REM Z$="                         "
-830 GOSUB 840
+830 rem GOSUB 840
 831 GOTO 960
 840 REM  ------- set function keys  for game -------
 850 rem KEY 1,"NAV"+CHR$(13)
@@ -569,12 +569,12 @@
 4190 PRINT"   REG = Galaxy 'region name' map":PRINT
 4191 return
 4200 REM setup to change cum gal record to galaxy map
-4210 GOSUB 840
+4210 rem GOSUB 840
 4211 H8=0:G5=1:PRINT"                        the galaxy":GOTO 4290
 4220 REM cum galactic record
 4230 rem 'INPUT"Do you want a hardcopy? Is the TTY on (Y/N) ";A$
 4240 rem 'IF A$="y" THEN POKE 1229,2 POKE 1237,3 NULL 1
-4250 GOSUB 840
+4250 rem GOSUB 840
 4260 PRINT:PRINT"            ";
 4270 PRINT "Computer record of galaxy for quadrant ";Q1;",";Q2
 4280 PRINT
@@ -602,7 +602,7 @@
 4373 rem 'POKE 1229,0 POKE 1237,1
 4380 GOTO 1520
 4390 REM status report
-4400 GOSUB 840
+4400 rem GOSUB 840
 4401 PRINT"   Status Report":X$="":IF K9<=1 THEN 4410
 4402 X$="s"
 4410 PRINT"Klingon";X$;" left: ";K9
@@ -614,7 +614,7 @@
 4460 PRINT"Your stupidity has left you on your own in"
 4470 PRINT"    the galaxy -- you have no starbases left!":GOTO 3180
 4480 REM torpedo, base nav, d/d calculator
-4490 GOSUB 840
+4490 rem GOSUB 840
 4491 IF K3<=0 THEN 2550
 4500 X$="":IF K3<=1 THEN 4510
 4501 X$="s"
@@ -623,7 +623,7 @@
 4521 IF K(I,3)<=0 THEN 4740
 4530 W1=K(I,1):X=K(I,2)
 4540 C1=S1:A=S2:GOTO 4590
-4550 GOSUB 840
+4550 rem GOSUB 840
 4551 PRINT"Direction/Distance Calculator:"
 4560 PRINT"You are at quadrant ",Q1,",",Q2," sector ",S1,",",S2
 4570 PRINT"Please enter ":INPUT" initial coordinates (x,y) ",C1,A
@@ -648,7 +648,7 @@
 4730 PRINT"Distance = ";:cc1=SQR(x*X+A*A):print cc1:IF H8=1 THEN 1520
 4740 NEXT I
 4741 GOTO 1520
-4750 GOSUB 840
+4750 rem GOSUB 840
 4751 IF B3=0 THEN 4770
 4752 PRINT"From ENTERPRISE to Starbase:":W1=B4:X=B5
 4760 GOTO 4540
