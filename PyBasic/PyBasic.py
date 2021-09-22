@@ -33,7 +33,7 @@ gc.collect()
 if implementation.name.upper() == 'MICROPYTHON':
     gc.threshold(gc.mem_free() // 4 + gc.mem_alloc())
 
-if implementation.name.upper() in ['MICROPYTHON','CIRCUITPYTHON']:
+if implementation.name.upper() == 'MICROPYTHON':
     from sys import print_exception
 
 def main():
@@ -250,7 +250,7 @@ def main():
         # Trap all exceptions so that interpreter
         # keeps running
         except Exception as e:
-            if implementation.name.upper() in ['MICROPYTHON','CIRCUITPYTHON']:
+            if implementation.name.upper() == 'MICROPYTHON':
                 #### print(e)
                 print_exception(e)
             else:
