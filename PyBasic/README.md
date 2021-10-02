@@ -10,7 +10,6 @@ The PyDOS version of PyBasic still has the following difference from the richpl 
 * PyDOS command line argument functionality 
 * prompt changed from > to :
 * commas can be used in addition to semi-colons as print statment delimeters
-* TAB() function places print cursor at specified column rather than inserting specified number of spaces
 * starting array element 1 rather than 0, so that dim(10) created a 10 element array
 * PI, RNDINT, TERNARY, LEFT$, RIGHT$ functions not supported in the PyDOS version
 * The RND function does not take any arguments or even empty parenthesis in the PyDOS version
