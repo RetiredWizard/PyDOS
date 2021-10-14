@@ -13,6 +13,9 @@ The PyDOS version of PyBasic still has the following difference from the richpl 
 * starting array element 1 rather than 0, so that dim(10) created a 10 element array
 * PI, RNDINT, TERNARY, LEFT$, RIGHT$ functions not supported in the PyDOS version
 * The RND function does not take any arguments or even empty parenthesis in the PyDOS version
+* PyDOS version supports generalized conditional syntax:
+
+   **IF** *conditional-expression* **THEN** *lineno*|*basic-statement(s)* [**ELSE** *lineno*|*basic-statement(s)*]
 
 * PyDOS version runs Basic program in place on disk rather than loading into memory
 * added a saved index source code option when saving or loading using the .PGM extension on a program filename, this vastly speeds up subsequent program load times
