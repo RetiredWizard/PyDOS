@@ -42,8 +42,10 @@ class Program:
         self.__next_stmt = 0
 
         # Initialise return stack for subroutine returns
-        # and loop returns
         self.__return_stack = []
+
+        # return dictionary for loop returns
+        self.__return_loop = {}
 
         # Setup DATA object
         self.__data = BASICData()
@@ -255,8 +257,12 @@ class Program:
 
         number_of_stmts = 1
         for e in statement:
-            if e.lexeme == ":":
+            if e.category == Token.COLON:
                 number_of_stmts += 1
+            elif e.category == Token.IF:
+                # any colons after an IF statement are seperators for the THEN or ELSE clause
+                # and will be processed by the recursive call to PARSE within the PARSE method
+                break
 
         for cstmt_number in range(0,number_of_stmts):
             try:
@@ -357,7 +363,7 @@ class Program:
                         # Put loop line number on the stack so
                         # that it can be returned to when the loop
                         # repeats
-                        self.__return_stack.append(self.get_next_line_number())
+                        self.__return_loop[flowsignal.floop_var] = self.get_next_line_number()
 
                         # Continue to the next statement in the loop
                         index = index + 1
@@ -403,13 +409,13 @@ class Program:
                         # Loop repeat encountered
                         # Pop the loop start address from the stack
                         try:
-                            index = line_numbers.index(self.__return_stack.pop())
+                            index = line_numbers.index(self.__return_loop.pop(flowsignal.floop_var))
 
                         except ValueError:
                             raise RuntimeError("Invalid loop exit in line " +
                                                str(self.get_next_line_number()))
 
-                        except IndexError:
+                        except KeyError:
                             raise RuntimeError("NEXT encountered without corresponding " +
                                                "FOR loop in line " + str(self.get_next_line_number()))
 

@@ -73,7 +73,10 @@ class FlowSignal:
     # been processed. There should be therefore be no ftarget value specified
     STOP               = 6
 
-    def __init__(self, ftarget=None, ftype=SIMPLE_JUMP):
+    # Indicates that a conditional result block should be executed
+    EXECUTE            = 7
+
+    def __init__(self, ftarget=None, ftype=SIMPLE_JUMP, floop_var=None):
         """Creates a new FlowSignal for a branch. If the jump
         target is supplied, then the branch is assumed to be
         either a GOTO or conditional branch and the type is assigned as
@@ -89,7 +92,7 @@ class FlowSignal:
 
         if ftype not in [self.GOSUB, self.SIMPLE_JUMP, self.LOOP_BEGIN,
                          self.LOOP_REPEAT, self.RETURN,
-                         self.LOOP_SKIP, self.STOP]:
+                         self.LOOP_SKIP, self.STOP, self.EXECUTE]:
             raise TypeError("Invalid flow signal type supplied: " + str(ftype))
 
         if ftarget == None and \
@@ -98,8 +101,9 @@ class FlowSignal:
 
         if ftarget != None and \
            ftype in [self.RETURN, self.LOOP_BEGIN, self.LOOP_REPEAT,
-                     self.STOP]:
+                     self.STOP, self.EXECUTE]:
             raise TypeError("Target wrongly supplied for flow signal " + str(ftype))
 
         self.ftype = ftype
         self.ftarget = ftarget
+        self.floop_var = floop_var

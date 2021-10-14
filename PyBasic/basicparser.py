@@ -18,12 +18,14 @@
 from basictoken import BASICToken as Token
 from flowsignal import FlowSignal
 from sys import implementation
-from time import localtime,sleep
+from time import sleep
 import math
 import random
 if implementation.name.upper() == 'MICROPYTHON':
     from machine import Pin, PWM
+    from time import ticks_ms as monotonic
 elif implementation.name.upper() == 'CIRCUITPYTHON':
+    from time import monotonic
     from pwmio import PWMOut
     foundPin = True
     try:
@@ -40,6 +42,7 @@ elif implementation.name.upper() == 'CIRCUITPYTHON':
             foundPin = False
 else:
     import winsound
+    from time import monotonic
 import gc
 gc.collect()
 #if implementation.name.upper() == 'MICROPYTHON':
@@ -121,7 +124,6 @@ class BASICParser:
         if implementation.name.upper() == 'MICROPYTHON':
             self.__pwm = PWM(Pin(19))
 
-
     def parse(self, tokenlist, line_number, cstmt_number, infile, tmpfile, datastmts):
         """Must be initialised with the list of
         BTokens to be processed. These tokens
@@ -140,11 +142,14 @@ class BASICParser:
         self.__tokenlist = tokenlist
         self.__tokenindex = 0
 
+
+        # This block locates the index number of the first token in the statement
+        # referenced by che cstmt_number argument
         indx = 0
         colon_count = 0
         if cstmt_number > 0:
             for e in tokenlist:
-                if e.lexeme == ":":
+                if e.category == Token.COLON:
                     colon_count += 1
                     self.__tokenindex = indx + 1
                 indx += 1
@@ -157,7 +162,40 @@ class BASICParser:
         # Assign the first token
         self.__token = self.__tokenlist[self.__tokenindex]
 
-        return self.__stmt(infile,tmpfile,datastmts)
+        flow = self.__stmt(infile,tmpfile,datastmts)
+
+        # If the statement returns an EXECUTE flowsignal then it's a conditional
+        # and we need to parse the THEN or ELSE block depending on where the
+        # __ifstmt method left the current __tokenindex
+        if flow and (flow.ftype == FlowSignal.EXECUTE):
+
+            # Find the number of compound statements in the current
+            # conditional block (to an ELSE or end of line)
+            number_of_stmts = 1
+            for e in tokenlist[self.__tokenindex:]:
+                if e.category == Token.COLON:
+                    number_of_stmts += 1
+                elif e.category == Token.ELSE:
+                    break
+
+            recur_tokenindex = self.__tokenindex
+            self.__tokenindex = 0
+            for cstmtNo in range(0,number_of_stmts):
+                try:
+                #if True:
+                    tmp_flow = self.parse(tokenlist[recur_tokenindex:],line_number,cstmtNo,infile,tmpfile,datastmts)
+
+                except RuntimeError as err:
+                    raise RuntimeError(str(err))
+
+                if tmp_flow:
+                    break
+
+            return tmp_flow
+
+        else:
+            return flow
+
 
     def __advance(self):
         """Advances to the next token
@@ -737,6 +775,7 @@ class BASICParser:
                         #'MICROPYTHON' else -1)].split(',', (len(variables)-1))
             inputvals = ((self.__file_handles[filenum].readline().replace("\n","")).replace("\r","")).split(',', (len(variables)-1))
         else:
+            # kfw inputvals = self.input_keyboard(prompt).split(',', (len(variables)-1))
             inputvals = input(prompt).split(',', (len(variables)-1))
 
         for variable in variables:
@@ -1075,28 +1114,32 @@ class BASICParser:
         # Process the THEN part and save the jump value
         self.__consume(Token.THEN)
 
-        if self.__token.category == Token.GOTO:
-            self.__advance()    # Advance past optional GOTO
+        if self.__token.category != Token.UNSIGNEDINT:
+            if saveval:
+                return FlowSignal(ftype=FlowSignal.EXECUTE)
+        else:
+            self.__expr()
 
-        self.__expr()
-        then_jump = self.__operand_stack.pop()
+            # Jump if the expression evaluated to True
+            if saveval:
+                # Set up and return the flow signal
+                return FlowSignal(ftarget=self.__operand_stack.pop())
 
-        # Jump if the expression evaluated to True
-        if saveval:
-            # Set up and return the flow signal
-            return FlowSignal(ftarget=then_jump)
+        # advance to ELSE
+        while self.__tokenindex < len(self.__tokenlist) and self.__token.category != Token.ELSE:
+            self.__advance()
 
         # See if there is an ELSE part
         if self.__token.category == Token.ELSE:
             self.__advance()
 
-            if self.__token.category == Token.GOTO:
-                self.__advance()    # Advance past optional GOTO
+            if self.__token.category != Token.UNSIGNEDINT:
+                return FlowSignal(ftype=FlowSignal.EXECUTE)
+            else:
+                self.__expr()
 
-            self.__expr()
-
-            # Set up and return the flow signal
-            return FlowSignal(ftarget=self.__operand_stack.pop())
+                # Set up and return the flow signal
+                return FlowSignal(ftarget=self.__operand_stack.pop())
 
         else:
             # No ELSE action
@@ -1193,7 +1236,7 @@ class BASICParser:
                               ftarget=loop_variable)
         else:
             # Set up and return the flow signal
-            return FlowSignal(ftype=FlowSignal.LOOP_BEGIN)
+            return FlowSignal(ftype=FlowSignal.LOOP_BEGIN,floop_var=loop_variable)
 
     def __nextstmt(self):
         """Processes a NEXT statement that terminates
@@ -1206,7 +1249,15 @@ class BASICParser:
 
         self.__advance()  # Advance past NEXT token
 
-        return FlowSignal(ftype=FlowSignal.LOOP_REPEAT)
+        # Process the loop variable initialisation
+        loop_variable = self.__token.lexeme  # Save lexeme of
+                                             # the current token
+
+        if loop_variable.endswith('$'):
+            raise SyntaxError('Syntax error: Loop variable is not numeric' +
+                              ' in line ' + str(self.__line_number))
+
+        return FlowSignal(ftype=FlowSignal.LOOP_REPEAT,floop_var=loop_variable)
 
     def __ongosubstmt(self):
         """Process the ON-GOSUB/GOTO statement
@@ -1667,6 +1718,6 @@ class BASICParser:
             self.__expr()  # Process the seed
             seed = self.__operand_stack.pop()
         else:
-            seed = localtime()[2]*1000000+localtime()[3]*10000+localtime()[4]*100+localtime()[5]
+            seed = int(monotonic())
 
         random.seed(seed)
