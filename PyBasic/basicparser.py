@@ -21,6 +21,10 @@ from sys import implementation
 from time import sleep
 import math
 import random
+try:
+    from pydos_ui import input
+except:
+    pass
 if implementation.name.upper() == 'MICROPYTHON':
     from machine import Pin, PWM
     from time import ticks_ms as monotonic
@@ -36,8 +40,8 @@ elif implementation.name.upper() == 'CIRCUITPYTHON':
     if not foundPin:
         foundPin = True
         try:
-            #MOSI is D19 on Feather
-            from board import MOSI as sndPin
+            #Use D12 on Feather
+            from board import D12 as sndPin
         except:
             foundPin = False
 else:

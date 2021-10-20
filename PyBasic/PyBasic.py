@@ -29,6 +29,10 @@ from program import Program
 from sys import stderr,implementation
 from os import listdir,rename,remove
 import gc
+try:
+    from pydos_ui import input
+except:
+    pass
 
 if implementation.name.upper() == 'MICROPYTHON':
     from sys import print_exception
@@ -37,20 +41,19 @@ gc.collect()
 if implementation.name.upper() == 'MICROPYTHON':
     gc.threshold(gc.mem_free() // 4 + gc.mem_alloc())
 
-
 def main():
 
     banner = (
-        """
-               PPPP   Y   Y  BBBB    AAA    SSSS    I     CCC
-               P   P   Y Y   B   B  A   A  S        I    C
-               P   P   Y Y   B   B  A   A  S        I    C
-               PPPP     Y    BBBB   AAAAA  SSSS     I    C
-        u   u  P        Y    B   B  A   A      S    I    C
-        u   u  P        Y    B   B  A   A      S    I    C
-        uuuuu  P        Y    BBBB   A   A  SSSS     I     CCC
-                           microPyBasic
-        """)
+"""
+       PPPP   Y   Y  BBBB    AAA    SSSS   I    CCC
+       P   P   Y Y   B   B  A   A  S       I   C
+       P   P   Y Y   B   B  A   A  S       I   C
+       PPPP     Y    BBBB   AAAAA  SSSS    I   C
+u   u  P        Y    B   B  A   A      S   I   C
+u   u  P        Y    B   B  A   A      S   I   C
+uuuuu  P        Y    BBBB   A   A  SSSS    I    CCC
+                   microPyBasic
+""")
 
     print(banner)
 

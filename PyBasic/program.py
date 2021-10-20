@@ -29,6 +29,10 @@ from lexer import Lexer
 import gc
 from os import listdir,remove
 from sys import implementation
+try:
+    from pydos_ui import input
+except:
+    pass
 gc.collect()
 
 class Program:
