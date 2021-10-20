@@ -25,7 +25,7 @@ def PyDOS():
 
     envVars = {}
 
-    (envVars["_scrWidth"],envVars["_scrHeight"]) = pydos_ui.get_screensize()
+    (envVars["_scrHeight"],envVars["_scrWidth"]) = pydos_ui.get_screensize()
 
     if implementation.name.upper() == "MICROPYTHON":
         wildcardLen = 16
