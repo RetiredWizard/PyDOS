@@ -129,7 +129,7 @@ def input(disp_text):
     try:
         Pydos_ui.kbd.key_count
     except:
-        print("Tribles on startup, waiting a bit",end="")
+        print("Trouble on startup, waiting a bit",end="")
         for i in range(100000):
             if i % 10000 == 0:
                 print (".",end="")
