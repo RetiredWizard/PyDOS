@@ -117,7 +117,7 @@ def viewFile(args):
         seqCnt = 0
         while cmnd.upper() != "Q":
             #cmnd = kbdInterrupt()
-            cmnd = Pydos_ui.read.keyboard(1)
+            cmnd = Pydos_ui.read_keyboard(1)
 
             if ord(cmnd) == 27 and seqCnt == 0:
                 seqCnt = 1
