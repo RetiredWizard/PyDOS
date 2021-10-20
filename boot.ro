@@ -1,0 +1,4 @@
+from sys import implementation
+if implementation.name.upper() == "CIRCUITPYTHON":
+    import storage
+    storage.remount("/",True)

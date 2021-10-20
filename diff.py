@@ -1,6 +1,10 @@
 import os
 import time
 import sys
+try:
+    from pydos_ui import input
+except:
+    pass
 if sys.implementation.name.upper() == "MICROPYTHON":
     import uselect
 

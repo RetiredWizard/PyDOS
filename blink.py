@@ -7,6 +7,10 @@ elif sys.implementation.name.upper() == 'CIRCUITPYTHON':
     import board
     from digitalio import DigitalInOut, Direction
     import supervisor
+try:
+    from pydos_ui import input
+except:
+    pass
 
 def blink():
     def kbdInterrupt():

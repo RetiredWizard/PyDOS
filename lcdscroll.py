@@ -1,5 +1,9 @@
 import sys
 from time import sleep
+try:
+    from pydos_ui import input
+except:
+    pass
 
 if sys.implementation.name.upper() == "CIRCUITPYTHON":
     import board

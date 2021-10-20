@@ -1,6 +1,12 @@
 #
 # Front-end for Micropython standard console IO
 #
+from pydos_ui import Pydos_ui
+try:
+    from pydos_ui import input
+except:
+    pass
+
 try:
     import usys as sys
 except:
@@ -13,16 +19,16 @@ class IO_DEVICE:
             kbd_intr(-1)
         except ImportError:
             pass
-        if hasattr(sys.stdin, "buffer"):
-            self.rd_raw_fct = sys.stdin.buffer.read
-        else:
-            self.rd_raw_fct = sys.stdin.read
+        #if hasattr(sys.stdin, "buffer"):
+            #self.rd_raw_fct = sys.stdin.buffer.read
+        #else:
+        self.rd_raw_fct = Pydos_ui.read_keyboard
 
     def wr(self, s):
         sys.stdout.write(s)
 
     def rd(self):
-        return sys.stdin.read(1)
+        return Pydos_ui.read_keyboard(1)
 
     def rd_raw(self):
         return self.rd_raw_fct(1)
@@ -35,13 +41,14 @@ class IO_DEVICE:
             pass
 
     def get_screen_size(self):
-        self.wr('\x1b[999;999H\x1b[6n')
-        pos = ''
-        char = self.rd() ## expect ESC[yyy;xxxR
-        while char != 'R':
-            pos += char
-            char = self.rd()
-        return [int(i, 10) for i in pos.lstrip("\n\x1b[").split(';')]
+        #self.wr('\x1b[999;999H\x1b[6n')
+        #pos = ''
+        #char = self.rd() ## expect ESC[yyy;xxxR
+        #while char != 'R':
+            #pos += char
+            #char = self.rd()
+        #return [int(i, 10) for i in pos.lstrip("\n\x1b[").split(';')]
+        return Pydos_ui.get_screensize()
 
 ## test, if the Editor class is already present
 if "pye_edit" not in globals().keys():
