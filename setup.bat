@@ -51,5 +51,24 @@ if not exist /lib/adafruit_bus_device mkdir /lib/adafruit_bus_device
 copy /cpython/NanoConnect/lib/adafruit_bus_device/* /lib/adafruit_bus_device/
 goto other
 :other
+set/p _ans3 = Are you using a Keyboard FeatherWing (Y/N)?:
+if %_ans3% == N goto done
+if %_ans3% == n goto done
+if %_ans3% == Y goto kbdFeatherW
+if %_ans3% == y goto kbdFeatherW
+echo Invalid Selection (Y or N)
+goto other
+:kbdFeatherW
+copy /cpython/kbdFeatherWing/* /
+if not exist /lib mkdir /lib
+copy /cpython/kbdFeatherWing/lib/* /lib/
+if not exist /lib/adafruit_display_shapes mkdir /lib/adafruit_display_shapes
+copy /cpython/kbdFeatherWing/lib/adafruit_display_shapes/* /lib/adafruit_display_shapes
+if not exist /lib/adafruit_display_text mkdir /lib/adafruit_display_text
+copy /cpython/kbdFeatherWing/lib/adafruit_display_text/* /lib/adafruit_display_text
+if not exist /PyBasic mkdir /PyBasic
+copy /cpython/kbdFeatherWing/PyBasic/* /PyBasic
+:done
 set _ans=
 set _ans2=
+set _ans3=
