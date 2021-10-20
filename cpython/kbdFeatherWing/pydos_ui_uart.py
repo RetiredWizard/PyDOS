@@ -32,6 +32,6 @@ class PyDOS_UI:
         if height < 1:
             height = 24
 
-        return(width,height)
+        return(height,width)
 
 Pydos_ui = PyDOS_UI()

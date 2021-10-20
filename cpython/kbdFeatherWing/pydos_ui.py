@@ -112,7 +112,7 @@ class PyDOS_UI:
 
     def get_screensize(self):
 
-        return(49,17)
+        return(17,49)
 
 Pydos_ui = PyDOS_UI()
 
