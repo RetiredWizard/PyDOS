@@ -1,17 +1,3 @@
-# integrate-Keyboard-FeatherWing Branch
-
-This is the **BETA** version of PyDOS with Keyboard FeatherWing (@arturo182) support. This version will
-be integrated into the main PyDOS code base. 
-
-This version of **pydos_ui.py** overloads the built in **INPUT** function
-when the Keyboard FeatherWing is being used so that most programs don't need to be modified other than including the **pydos_ui** import
-statements.
-
-A batch file (**ui.bat**) has been setup to make switching between the Keyboard FeatherWing UI and a standard Serial USB (UART) UI easier.
-This can be very helpful when connecting the PyDOS device to a host computer for file transfers.
-
-
-
 ## PyDOS, PyBASIC, edit... All the functionality of the 1981 IBM PC on a PI Pico?
 
 
