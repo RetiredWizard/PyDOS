@@ -1,6 +1,5 @@
 ## PyDOS, PyBASIC, edit... All the functionality of the 1981 IBM PC on a PI Pico?
 
-
 **MicroPython/CircuitPython DOS-like shell for microcontroller boards**   
 **Check out the demo video at https://www.youtube.com/watch?v=Az_oiq8GE4Y**
 
@@ -47,7 +46,7 @@ the extension
 ## Installation
 
 If the board you're using has limited flash storage you can delete either the **cpython** (if you're not using CircuitPython) or **mpython**
-(if you're not using Micro Python) folder from the downloaded repository files. Within the remaining Python folder (**cpython** or **mpython**) are folders
+(if you're not using MicroPython) folder from the downloaded repository files. Within the remaining Python folder (**cpython** or **mpython**) are folders
 for specific micro controller boards,
 you can free up further space by deleting anything other than the board you are using. Finally, after running the **setup.bat** file in PyDOS you can
 delete both the **cpython** and **mpython** folders as they are only used by the **setup.bat** script.
