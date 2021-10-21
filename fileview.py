@@ -128,8 +128,8 @@ def viewFile(args):
                 seqCnt = 0
                 if currLineNum > scrLines:
                     currLineNum -= 1
-                    #print (chr(27)+"[1;1H"+chr(27)+"M",end="")
-                    print (chr(27)+"[2;0H"+chr(27)+"[T",end="")
+                    print (chr(27)+"[1;1H"+chr(27)+"M",end="")
+                    #print (chr(27)+"[2;0H"+chr(27)+"[T",end="")
                     f.seek(index[currLineNum-scrLines])
                     print((f.readline()[:-1])[:scrWidth],end="")
 
@@ -143,8 +143,8 @@ def viewFile(args):
                         if currLineNum == maxRead:
                             index.append(index[currLineNum]+len(line))
                             maxRead += 1
-                        #print(chr(27)+"["+str(scrLines)+";1H"+chr(27)+"D",end="")
-                        print(chr(27)+"["+str(scrLines+1)+";0H"+chr(27)+"[S",end="")
+                        print(chr(27)+"["+str(scrLines)+";1H"+chr(27)+"D",end="")
+                        #print(chr(27)+"["+str(scrLines+1)+";0H"+chr(27)+"[S",end="")
                         print((line[:-1])[:scrWidth],end="")
                         currLineNum += 1
                     else:
