@@ -1,21 +1,31 @@
 import os
 from time import localtime
 from sys import implementation
+from pydos_ui import PyDOS_UI
+try:
+    from pydos_ui import input
+except:
+    pass
+
 import gc
-gc.collect()
 if implementation.name.upper() == "MICROPYTHON":
     from sys import stdin
     from micropython import mem_info
     import uselect
+    gc.collect()
     gc.threshold(gc.mem_free() // 4 + gc.mem_alloc())
+else:
+    gc.collect()
 
 def PyDOS():
 
     global envVars
 
+    pydos_ui = PyDOS_UI()
+
     envVars = {}
-    envVars["_scrWidth"] = 80
-    envVars["_scrHeight"] = 24
+
+    (envVars["_scrHeight"],envVars["_scrWidth"]) = pydos_ui.get_screensize()
 
     if implementation.name.upper() == "MICROPYTHON":
         wildcardLen = 16
@@ -585,7 +595,7 @@ def PyDOS():
                         break
 
         elif cmd == "VER":
-            print("PyDOS [Version 0.84c]")
+            print("PyDOS [Version 0.9]")
 
         elif cmd == "ECHO":
             if len(args) == 1:

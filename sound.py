@@ -13,8 +13,8 @@ elif sys.implementation.name.upper() == 'CIRCUITPYTHON':
     if not foundPin:
         foundPin = True
         try:
-            #MOSI is D19 on Feather
-            from board import MOSI as sndPin
+            #Use D12 on Feather
+            from board import D12 as sndPin
         except:
             foundPin = False
 

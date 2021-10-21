@@ -1,3 +1,7 @@
+try:
+    from pydos_ui import input
+except:
+    pass
 def run(runargv):
     cf = open(runargv)
     exec(cf.read())

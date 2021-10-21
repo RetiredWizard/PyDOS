@@ -1,2 +1,4 @@
-import storage
-storage.remount("/",False)
+from sys import implementation
+if implementation.name.upper() == "CIRCUITPYTHON":
+    import storage
+    storage.remount("/",False)

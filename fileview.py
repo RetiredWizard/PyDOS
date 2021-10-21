@@ -1,4 +1,9 @@
-import os, time, sys
+import os
+from pydos_ui import Pydos_ui
+try:
+    from pydos_ui import input
+except:
+    pass
 #import uselect
 
 def viewFile(args):
@@ -112,7 +117,7 @@ def viewFile(args):
         seqCnt = 0
         while cmnd.upper() != "Q":
             #cmnd = kbdInterrupt()
-            cmnd = sys.stdin.read(1)
+            cmnd = Pydos_ui.read_keyboard(1)
 
             if ord(cmnd) == 27 and seqCnt == 0:
                 seqCnt = 1
@@ -124,6 +129,7 @@ def viewFile(args):
                 if currLineNum > scrLines:
                     currLineNum -= 1
                     print (chr(27)+"[1;1H"+chr(27)+"M",end="")
+                    #print (chr(27)+"[2;0H"+chr(27)+"[T",end="")
                     f.seek(index[currLineNum-scrLines])
                     print((f.readline()[:-1])[:scrWidth],end="")
 
@@ -138,6 +144,7 @@ def viewFile(args):
                             index.append(index[currLineNum]+len(line))
                             maxRead += 1
                         print(chr(27)+"["+str(scrLines)+";1H"+chr(27)+"D",end="")
+                        #print(chr(27)+"["+str(scrLines+1)+";0H"+chr(27)+"[S",end="")
                         print((line[:-1])[:scrWidth],end="")
                         currLineNum += 1
                     else:

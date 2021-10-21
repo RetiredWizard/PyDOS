@@ -6,7 +6,10 @@ if sys.implementation.name.upper() == 'MICROPYTHON':
 elif sys.implementation.name.upper() == 'CIRCUITPYTHON':
     import board
     from digitalio import DigitalInOut, Direction
-    import supervisor
+try:
+    from pydos_ui import input
+except:
+    pass
 
 def blink():
     def kbdInterrupt():
@@ -15,7 +18,7 @@ def blink():
         sba = False
 
         if sys.implementation.name.upper() == "CIRCUITPYTHON":
-            if supervisor.runtime.serial_bytes_available:
+            if Pydos_ui.serial_bytes_available():
                 cmnd = input().strip()
         else:
             spoll = uselect.poll()
