@@ -58,6 +58,8 @@ Upon downloading the latest version of CircuitPython from the
 github repository, modify the **py/circuitpy_mpconfig.h** file and change the value on the line that reads "**#define MICROPY_ENABLE_PYSTACK**" from "(1)" to "(0)". Once
 that is done you can follow the setps in https://learn.adafruit.com/building-circuitpython/build-circuitpython and demonstrated in the YouTube video mentioned above.
 
+PyDOS will run without using this custom CircuitPython image however PyBasic and some of the other applications will not run as well since PyDOS will be memory limited.
+
 To install the custom CircuitPython image, put your microcontroller board in "bootloader" mode and copy the compiled .UF2 file to the USB mass storage device that
 shows up on your host computer.
 
