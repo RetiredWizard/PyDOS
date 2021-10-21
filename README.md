@@ -63,7 +63,9 @@ To install the custom Circuit Python image, put your microcontroller board in "b
 shows up on your host computer.
 
 After the .UF2 file is copied to the microcontroller board it should re-boot and a new USB mass storage device should appear. Simply drag the PyDOS directory structure
-(after removing the **mpython** folder if space is a concern) to the root directory of the device that appears. Your microcontroller is now ready to run PyDOS.
+(after removing the **mpython** folder if space is a concern) to the root directory of the device that appears. Your microcontroller now has PyDOS installed.
+
+At this point you should power cycle the microcontroller board so that the file system is configured to allow the microcontroller to have Read/Write access.
 
 To interact with the microcontroller you will need to connect using a terminal program. On a PC you can use putty and on linux minicom works well. To start minicom
 on linux type the command:
