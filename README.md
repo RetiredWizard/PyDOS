@@ -1,7 +1,7 @@
 ## PyDOS, PyBASIC, edit... All the functionality of the 1981 IBM PC on a PI Pico?
 
 
-**Micropython DOS-like shell for microcontroller boards**   
+**MicroPython DOS-like shell for microcontroller boards**   
 **Check out the demo video at https://www.youtube.com/watch?v=Az_oiq8GE4Y**
 
 To start the shell type **import PyDOS** at the micropython REPL prompt.
@@ -52,14 +52,14 @@ for specific micro controller boards,
 you can free up further space by deleting anything other than the board you are using. Finally, after running the **setup.bat** file in PyDOS you can
 delete both the **cpython** and **mpython** folders as they are only used by the **setup.bat** script.
 
-**Circuit Python Setup**
+**CircuitPython Setup**
 
-For Circuit Python the first thing you should do is compile a custom CircuitPython image. (see https://www.youtube.com/watch?v=sWy5_B3LL8c for a demonstration)
+For CircuitPython the first thing you should do is compile a custom CircuitPython image. (see https://www.youtube.com/watch?v=sWy5_B3LL8c for a demonstration)
 Upon downloading the latest version of CircuitPython from the
 github repository, modify the **py/circuitpy_mpconfig.h** file and change the value on the line that reads "**#define MICROPY_ENABLE_PYSTACK**" from "(1)" to "(0)". Once
 that is done you can follow the setps in https://learn.adafruit.com/building-circuitpython/build-circuitpython and demonstrated in the YouTube video mentioned above.
 
-To install the custom Circuit Python image, put your microcontroller board in "bootloader" mode and copy the compiled .UF2 file to the USB mass storage device that
+To install the custom CircuitPython image, put your microcontroller board in "bootloader" mode and copy the compiled .UF2 file to the USB mass storage device that
 shows up on your host computer.
 
 After the .UF2 file is copied to the microcontroller board it should re-boot and a new USB mass storage device should appear. Simply drag the PyDOS directory structure
@@ -76,9 +76,9 @@ You should be presented with the REPL prompt (>>>), if not, press return or Ctrl
 
 At the REPL prompt type "**import PyDOS*** to start PyDOS and then type **setup** to run the customization script.
 
-**Micropython Setup**
+**MicroPython Setup**
 
-You can use a standard Micropython image downloaded from Micropython.org to run PyDOS. Once your microcontroller has Micropython installed and running the best way
+You can use a standard MicroPython image downloaded from Micropython.org to run PyDOS. Once your microcontroller has Micropython installed and running the best way
 to copy the PyDOS files and interact with the repl is to use MPRemote. Detailed documentation on installing and using MPRemote can be found 
 at https://docs.micropython.org/en/latest/reference/mpremote.html.
 
