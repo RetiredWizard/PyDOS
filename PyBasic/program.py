@@ -276,6 +276,9 @@ class Program:
             except RuntimeError as err:
                 raise RuntimeError(str(err))
 
+            except KeyboardInterrupt:
+                return FlowSignal(ftype=FlowSignal.STOP)
+
             if tmp_flow:
                 break
 
