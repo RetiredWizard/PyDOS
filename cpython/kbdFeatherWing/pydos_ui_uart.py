@@ -3,11 +3,16 @@
 
 """
 from sys import stdin,stdout
+from supervisor import runtime
 
 class PyDOS_UI:
 
     def __init__(self):
         pass
+
+    def serial_bytes_available(self):
+        # Does the same function as supervisor.runtime.serial_bytes_available
+        return runtime.serial_bytes_available
 
     def read_keyboard(self,num):
         # Does the same function as sys.stdin.read(num)

@@ -47,6 +47,21 @@ class PyDOS_UI:
 
         self.lastCmdLine = ""
 
+    def serial_bytes_available(self):
+        # Does the same function as supervisor.runtime.serial_bytes_available
+        try:
+            sba = (self.kbd.key_count != 0)
+        except:
+            print("Trouble on startup, waiting a bit",end="")
+            for i in range(100000):
+                if i % 10000 == 0:
+                    print (".",end="")
+            print()
+            sba = (self.kbd.key_count != 0)
+
+        return sba
+
+
     def process_key(self,key,time_Param):
         # Modified the pressed key value per translation table or
         # held key modifications (shift for 3 seconds, alt for 6 seconds)
@@ -113,6 +128,7 @@ class PyDOS_UI:
     def get_screensize(self):
 
         return(17,49)
+
 
 Pydos_ui = PyDOS_UI()
 
