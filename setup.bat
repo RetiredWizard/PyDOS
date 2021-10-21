@@ -15,7 +15,7 @@ goto board
 set _ans=M
 copy /mpython/* /
 :board
-set/p _ans2 = (T)hingPlus, (F)eather, (N)anoConnect, (O)ther:
+set/p _ans2 = (T)hingPlus RP2040, (F)eather RP2040, (N)anoConnect, (O)ther:
 if %_ans2% == t goto thingplus
 if %_ans2% == T goto thingplus
 if %_ans2% == f goto feather
@@ -59,6 +59,7 @@ if %_ans3% == y goto kbdFeatherW
 echo Invalid Selection (Y or N)
 goto other
 :kbdFeatherW
+del /pydos_ui.py
 copy /cpython/kbdFeatherWing/* /
 if not exist /lib mkdir /lib
 copy /cpython/kbdFeatherWing/lib/* /lib/
@@ -67,6 +68,9 @@ copy /cpython/kbdFeatherWing/lib/adafruit_display_shapes/* /lib/adafruit_display
 if not exist /lib/adafruit_display_text mkdir /lib/adafruit_display_text
 copy /cpython/kbdFeatherWing/lib/adafruit_display_text/* /lib/adafruit_display_text
 if not exist /PyBasic mkdir /PyBasic
+del /PyBasic/eliza.bas
+del /PyBasic/startrek.bas
+del /PyBasic/startrek.pgm
 copy /cpython/kbdFeatherWing/PyBasic/* /PyBasic
 :done
 set _ans=
