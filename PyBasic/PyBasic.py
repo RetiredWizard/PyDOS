@@ -45,14 +45,14 @@ def main():
 
     banner = (
 """
-      PPPP   Y   Y  BBBB    AAA    SSSS   I    CCC
-      P   P   Y Y   B   B  A   A  S       I   C
-      P   P   Y Y   B   B  A   A  S       I   C
-      PPPP     Y    BBBB   AAAAA  SSSS    I   C
-u   u P        Y    B   B  A   A      S   I   C
-u   u P        Y    B   B  A   A      S   I   C
-uuuuu P        Y    BBBB   A   A  SSSS    I    CCC
-                   microPyBasic
+     PPPP   Y   Y  BBBB    AAA    SSSS   I    CCC
+     P   P   Y Y   B   B  A   A  S       I   C
+     P   P   Y Y   B   B  A   A  S       I   C
+     PPPP     Y    BBBB   AAAAA  SSSS    I   C
+u  u P        Y    B   B  A   A      S   I   C
+u  u P        Y    B   B  A   A      S   I   C
+uuuu P        Y    BBBB   A   A  SSSS    I    CCC
+                    microPyBasic
 """)
 
     print(banner)
