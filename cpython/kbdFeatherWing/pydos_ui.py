@@ -132,7 +132,7 @@ class PyDOS_UI:
 
 Pydos_ui = PyDOS_UI()
 
-def input(disp_text):
+def input(disp_text=None):
     # Does the same function as input(disp_text)
     # displays the "disp_text" prompt and waits for keyboard input
     # This is a blocking read, ie the program will wait for input
