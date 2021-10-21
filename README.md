@@ -1,7 +1,7 @@
 ## PyDOS, PyBASIC, edit... All the functionality of the 1981 IBM PC on a PI Pico?
 
 
-**MicroPython DOS-like shell for microcontroller boards**   
+**MicroPython/CircuitPython DOS-like shell for microcontroller boards**   
 **Check out the demo video at https://www.youtube.com/watch?v=Az_oiq8GE4Y**
 
 To start the shell type **import PyDOS** at the micropython REPL prompt.
