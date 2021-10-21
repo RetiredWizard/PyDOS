@@ -1,4 +1,3 @@
-# Write your code here :-)
 """
 Blink example for QT Py using onboard NeoPixel.
 Requires two libraries from the Adafruit CircuitPython Library Bundle.
@@ -10,14 +9,18 @@ Save this file as code.py to your CIRCUITPY drive to run it.
 import time
 import board
 import neopixel
-import supervisor
+from pydos_ui import Pydos_ui
+try:
+    from pydos_ui import input
+except:
+    pass
 
 def kbdInterrupt():
 
     cmnd = ""
     sba = False
 
-    if supervisor.runtime.serial_bytes_available:
+    if Pydos_ui.serial_bytes_available():
         cmnd = input().strip()
         if cmnd == "":
             sba = False
