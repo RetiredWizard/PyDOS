@@ -2,13 +2,17 @@
 from sys import implementation
 if implementation.name.upper() == "CIRCUITPYTHON":
     import board
+    try:
+        board.SCK
+    except:
+        import kfw_pico_board as board
     import digitalio
     import storage
 
 # PyDOSReadOnly of False sets the PyDOS file system to Read/Write status for next power cycle
 # This selection is ignored if D2 is grounded, if so the PyDOS file system is set to readonly
 # giving the host computer write access to the flash
-    
+
     PyDOSReadOnly = False
 
 # For Gemma M0, Trinket M0, Metro M0/M4 Express, ItsyBitsy M0/M4 Express
