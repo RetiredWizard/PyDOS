@@ -63,10 +63,55 @@ that is done you can follow the setps in https://learn.adafruit.com/building-cir
 To install the custom CircuitPython image, put your microcontroller board in "bootloader" mode and copy the compiled .UF2 file to the USB mass storage device that
 shows up on your host computer.
 
-After the .UF2 file is copied to the microcontroller board it should re-boot and a new USB mass storage device should appear. Simply drag the PyDOS directory structure
-(after removing the **mpython** folder if space is a concern) to the root directory of the device that appears. Your microcontroller now has PyDOS installed.
+After the .UF2 file is copied to the microcontroller board it should re-boot and a new USB mass storage device should appear. 
 
-At this point you should power cycle the microcontroller board so that the file system is configured to allow the microcontroller to have Read/Write access.
+To copy PyDOS to the Microcontroller, simply drag the PyDOS directory structure
+(after removing the **mpython** folder if space is a concern) to the root directory of the device that appears on the host computer.
+Your microcontroller now has PyDOS installed.
+
+At this point the microcontroller file system is set to allow computer Read/Write access, however the boot.py file that you copied
+with PyDOS will switch the mode so that
+PyDOS has Read/Write access and the host computer will only have ReadOnly access. This change won't take effect until you power cycle the micro controller board so **be
+sure that the PyDOS files are all copied before turning the power off on your microcontroller board**. If the copy is interrupted for any reason (it's possible that the
+CircuitPython auto-reload feature may interrupt the copy) you can delete the boot.py file in the root of the microcontroller flash, to be sure the file system doesn't
+switch modes and try the copy again. If you do find your self locked out of the flash from the host computer and PyDOS is not running, you can recover using one
+of the following options.
+
++ Ground Pin D5 and power cycle the microcontroller board
++ If the **fs.py** file was copied to the cpython folder you can launch it from the REPL as follow:
+
+	    import os
+	    os.chdir("/cpython")
+	    import fs
+	    This program will set the CircuitPython filesystem access mode AFTER the next
+	    Powercycle. A Control-D will NOT reset the filesystem access mode.
+	    
+	    Enter RO or RW: RO                 # Entering an RO here will all the Host compter to have Read Write access
+
++ If the **edit.py** file was copied you can launch edit from the REPL by typing "import edit". You can then use edit to modify line 16 of boot.py as follows:
+
+	   import edit
+	   h for command list
+	   : o boot.py
+	   boot.py: 15L
+	      * 15 PyDOSReadOnly = False    # If this line isn't displayed you may need to enter the L command to locate it
+	   boot.py: 15R"False","True"
+	   boot.py: e
+
+* If the **boot.ro** file was copied to the cpython folder you can copy it to /boot.py from the repl as follows:
+
+	    file1 = open("/cpython/boot.ro")
+	    file2 = open("/boot.py","w")
+	    file2.write(file1.read())
+	    
++ If none of these options work, you may need to erase everything on the flash and start the PyDOS copy again:
+
+	    import storage
+	    storage.erase_filesystem()
+
+
+At this point, if the copy worked without any errors, you should power cycle the microcontroller board so that the file system is configured to allow
+the microcontroller to have Read/Write access.
 
 To interact with the microcontroller you will need to connect using a terminal program. On a PC you can use putty and on linux minicom works well. To start minicom
 on linux type the command:
