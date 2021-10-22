@@ -18,6 +18,10 @@
 
 from bbq10keyboard import BBQ10Keyboard, STATE_PRESS, STATE_RELEASE, STATE_LONG_PRESS
 import board
+try:
+    board.SCK
+except:
+    import kfw_pico_board as board
 
 import adafruit_ili9341
 import digitalio
