@@ -23,7 +23,7 @@ else:
             readOnly = "True"
 
         try:
-            f = open('boot.py','w')
+            f = open('/boot.py','w')
             f.write('import storage'+"\n")
             f.write('storage.remount("/",'+readOnly+")\n")
             f.close()
