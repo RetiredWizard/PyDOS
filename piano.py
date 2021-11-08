@@ -104,7 +104,7 @@ def piano():
 
         if press:
             if sys.implementation.name.upper() == 'MICROPYTHON':
-                pwm.freq = note
+                pwm.freq(note)
                 pwm.duty_u16(volume)
             elif sys.implementation.name.upper() == 'CIRCUITPYTHON':
                 pwm.frequency = note
