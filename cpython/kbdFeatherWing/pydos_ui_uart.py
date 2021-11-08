@@ -2,21 +2,36 @@
     Terminal abstraction layer for USB UART
 
 """
-from sys import stdin,stdout
+from sys import stdin,stdout,implementation
+if implementation.name.upper() == "MICROPYTHON":
+    import uselect
+elif implementation.name.upper() == "CIRCUITPYTHON":
+    from supervisor import runtime
 
 class PyDOS_UI:
 
     def __init__(self):
         pass
 
-    try:
+    if implementation.name.upper() == "CIRCUITPYTHON":
         from supervisor import runtime
 
         def serial_bytes_available(self):
             # Does the same function as supervisor.runtime.serial_bytes_available
             return runtime.serial_bytes_available
-    except:
-        pass
+    elif implementation.name.upper() == "MICROPYTHON":
+        def serial_bytes_available(self):
+
+            spoll = uselect.poll()
+            spoll.register(stdin,uselect.POLLIN)
+
+            retval = spoll.poll(0)
+            spoll.unregister(stdin)
+
+            if not retval:
+                retval = 0
+
+            return retval
 
     def read_keyboard(self,num):
         # Does the same function as sys.stdin.read(num)
