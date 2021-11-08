@@ -14,8 +14,6 @@ class PyDOS_UI:
         pass
 
     if implementation.name.upper() == "CIRCUITPYTHON":
-        from supervisor import runtime
-
         def serial_bytes_available(self):
             # Does the same function as supervisor.runtime.serial_bytes_available
             return runtime.serial_bytes_available
