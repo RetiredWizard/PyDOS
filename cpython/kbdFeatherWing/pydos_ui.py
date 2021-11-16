@@ -18,10 +18,15 @@
 
 from bbq10keyboard import BBQ10Keyboard, STATE_PRESS, STATE_RELEASE, STATE_LONG_PRESS
 import board
-try:
-    board.SCK
-except:
+
+noSCK = 'SCK' not in dir(board)
+noIO36 = 'IO36' not in dir(board)
+
+if noSCK:
     import kfw_pico_board as board
+elif not noIO36:
+    if board.SCK == board.IO36:
+        import kfw_s2_board as board
 
 import adafruit_ili9341
 import digitalio
