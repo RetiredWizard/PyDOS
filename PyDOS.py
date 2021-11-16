@@ -828,7 +828,7 @@ def PyDOS():
                         if ans == "Y":
                             for dir in os.listdir(tmpDir[:(-1 if tmpDir != "/" else None)]):
                                 if os.stat(tmpDir+dir)[0] & (2**15) != 0 and _match(newdir,dir[:wildcardLen]):
-                                    if dir == dir[:16]:
+                                    if dir == dir[:wildcardLen]:
                                         os.remove(tmpDir+dir)
                                         print(tmpDir+dir,"deleted.")
                                     else:
