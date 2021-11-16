@@ -44,6 +44,13 @@ elif implementation.name.upper() == 'CIRCUITPYTHON':
             from board import D12 as sndPin
         except:
             foundPin = False
+    if not foundPin:
+        foundPin = True
+        try:
+            #D12 is GP11 on the Raspberry PICO
+            from board import GP11 as sndPin
+        except:
+            foundPin = False
 else:
     import winsound
     from time import monotonic
@@ -604,7 +611,6 @@ class BASICParser:
         places the file handle into handle table
 
         """
-
         self.__advance() # Advance past OPEN token
 
         # Acquire the filename
@@ -894,12 +900,15 @@ class BASICParser:
             sleep(duration/18.2)
             self.__pwm.duty_u16(0)
         elif implementation.name.upper() == 'CIRCUITPYTHON':
-            audioPin = PWMOut(sndPin, duty_cycle=0, frequency=440, variable_frequency=True)
-            audioPin.frequency = freq
-            audioPin.duty_cycle = volume
-            sleep(duration/18.2)
-            audioPin.duty_cycle = 0
-            audioPin.deinit()
+            try:
+                audioPin = PWMOut(sndPin, duty_cycle=0, frequency=440, variable_frequency=True)
+                audioPin.frequency = freq
+                audioPin.duty_cycle = volume
+                sleep(duration/18.2)
+                audioPin.duty_cycle = 0
+                audioPin.deinit()
+            except:
+                pass
         else:
             winsound.Beep(freq,int(self.__operand_stack.pop()*1000/18.2))
 
