@@ -7,6 +7,7 @@ if implementation.name.upper() == "MICROPYTHON":
     import uselect
 elif implementation.name.upper() == "CIRCUITPYTHON":
     from supervisor import runtime
+    import board
 
 class PyDOS_UI:
 
@@ -17,6 +18,10 @@ class PyDOS_UI:
         def serial_bytes_available(self):
             # Does the same function as supervisor.runtime.serial_bytes_available
             return runtime.serial_bytes_available
+
+        def I2C():
+            return board.I2C()
+
     elif implementation.name.upper() == "MICROPYTHON":
         def serial_bytes_available(self):
 
