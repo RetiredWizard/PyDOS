@@ -17,6 +17,13 @@ elif sys.implementation.name.upper() == 'CIRCUITPYTHON':
             from board import D12 as sndPin
         except:
             foundPin = False
+    if not foundPin:
+        foundPin = True
+        try:
+            #D12 is GP11 on the Raspberry PICO
+            from board import GP11 as sndPin
+        except:
+            foundPin = False
 
 if __name__ != "PyDOS":
     passedIn = ""
@@ -35,7 +42,9 @@ freq=int(args[0])
 dur = int(args[1])
 vol = int(args[2])
 
-if sys.implementation.name.upper() == "MICROPYTHON":
+if not foundPin:
+    print("Sound Pin not found")
+elif sys.implementation.name.upper() == "MICROPYTHON":
     pwm=machine.PWM(machine.Pin(19))
     pwm.freq(freq)
     pwm.duty_u16(vol)

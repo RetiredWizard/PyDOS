@@ -23,6 +23,13 @@ elif sys.implementation.name.upper() == 'CIRCUITPYTHON':
             from board import D12 as sndPin
         except:
             foundPin = False
+    if not foundPin:
+        foundPin = True
+        try:
+            #D12 is GP11 on the Raspberry PICO
+            from board import GP11 as sndPin
+        except:
+            foundPin = False
 
 def piano():
 
@@ -125,4 +132,7 @@ def piano():
     if sys.implementation.name.upper() == 'CIRCUITPYTHON':
         pwm.deinit()
 
-piano()
+if foundPin:
+    piano()
+else:
+    print("Sound Pin not found")

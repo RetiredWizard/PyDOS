@@ -17,6 +17,27 @@ if implementation.name.upper() == "MICROPYTHON":
 else:
     gc.collect()
 
+# The first string may contain wildcard characters
+def _match(first, second):
+
+    # If we reach at the end of both strings, we are done
+    if len(first) == 0 and len(second) == 0:
+        return True
+
+    # Make sure that the characters after '*' are present
+    # in second string. first string will can't contain two consecutive '*'
+    if len(first) > 1 and first[0] == '*' and  len(second) == 0:
+        return False
+
+    if (len(first) > 1 and first[0] == '?') or (len(first) != 0
+        and len(second) !=0 and first[0] == second[0]):
+        return _match(first[1:],second[1:]);
+
+    if len(first) !=0 and first[0] == '*':
+        return _match(first[1:],second) or _match(first,second[1:])
+
+    return False
+
 def PyDOS():
 
     global envVars
@@ -27,10 +48,7 @@ def PyDOS():
 
     (envVars["_scrHeight"],envVars["_scrWidth"]) = pydos_ui.get_screensize()
 
-    if implementation.name.upper() == "MICROPYTHON":
-        wildcardLen = 16
-    else:
-        wildcardLen = 65
+    wildcardLen = 65
 
     def anyKey():
 
@@ -58,34 +76,6 @@ def PyDOS():
 
         return(keyIn)
 
-# The main function that checks if two given strings match.
-# The first string may contain wildcard characters
-    def match(first, second):
-
-        # If we reach at the end of both strings, we are done
-        if len(first) == 0 and len(second) == 0:
-            return True
-
-        # Make sure that the characters after '*' are present
-        # in second string. This function assumes that the first
-        # string will not contain two consecutive '*'
-        if len(first) > 1 and first[0] == '*' and  len(second) == 0:
-            return False
-
-        # If the first string contains '?', or current characters
-        # of both strings match
-        if (len(first) > 1 and first[0] == '?') or (len(first) != 0
-            and len(second) !=0 and first[0] == second[0]):
-            return match(first[1:],second[1:]);
-
-        # If there is *, then there are two possibilities
-        # a) We consider current character of second string
-        # b) We ignore current character of second string.
-        if len(first) !=0 and first[0] == '*':
-            return match(first[1:],second) or match(first,second[1:])
-
-        return False
-
     def weekDay():
         offset = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334]
         week   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
@@ -107,8 +97,8 @@ def PyDOS():
         return week[int(dayOfWeek)]
 
     def exCmd(cFile,passedIn):
-    #    try:
-        if True:
+        try:
+        #if True:
             cf = open(cFile)
             if passedIn.find("'") > -1:
                 if passedIn.find('"') > -1:
@@ -123,10 +113,10 @@ def PyDOS():
                 exec("passedIn = '"+passedIn+"'\n"+cf.read())
             cf.close()
 
-    #    except SyntaxError:
-    #        print("A syntax error was detected in",cFile)
-    #    except:
-    #        print("An exception occurred in the",cFile,"python script")
+        except SyntaxError:
+            print("A syntax error was detected in",cFile)
+        except:
+            print("An exception occurred in the",cFile,"python script")
 
         return
 
@@ -290,7 +280,7 @@ def PyDOS():
                     dPath = tmpDir+("/" if tmpDir[-1] != "/" else "")
                     print("Directory of", tmpDir)
                     for dir in os.listdir():
-                        if os.stat(dPath+dir)[0] & (2**15) == 0 and match(lastDir,dir[:wildcardLen]):
+                        if os.stat(dPath+dir)[0] & (2**15) == 0 and _match(lastDir,dir[:wildcardLen]):
                             fTime = txtFileTime(dPath+dir)
                             if swPause and nLines == int(envVars["_scrHeight"])-1:
                                 anyKey()
@@ -313,7 +303,7 @@ def PyDOS():
                     except:
                         availDisk = 0
                     for dir in os.listdir():
-                        if os.stat(dPath+dir)[0] & (2**15) != 0 and match(lastDir,dir[:wildcardLen]):
+                        if os.stat(dPath+dir)[0] & (2**15) != 0 and _match(lastDir,dir[:wildcardLen]):
                             fSize = str(os.stat(dPath+dir)[6])
                             tFSize += os.stat(dPath+dir)[6]
                             fTime = txtFileTime(dPath+dir)
@@ -595,7 +585,7 @@ def PyDOS():
                         break
 
         elif cmd == "VER":
-            print("PyDOS [Version 0.9]")
+            print("PyDOS [Version 0.91]")
 
         elif cmd == "ECHO":
             if len(args) == 1:
@@ -840,7 +830,7 @@ def PyDOS():
 
                         if ans == "Y":
                             for dir in os.listdir(tmpDir[:(-1 if tmpDir != "/" else None)]):
-                                if os.stat(tmpDir+dir)[0] & (2**15) != 0 and match(newdir,dir[:wildcardLen]):
+                                if os.stat(tmpDir+dir)[0] & (2**15) != 0 and _match(newdir,dir[:wildcardLen]):
                                     if dir == dir[:16]:
                                         os.remove(tmpDir+dir)
                                         print(tmpDir+dir,"deleted.")
@@ -1056,7 +1046,7 @@ def PyDOS():
                                 if wildCardOp:
                                     ans = ""
                                     for dir in os.listdir(sourcePath[:(-1 if sourcePath != "/" else None)]):
-                                        if os.stat(sourcePath+dir)[0] & (2**15) != 0 and match(newdir,dir[:wildcardLen]):
+                                        if os.stat(sourcePath+dir)[0] & (2**15) != 0 and _match(newdir,dir[:wildcardLen]):
                                             print("copy",sourcePath+dir,"to",targetPath+newdir2+("" if newdir2 == "" else "/")+dir)
                                             if dir in os.listdir(targetPath+newdir2):
                                                 if sourcePath == targetPath+newdir2+("" if newdir2 == "" else "/"):
