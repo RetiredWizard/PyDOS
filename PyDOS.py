@@ -98,7 +98,6 @@ def PyDOS():
 
     def exCmd(cFile,passedIn):
         try:
-        #if True:
             cf = open(cFile)
             if passedIn.find("'") > -1:
                 if passedIn.find('"') > -1:
@@ -113,10 +112,8 @@ def PyDOS():
                 exec("passedIn = '"+passedIn+"'\n"+cf.read())
             cf.close()
 
-        except SyntaxError:
-            print("A syntax error was detected in",cFile)
-        except:
-            print("An exception occurred in the",cFile,"python script")
+        except Exception as err:
+            print("*ERROR* Exception:",str(err),"in",cFile)
 
         return
 
