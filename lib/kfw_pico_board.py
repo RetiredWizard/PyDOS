@@ -68,7 +68,7 @@ LED = board.LED
 SMPS_MODE = board.SMPS_MODE
 VBUS_SENSE = board.VBUS_SENSE
 VOLTAGE_MONITOR = board.VOLTAGE_MONITOR
-boardid = board.boardid
+boardid = board.board_id
 
 def SPI():
     global _SPI
