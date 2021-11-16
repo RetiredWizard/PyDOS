@@ -31,24 +31,18 @@ if implementation.name.upper() == 'MICROPYTHON':
 elif implementation.name.upper() == 'CIRCUITPYTHON':
     from time import monotonic
     from pwmio import PWMOut
+    from board import board_id
     foundPin = True
-    try:
+    if board_id == "arduino_nano_rp2040_connect":
         #A5 is GPIO D19 on Nano Connect
         from board import A5 as sndPin
-    except:
-        foundPin = False
-    if not foundPin:
-        foundPin = True
+    elif board_id == "raspberry_pi_pico":
+        #D12 is GP11 on the Raspberry PICO
+        from board import GP11 as sndPin
+    else:
         try:
-            #Use D12 on Feather
+            #Use D12 on Feathers
             from board import D12 as sndPin
-        except:
-            foundPin = False
-    if not foundPin:
-        foundPin = True
-        try:
-            #D12 is GP11 on the Raspberry PICO
-            from board import GP11 as sndPin
         except:
             foundPin = False
 else:
