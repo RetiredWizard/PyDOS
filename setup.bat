@@ -62,6 +62,7 @@ goto other
 del /pydos_ui.py
 copy /cpython/kbdFeatherWing/* /
 if not exist /lib mkdir /lib
+if exist /lib/neopixel.mpy del /lib/neopixel.mpy 
 copy /cpython/kbdFeatherWing/lib/* /lib/
 if not exist /lib/adafruit_display_shapes mkdir /lib/adafruit_display_shapes
 copy /cpython/kbdFeatherWing/lib/adafruit_display_shapes/* /lib/adafruit_display_shapes
