@@ -7,6 +7,7 @@ except:
 if sys.implementation.name.upper() == 'MICROPYTHON':
     import machine
     from time import ticks_ms
+    foundPin = True
 elif sys.implementation.name.upper() == 'CIRCUITPYTHON':
     from supervisor import ticks_ms
     from pwmio import PWMOut

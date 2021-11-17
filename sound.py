@@ -36,18 +36,19 @@ freq=int(args[0])
 dur = int(args[1])
 vol = int(args[2])
 
-if not foundPin:
-    print("Sound Pin not found")
-elif sys.implementation.name.upper() == "MICROPYTHON":
+if sys.implementation.name.upper() == "MICROPYTHON":
     pwm=machine.PWM(machine.Pin(19))
     pwm.freq(freq)
     pwm.duty_u16(vol)
     time.sleep(dur/1000)
     pwm.duty_u16(0)
 elif sys.implementation.name.upper() == "CIRCUITPYTHON":
-    audioPin = PWMOut(sndPin, duty_cycle=0, frequency=440, variable_frequency=True)
-    audioPin.frequency = freq
-    audioPin.duty_cycle = vol
-    time.sleep(dur/1000)
-    audioPin.duty_cycle = 0
-    audioPin.deinit()
+    if not foundPin:
+        print("Sound Pin not found")
+    else:
+        audioPin = PWMOut(sndPin, duty_cycle=0, frequency=440, variable_frequency=True)
+        audioPin.frequency = freq
+        audioPin.duty_cycle = vol
+        time.sleep(dur/1000)
+        audioPin.duty_cycle = 0
+        audioPin.deinit()
