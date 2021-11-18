@@ -9,6 +9,7 @@ if sys.implementation.name.upper() == 'MICROPYTHON':
     from time import ticks_ms
     foundPin = True
 elif sys.implementation.name.upper() == 'CIRCUITPYTHON':
+    from time import sleep
     from supervisor import ticks_ms
     from pwmio import PWMOut
     from board import board_id
@@ -111,6 +112,8 @@ def piano():
             elif sys.implementation.name.upper() == 'CIRCUITPYTHON':
                 pwm.frequency = note
                 pwm.duty_cycle = volume
+                if board_id == "unexpectedmaker_feathers2":
+                    sleep(.05)
 
             #time.sleep(.1)
             #cmnd = kbdInterrupt()
