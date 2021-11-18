@@ -585,7 +585,7 @@ def PyDOS():
                         break
 
         elif cmd == "VER":
-            print("PyDOS [Version 0.91]")
+            print("PyDOS [Version 1.0]")
 
         elif cmd == "ECHO":
             if len(args) == 1:
