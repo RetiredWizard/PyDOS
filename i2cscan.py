@@ -15,9 +15,9 @@ elif sys.implementation.name.upper() == 'CIRCUITPYTHON':
     #  >>> import board
     #  >>> board.I2C().unlock()
     import time
-    import board
+    from pydos_ui import PyDOS_UI
 
-    i2c = board.I2C()
+    i2c = PyDOS_UI.I2C()
 
 print('Scan i2c bus...')
 
@@ -37,4 +37,4 @@ for device in devices:
 
 if sys.implementation.name.upper() == 'CIRCUITPYTHON':
     i2c.unlock()
-    i2c.deinit()
+    #i2c.deinit()

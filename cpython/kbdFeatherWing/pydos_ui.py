@@ -18,10 +18,11 @@
 
 from bbq10keyboard import BBQ10Keyboard, STATE_PRESS, STATE_RELEASE, STATE_LONG_PRESS
 import board
-try:
-    board.SCK
-except:
+
+if board.board_id == 'raspberry_pi_pico':
     import kfw_pico_board as board
+elif board.board_id == 'unexpectedmaker_feathers2':
+    import kfw_s2_board as board
 
 import adafruit_ili9341
 import digitalio
@@ -50,6 +51,9 @@ class PyDOS_UI:
         self.shift_Mode = self.SHIFT # Default Cap lock/Long Press mode
 
         self.lastCmdLine = ""
+
+    def I2C():
+        return board.I2C()
 
     def serial_bytes_available(self):
         # Does the same function as supervisor.runtime.serial_bytes_available

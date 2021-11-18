@@ -31,16 +31,17 @@ if implementation.name.upper() == 'MICROPYTHON':
 elif implementation.name.upper() == 'CIRCUITPYTHON':
     from time import monotonic
     from pwmio import PWMOut
+    from board import board_id
     foundPin = True
-    try:
+    if board_id == "arduino_nano_rp2040_connect":
         #A5 is GPIO D19 on Nano Connect
         from board import A5 as sndPin
-    except:
-        foundPin = False
-    if not foundPin:
-        foundPin = True
+    elif board_id == "raspberry_pi_pico":
+        #D12 is GP11 on the Raspberry PICO
+        from board import GP11 as sndPin
+    else:
         try:
-            #Use D12 on Feather
+            #Use D12 on Feathers
             from board import D12 as sndPin
         except:
             foundPin = False
@@ -604,7 +605,6 @@ class BASICParser:
         places the file handle into handle table
 
         """
-
         self.__advance() # Advance past OPEN token
 
         # Acquire the filename
@@ -894,12 +894,15 @@ class BASICParser:
             sleep(duration/18.2)
             self.__pwm.duty_u16(0)
         elif implementation.name.upper() == 'CIRCUITPYTHON':
-            audioPin = PWMOut(sndPin, duty_cycle=0, frequency=440, variable_frequency=True)
-            audioPin.frequency = freq
-            audioPin.duty_cycle = volume
-            sleep(duration/18.2)
-            audioPin.duty_cycle = 0
-            audioPin.deinit()
+            try:
+                audioPin = PWMOut(sndPin, duty_cycle=0, frequency=440, variable_frequency=True)
+                audioPin.frequency = freq
+                audioPin.duty_cycle = volume
+                sleep(duration/18.2)
+                audioPin.duty_cycle = 0
+                audioPin.deinit()
+            except:
+                pass
         else:
             winsound.Beep(freq,int(self.__operand_stack.pop()*1000/18.2))
 

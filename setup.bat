@@ -62,6 +62,7 @@ goto other
 del /pydos_ui.py
 copy /cpython/kbdFeatherWing/* /
 if not exist /lib mkdir /lib
+if exist /lib/neopixel.mpy del /lib/neopixel.mpy 
 copy /cpython/kbdFeatherWing/lib/* /lib/
 if not exist /lib/adafruit_display_shapes mkdir /lib/adafruit_display_shapes
 copy /cpython/kbdFeatherWing/lib/adafruit_display_shapes/* /lib/adafruit_display_shapes
@@ -70,7 +71,6 @@ copy /cpython/kbdFeatherWing/lib/adafruit_display_text/* /lib/adafruit_display_t
 if not exist /PyBasic mkdir /PyBasic
 del /PyBasic/eliza.bas
 del /PyBasic/startrek.bas
-del /PyBasic/startrek.pgm
 copy /cpython/kbdFeatherWing/PyBasic/* /PyBasic
 :done
 set _ans=

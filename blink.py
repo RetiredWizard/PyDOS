@@ -6,6 +6,8 @@ if sys.implementation.name.upper() == 'MICROPYTHON':
 elif sys.implementation.name.upper() == 'CIRCUITPYTHON':
     import board
     from digitalio import DigitalInOut, Direction
+
+from pydos_ui import Pydos_ui
 try:
     from pydos_ui import input
 except:
