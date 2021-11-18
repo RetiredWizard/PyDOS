@@ -71,7 +71,6 @@ copy /cpython/kbdFeatherWing/lib/adafruit_display_text/* /lib/adafruit_display_t
 if not exist /PyBasic mkdir /PyBasic
 del /PyBasic/eliza.bas
 del /PyBasic/startrek.bas
-del /PyBasic/startrek.pgm
 copy /cpython/kbdFeatherWing/PyBasic/* /PyBasic
 :done
 set _ans=
