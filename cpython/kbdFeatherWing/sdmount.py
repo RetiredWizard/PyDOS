@@ -9,6 +9,8 @@ elif implementation.name.upper() == "CIRCUITPYTHON":
     import digitalio
     if board.board_id == "unexpectedmaker_feathers2":
         import kfw_s2_board as board
+    if board.board_id == "raspberry_pi_pico":
+        import kfw_pico_board as board
 
 drive = "/sd"
 
