@@ -1,5 +1,5 @@
 @echo off
 cd /PyBasic
-PyBasic eliza.pgm
+PyBasic eliza.bas
 cd /
 menu.bat
