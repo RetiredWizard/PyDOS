@@ -1,5 +1,5 @@
 @echo off
 cd /PyBasic
-PyBasic startrek.pgm
+PyBasic startrek.bas
 cd /
 menu.bat
