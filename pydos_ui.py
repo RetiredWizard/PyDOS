@@ -43,9 +43,18 @@ class PyDOS_UI:
         return stdin.read(num)
 
     def get_screensize(self):
+        print("Press any key...",end="")
+        stdout.write('\x1b[2K')
         stdout.write('\x1b[999;999H\x1b[6n')
         pos = ''
-        char = stdin.read(1) ## expect ESC[yyy;xxxR
+        char = ''
+        try:
+            char = stdin.read(1) ## expect ESC[yyy;xxxR
+        except:
+            return(80,24)
+        if char != '\x1b':
+            return(80,24)
+
         while char != 'R':
             pos += char
             char = stdin.read(1)
