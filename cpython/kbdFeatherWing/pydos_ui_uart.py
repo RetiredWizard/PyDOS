@@ -51,9 +51,9 @@ class PyDOS_UI:
         try:
             char = stdin.read(1) ## expect ESC[yyy;xxxR
         except:
-            return(80,24)
+            return(24,80)
         if char != '\x1b':
-            return(80,24)
+            return(24,80)
 
         while char != 'R':
             pos += char
