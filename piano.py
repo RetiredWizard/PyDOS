@@ -6,7 +6,8 @@ except:
     pass
 if sys.implementation.name.upper() == 'MICROPYTHON':
     import machine
-    from time import ticks_ms
+    from time import ticks_ms,sleep
+    from os import uname
     foundPin = True
 elif sys.implementation.name.upper() == 'CIRCUITPYTHON':
     from time import sleep
@@ -108,12 +109,17 @@ def piano():
         if press:
             if sys.implementation.name.upper() == 'MICROPYTHON':
                 pwm.freq(note)
-                pwm.duty_u16(volume)
+                if 'duty_u16' in dir(pwm):
+                    pwm.duty_u16(volume)
+                else:
+                    pwm.duty(int((volume/65535)*1023))
+                if "ESP32" in uname().machine or "S2" in uname().machine:
+                    sleep(.1)
             elif sys.implementation.name.upper() == 'CIRCUITPYTHON':
                 pwm.frequency = note
                 pwm.duty_cycle = volume
-                if board_id == "unexpectedmaker_feathers2":
-                    sleep(.05)
+                if "s2" in board_id:
+                    sleep(.1)
 
             #time.sleep(.1)
             #cmnd = kbdInterrupt()
@@ -122,7 +128,10 @@ def piano():
             #pressedat = time.time()
         else:
             if sys.implementation.name.upper() == 'MICROPYTHON':
-                pwm.duty_u16(0)
+                if 'duty_u16' in dir(pwm):
+                    pwm.duty_u16(0)
+                else:
+                    pwm.duty(0)
             elif sys.implementation.name.upper() == 'CIRCUITPYTHON':
                 pwm.duty_cycle = 0
             #print("Release")

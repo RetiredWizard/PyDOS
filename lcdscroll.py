@@ -10,8 +10,10 @@ if sys.implementation.name.upper() == "CIRCUITPYTHON":
     import busio
     import supervisor
     from circuitpython_i2c_lcd import I2cLcd
+    from pydos_ui import PyDOS_UI
 else:
     import machine
+    from os import uname
     import lcd2004
     import uselect
 
@@ -43,7 +45,7 @@ def lcdScroll(argv):
         return sba,cmnd
 
     if sys.implementation.name.upper() == "CIRCUITPYTHON":
-        i2c = busio.I2C(board.SCL, board.SDA)
+        i2c = PyDOS_UI.I2C()
 
         # circuitpython seems to require locking the i2c bus
         while i2c.try_lock():
@@ -62,12 +64,18 @@ def lcdScroll(argv):
 
     else:
 
-        # Sparkfun thingplus QWIC SCL=7 SDA=6
-        SCL=7
-        SDA=6
-        # Raspberry PI Pico SCL = GPIO3,pin5 SDA = GPIO2,pin4
-        #SCL=3
-        #SDA=2
+        if uname().machine == 'TinyPICO with ESP32-PICO-D4':
+            SCL=22
+            SDA=21
+        elif uname().machine == 'SparkFun Thing Plus RP2040 with RP2040':
+            # Sparkfun thingplus QWIC SCL=7 SDA=6
+            SCL=7
+            SDA=6
+        else:
+            # Raspberry PI Pico SCL = GPIO3,pin5 SDA = GPIO2,pin4
+            SCL=3
+            SDA=2
+
         ID=1
         i2c=machine.I2C(ID,scl=machine.Pin(SCL),sda=machine.Pin(SDA),freq=400000)
         lcd=lcd2004.lcd(ID,39,SCL,SDA)
@@ -141,7 +149,7 @@ def lcdScroll(argv):
 
     if sys.implementation.name.upper() == "CIRCUITPYTHON":
         i2c.unlock()
-        i2c.deinit()
+        #i2c.deinit()
 
 if __name__ != "PyDOS":
     passedIn = ""

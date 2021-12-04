@@ -10,22 +10,40 @@ goto tryagain
 :cpython
 set _ans = C
 copy /cpython/* /
+if not exist /lib mkdir /lib
+copy /cpython/lib/* /lib/
 goto board
 :mpython
 set _ans=M
 copy /mpython/* /
+if not exist /lib mkdir /lib
+copy /mpython/lib/* /lib/
 :board
-set/p _ans2 = (T)hingPlus RP2040, (F)eather RP2040, (N)anoConnect, (O)ther:
+@echo (T)hingPlus RP2040, (F)eather RP2040, (N)anoConnect, 
+set/p _ans2 =  (S)FeatherS2 or Feather ESP32-S2, (P)TinyPico, (O)ther:
 if %_ans2% == t goto thingplus
 if %_ans2% == T goto thingplus
 if %_ans2% == f goto feather
 if %_ans2% == F goto feather
+if %_ans2% == s goto s2
+if %_ans2% == S goto s2
 if %_ans2% == n goto nanoconnect
 if %_ans2% == N goto nanoconnect
+if %_ans2% == p goto tinypico
+if %_ans2% == p goto tinypico
 if %_ans2% == o goto other
 if %_ans2% == O goto other
-echo Invalid selection (T,F,N or O)
+echo Invalid selection (T,F,N,S,P or O)
 goto board
+:tinypico
+if %_ans% == C goto tinypicoCP
+copy /mpython/TinyPico/* /
+goto other
+:tinypicoCP
+copy /cpython/ESP32S2/* /
+if not exist /lib mkdir /lib
+copy /cpython/ESP32S2/lib/* /lib/
+goto other
 :thingplus
 if %_ans% == C goto other
 copy /mpython/ThingPlus/* /
@@ -35,11 +53,13 @@ if %_ans% == M goto other
 copy /cpython/Feather/* /
 if not exist /lib mkdir /lib
 copy /cpython/Feather/lib/* /lib/
-if not exist /lib/adafruit_character_lcd mkdir /lib/adafruit_character_lcd
-copy /cpython/Feather/lib/adafruit_character_lcd/* /lib/adafruit_character_lcd/
-if not exist /lib/adafruit_mcp230xx mkdir /lib/adafruit_mcp230xx
-copy /cpython/Feather/lib/adafruit_mcp230xx/* /lib/adafruit_mcp230xx/
 goto other
+:s2
+if %_ans% == M goto other
+copy /cpython/ESP32S2/* /
+if not exist /lib mkdir /lib
+copy /cpython/ESP32S2/lib/* /lib/
+goto feather
 :nanoconnect
 if %_ans% == M goto other
 copy /cpython/NanoConnect/* /
@@ -59,15 +79,11 @@ if %_ans3% == y goto kbdFeatherW
 echo Invalid Selection (Y or N)
 goto other
 :kbdFeatherW
-del /pydos_ui.py
+del /lib/pydos_ui.py
 copy /cpython/kbdFeatherWing/* /
 if not exist /lib mkdir /lib
 if exist /lib/neopixel.mpy del /lib/neopixel.mpy 
 copy /cpython/kbdFeatherWing/lib/* /lib/
-if not exist /lib/adafruit_display_shapes mkdir /lib/adafruit_display_shapes
-copy /cpython/kbdFeatherWing/lib/adafruit_display_shapes/* /lib/adafruit_display_shapes
-if not exist /lib/adafruit_display_text mkdir /lib/adafruit_display_text
-copy /cpython/kbdFeatherWing/lib/adafruit_display_text/* /lib/adafruit_display_text
 if not exist /PyBasic mkdir /PyBasic
 del /PyBasic/eliza.bas
 del /PyBasic/startrek.bas
