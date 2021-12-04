@@ -11,9 +11,9 @@ if %_val% == K goto kfw
 if %_val% == k goto kfw
 goto prompt
 :uart
-copy pydos_ui_uart.py pydos_ui.py
+copy /lib/pydos_ui_uart.py /lib/pydos_ui.py
 goto done
 :kfw
-copy pydos_ui_kfw.py pydos_ui.py
+copy /lib/pydos_ui_kfw.py /lib/pydos_ui.py
 :done
 set _val=

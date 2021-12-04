@@ -6,9 +6,16 @@
 import sys
 if sys.implementation.name.upper() == 'MICROPYTHON':
     import machine
-    # i2c pins for qwic connect on thingplus SCL=7, SDA=6; raspberry pi pico physical pins 5,4 Gpio SCL=3, SDA=2
-    i2c = machine.I2C(1,scl=machine.Pin(7), sda=machine.Pin(6))
-    #i2c = machine.I2C(1,scl=machine.Pin(3), sda=machine.Pin(2))
+    from os import uname
+
+    if uname().machine == 'TinyPICO with ESP32-PICO-D4':
+        i2c = machine.I2C(1,scl=machine.Pin(22),sda=machine.Pin(21))
+    elif uname().machine == 'SparkFun Thing Plus RP2040 with RP2040':
+        # i2c pins for qwic connect on thingplus SCL=7, SDA=6;
+        i2c = machine.I2C(1,scl=machine.Pin(7), sda=machine.Pin(6))
+    else:
+        # raspberry pi pico physical pins 5,4 Gpio SCL=3, SDA=2
+        i2c = machine.I2C(1,scl=machine.Pin(3), sda=machine.Pin(2))
 elif sys.implementation.name.upper() == 'CIRCUITPYTHON':
     # If you run this and it seems to hang, try manually unlocking
     # your I2C bus from the REPL with

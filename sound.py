@@ -39,9 +39,15 @@ vol = int(args[2])
 if sys.implementation.name.upper() == "MICROPYTHON":
     pwm=machine.PWM(machine.Pin(19))
     pwm.freq(freq)
-    pwm.duty_u16(vol)
+    if 'duty_u16' in dir(pwm):
+        pwm.duty_u16(vol)
+    else:
+        pwm.duty(int((vol/65535)*1023))
     time.sleep(dur/1000)
-    pwm.duty_u16(0)
+    if 'duty_u16' in dir(pwm):
+        pwm.duty_u16(0)
+    else:
+        pwm.duty(0)
 elif sys.implementation.name.upper() == "CIRCUITPYTHON":
     if not foundPin:
         print("Sound Pin not found")
