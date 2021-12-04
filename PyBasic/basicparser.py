@@ -127,7 +127,10 @@ class BASICParser:
         self.__file_handles = {}
 
         if implementation.name.upper() == 'MICROPYTHON':
-            self.__pwm = PWM(Pin(19))
+            try:
+                self.__pwm = PWM(Pin(19),freq=0)
+            except:
+                self.__pwm = PWM(Pin(19))
 
     def parse(self, tokenlist, line_number, cstmt_number, infile, tmpfile, datastmts):
         """Must be initialised with the list of
@@ -890,9 +893,14 @@ class BASICParser:
 
         if implementation.name.upper() == 'MICROPYTHON':
             self.__pwm.freq(freq)
-            self.__pwm.duty_u16(volume)
-            sleep(duration/18.2)
-            self.__pwm.duty_u16(0)
+            if "duty_u16" in dir(self.__pwm):
+                self.__pwm.duty_u16(volume)
+                sleep(duration/18.2)
+                self.__pwm.duty_u16(0)
+            else:
+                self.__pwm.duty(int((volume/65535)*1023))
+                sleep(duration/18.2)
+                self.__pwm.duty(0)
         elif implementation.name.upper() == 'CIRCUITPYTHON':
             try:
                 audioPin = PWMOut(sndPin, duty_cycle=0, frequency=440, variable_frequency=True)
