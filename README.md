@@ -53,13 +53,14 @@ delete both the **cpython** and **mpython** folders as they are only used by the
 
 **Building custom CircuitPython firmware**
 
-For CircuitPython the first thing you should do is compile a custom CircuitPython image. (see https://www.youtube.com/watch?v=sWy5_B3LL8c for a demonstration)
-Upon downloading the latest version of CircuitPython from the
-github repository, modify the **py/circuitpy_mpconfig.h** file and change the value on the line that reads "**#define MICROPY_ENABLE_PYSTACK**" from "(1)" to "(0)". Once
-that is done you can follow the setps in https://learn.adafruit.com/building-circuitpython/build-circuitpython and demonstrated in the YouTube video mentioned above.
+For CircuitPython the first thing you should do is compile a custom CircuitPython image, the steps for doing so are described in the Adafruit learning guide
+at: https://learn.adafruit.com/building-circuitpython/build-circuitpython.  Upon downloading the latest version of CircuitPython from the github repository,
+modify the **py/circuitpy_mpconfig.h** file and change the value on the line that reads "#**define MICROPY_ENABLE_PYSTACK**" from "(1)" to "(0)". On an 
+ESP32S2 microcontroller it's also necessary to modify the **py/mpconfig.h** file and change the value on the line that reades "**#define MICROPY_STACKLESS**"
+from "(0)" to "(1)".
 
-+An addtional compiler option is required when running PyDOS on an ESP32S2 microcontroller. Modify the **py/mpconfig.h** file and change the value on the line that reades 
-"**#define MICROPY_STACKLESS"** from "(0)" to "(1)".
+An earlier version of the build process is demonstrated in the YouTube video at: https://www.youtube.com/watch?v=sWy5_B3LL8c, but be sure to check the Adafruit
+guide and use the updated instructions.
 
 **PyDOS will run without using this custom CircuitPython image however PyBasic and some of the other applications will not run as well since PyDOS will be memory limited.**
 
