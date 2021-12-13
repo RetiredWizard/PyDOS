@@ -16,6 +16,12 @@ experimental on Micropython so it's not difficult to crash the microcontroller u
 a thread started on the second core so be sure any threads you launch will shutdown on their own or monitor a global variable or
 thread.lock to respond to a shutdown request (see the badblink.py for an example).
 
+**runvm.py** (Circuitpython only) - This program will use the **supervisor.set_next_code_file** method to configure the microcontroller
+board to launch the specfied python script after the next soft reboot. The program then uses the **supervisor.reload()** method to 
+perform a reboot and launch the target script. The target script is "wrapped" in some code that passes any specified arguments and the
+PyDOS environment variables to the newly booted environment as well as code that causes a second soft reboot after the script has completed
+to return control to PyDOS.
+
 **edit.py** - line editor inspired by DOS edlin. Intial program structure of line editor by Joesph Long
     https://github.com/j-osephlong/Python-Text-Editor
     
