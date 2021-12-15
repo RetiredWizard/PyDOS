@@ -29,9 +29,9 @@ to return control to PyDOS.
 
 **fileview.py** - scrollable text file viewer
 
-**sdmount.py** (Micropython only) - mounts an sd card to the file system
+**sdmount.py** (Micropython ThingPlus or Circuitpython Keyboard Featherwing) - mounts an sd card to the file system
 
-**sdumount.py** (Micropython only) - dismounts an sd card from the file system
+**sdumount.py** (Micropython ThingPlus only) - dismounts an sd card from the file system
 
 **setdate.py** (Micropython only) - initalizes the RP2040 real time clock to an entered date
 
