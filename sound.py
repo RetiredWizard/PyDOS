@@ -12,6 +12,8 @@ elif sys.implementation.name.upper() == 'CIRCUITPYTHON':
     elif board_id == "raspberry_pi_pico":
         #D12 is GP11 on the Raspberry PICO
         from board import GP11 as sndPin
+    elif board_id == "cytron_maker_pi_rp2040":
+        from board import GP22 as sndPin
     else:
         try:
             #Use D12 on Feathers
