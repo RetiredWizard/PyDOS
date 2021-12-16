@@ -8,19 +8,31 @@ if implementation.name.upper() == "MICROPYTHON":
 elif implementation.name.upper() == "CIRCUITPYTHON":
     from supervisor import runtime
     import board
+    if board.board_id == "cytron_maker_pi_rp2040":
+        import busio
 
 class PyDOS_UI:
+
+    _I2C = None
 
     def __init__(self):
         pass
 
     if implementation.name.upper() == "CIRCUITPYTHON":
+
         def serial_bytes_available(self):
             # Does the same function as supervisor.runtime.serial_bytes_available
             return runtime.serial_bytes_available
 
         def I2C():
-            return board.I2C()
+            if board.board_id == "cytron_maker_pi_rp2040":
+                if not PyDOS_UI._I2C:
+                    # Grove #1, GP1 & GP2
+                    PyDOS_UI._I2C = busio.I2C(board.GP1, board.GP0)
+
+                return PyDOS_UI._I2C
+            else:
+                return board.I2C()
 
     elif implementation.name.upper() == "MICROPYTHON":
         def serial_bytes_available(self):
