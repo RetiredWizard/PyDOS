@@ -33,6 +33,7 @@ class PyDOS_UI:
     SHIFT = 1
     ALT = 2
     #_kbd = None
+    _I2C_power = None
 
     def __init__(self):
         # Release any resources currently in use for the displays
@@ -53,6 +54,11 @@ class PyDOS_UI:
         self.lastCmdLine = ""
 
     def I2C():
+        if 'I2C_POWER_INVERTED' in dir(board) and not PyDOS_UI._I2C_power:
+            PyDOS_UI._I2C_power = digitalio.DigitalInOut(board.I2C_POWER_INVERTED)
+            PyDOS_UI._I2C_power.direction = digitalio.Direction.OUTPUT
+            PyDOS_UI._I2C_power.value = False
+
         return board.I2C()
 
     def serial_bytes_available(self):
