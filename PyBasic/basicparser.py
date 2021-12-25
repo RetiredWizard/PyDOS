@@ -30,9 +30,9 @@ if implementation.name.upper() == 'MICROPYTHON':
     from time import ticks_ms as monotonic
 elif implementation.name.upper() == 'CIRCUITPYTHON':
     from time import monotonic
-    from pwmio import PWMOut
     from board import board_id
-    foundPin = True
+    if board_id != 'raspberrypi_zero2w': # temporary? until broadcom port supports pwmio
+        from pwmio import PWMOut
     if board_id == "arduino_nano_rp2040_connect":
         #A5 is GPIO D19 on Nano Connect
         from board import A5 as sndPin
@@ -46,7 +46,7 @@ elif implementation.name.upper() == 'CIRCUITPYTHON':
             #Use D12 on Feathers
             from board import D12 as sndPin
         except:
-            foundPin = False
+            pass
 else:
     import winsound
     from time import monotonic
