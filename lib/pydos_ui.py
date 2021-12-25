@@ -7,6 +7,7 @@ if implementation.name.upper() == "MICROPYTHON":
     import uselect
 elif implementation.name.upper() == "CIRCUITPYTHON":
     from supervisor import runtime
+    import digitalio
     import board
     if board.board_id == "cytron_maker_pi_rp2040":
         import busio
@@ -14,6 +15,7 @@ elif implementation.name.upper() == "CIRCUITPYTHON":
 class PyDOS_UI:
 
     _I2C = None
+    _I2C_power = None
 
     def __init__(self):
         pass
@@ -32,6 +34,11 @@ class PyDOS_UI:
 
                 return PyDOS_UI._I2C
             else:
+                if 'I2C_POWER_INVERTED' in dir(board) and not PyDOS_UI._I2C_power:
+                    PyDOS_UI._I2C_power = digitalio.DigitalInOut(board.I2C_POWER_INVERTED)
+                    PyDOS_UI._I2C_power.direction = digitalio.Direction.OUTPUT
+                    PyDOS_UI._I2C_power.value = False
+
                 return board.I2C()
 
     elif implementation.name.upper() == "MICROPYTHON":
