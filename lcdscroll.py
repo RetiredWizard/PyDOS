@@ -51,6 +51,11 @@ def lcdScroll(argv):
         while i2c.try_lock():
             pass
 
+        if DEFAULT_I2C_ADDR not in i2c.scan():
+            print("LCD not found at address: ",hex(DEFAULT_I2C_ADDR))
+            i2c.unlock()
+            return
+
         # 2 lines, 16 characters per line
         lcd = I2cLcd(i2c, DEFAULT_I2C_ADDR, 2, 16)
 
