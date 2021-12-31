@@ -585,7 +585,7 @@ def PyDOS():
                         break
 
         elif cmd == "VER":
-            print("PyDOS [Version 1.02]")
+            print("PyDOS [Version 1.03]")
 
         elif cmd == "ECHO":
             if len(args) == 1:
@@ -1186,10 +1186,11 @@ def PyDOS():
                 batIndex = [0]
                 batLabels = {}
                 for batLine in BATfile:
-                    batIndex.append(batIndex[batLineNo]+len(batLine))
-                    batLineNo += 1
-                    if batLine.strip()[0] == ":" and len(batLine.strip().split(" ")[0]) > 1:
-                        batLabels[batLine.strip().split(" ")[0][1:]] = [batLineNo,batIndex[batLineNo]]
+                    if batline.strip() != "":
+                        batIndex.append(batIndex[batLineNo]+len(batLine))
+                        batLineNo += 1
+                        if batLine.strip()[0] == ":" and len(batLine.strip().split(" ")[0]) > 1:
+                            batLabels[batLine.strip().split(" ")[0][1:]] = [batLineNo,batIndex[batLineNo]]
                 BATfile.seek(0)
                 batLineNo = 0
 
