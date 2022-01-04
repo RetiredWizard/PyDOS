@@ -1186,7 +1186,7 @@ def PyDOS():
                 batIndex = [0]
                 batLabels = {}
                 for batLine in BATfile:
-                    if batline.strip() != "":
+                    if batLine.strip() != "":
                         batIndex.append(batIndex[batLineNo]+len(batLine))
                         batLineNo += 1
                         if batLine.strip()[0] == ":" and len(batLine.strip().split(" ")[0]) > 1:
