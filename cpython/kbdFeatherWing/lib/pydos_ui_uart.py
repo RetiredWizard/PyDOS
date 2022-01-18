@@ -9,13 +9,14 @@ elif implementation.name.upper() == "CIRCUITPYTHON":
     from supervisor import runtime
     import digitalio
     import board
-    if board.board_id == "cytron_maker_pi_rp2040":
-        import busio
+    #if board.board_id == "cytron_maker_pi_rp2040":
+    import busio
 
 class PyDOS_UI:
 
     _I2C = None
     _I2C_power = None
+    _SPI = None
 
     def __init__(self):
         pass
@@ -40,6 +41,19 @@ class PyDOS_UI:
                     PyDOS_UI._I2C_power.value = False
 
                 return board.I2C()
+
+        def SPI():
+            if not PyDOS_UI._SPI:
+                try:
+                    PyDOS_UI._SPI = board.SPI()
+                except:
+                    if 'SCK' in dir(board):
+                        if 'MOSI' in dir(board):
+                            PyDOS_UI._SPI = busio.SPI(board.SCK, board.MOSI, board.MISO)
+                        elif 'COPI' in dir(board):
+                            PyDOS_UI._SPI = busio.SPI(board.SCK, board.COPI, board.CIPO)
+
+            return PyDOS_UI._SPI
 
     elif implementation.name.upper() == "MICROPYTHON":
         def serial_bytes_available(self):
