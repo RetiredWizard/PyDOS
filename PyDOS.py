@@ -279,7 +279,7 @@ def PyDOS():
                     nLines = 1
                     dPath = tmpDir+("/" if tmpDir[-1] != "/" else "")
                     print("Directory of", tmpDir)
-                    for dir in os.listdir():
+                    for dir in sorted(os.listdir(), key=lambda v: (v.upper(), v[0].isupper())):
                         if os.stat(dPath+dir)[0] & (2**15) == 0 and _match(lastDir,dir[:wildcardLen]):
                             fTime = txtFileTime(dPath+dir)
                             if swPause and nLines == int(envVars["_scrHeight"])-1:
@@ -302,7 +302,7 @@ def PyDOS():
                         availDisk = os.statvfs(tmpDir)[1]*os.statvfs(tmpDir)[4]
                     except:
                         availDisk = 0
-                    for dir in os.listdir():
+                    for dir in sorted(os.listdir(), key=lambda v: (v.upper(), v[0].isupper())):
                         if os.stat(dPath+dir)[0] & (2**15) != 0 and _match(lastDir,dir[:wildcardLen]):
                             fSize = str(os.stat(dPath+dir)[6])
                             tFSize += os.stat(dPath+dir)[6]
@@ -351,7 +351,7 @@ def PyDOS():
                         scrAdj1 = 52 - min(int(envVars["_scrWidth"]),52)
                         print("."+" "*(23-scrAdj1)+"<DIR>")
                         print(".."+" "*(22-scrAdj1)+"<DIR>")
-                    for dir in os.listdir(lastDir):
+                    for dir in sorted(os.listdir(lastDir), key=lambda v: (v.upper(), v[0].isupper())):
                         if os.stat(lastDir+"/"+dir)[0] & (2**15) == 0:
                             fTime = txtFileTime(lastDir+"/"+dir)
                             if swPause and nLines == int(envVars["_scrHeight"])-1:
@@ -374,7 +374,7 @@ def PyDOS():
                         availDisk = os.statvfs(dPath)[1]*os.statvfs(dPath)[4]
                     except:
                         availDisk = 0
-                    for dir in os.listdir(lastDir):
+                    for dir in sorted(os.listdir(lastDir), key=lambda v: (v.upper(), v[0].isupper())):
                         if os.stat(lastDir+"/"+dir)[0] & (2**15) != 0:
                             fSize = str(os.stat(lastDir+"/"+dir)[6])
                             tFSize += int(fSize)
@@ -585,7 +585,7 @@ def PyDOS():
                         break
 
         elif cmd == "VER":
-            print("PyDOS [Version 1.03]")
+            print("PyDOS [Version 1.04]")
 
         elif cmd == "ECHO":
             if len(args) == 1:
