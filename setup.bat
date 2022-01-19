@@ -19,7 +19,7 @@ copy /mpython/* /
 if not exist /lib mkdir /lib
 copy /mpython/lib/* /lib/
 :board
-@echo (T)hingPlus RP2040, (F)eather RP2040, (N)anoConnect, 
+@echo (T)hingPlus RP2040, (F)eather RP2040 or KB2040, (N)anoConnect, 
 set/p _ans2 =  (S)FeatherS2 or Feather ESP32-S2, (P)TinyPico, (O)ther:
 if %_ans2% == t goto thingplus
 if %_ans2% == T goto thingplus
