@@ -2,7 +2,7 @@
 # https://learnembeddedsystems.co.uk/using-the-rgb-led-on-the-arduino-nano-rp2040-connect
 
 import time
-import kfw_pico_board as board
+import board
 
 import neopixel
 from pydos_ui import Pydos_ui
