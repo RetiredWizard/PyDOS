@@ -19,14 +19,16 @@ copy /mpython/* /
 if not exist /lib mkdir /lib
 copy /mpython/lib/* /lib/
 :board
-@echo (T)hingPlus RP2040, (F)eather RP2040 or KB2040, (N)anoConnect, 
-set/p _ans2 =  (S)FeatherS2 or Feather ESP32-S2, (P)TinyPico, (O)ther:
+@echo (T)hingPlus RP2040, (F)eather RP2040, (N)anoConnect, 
+set/p _ans2 =  (S)FeatherS2, (E)Feather ESP32-S2, (P)ESP32-S2 TinyPico, (O)ther:
 if %_ans2% == t goto thingplus
 if %_ans2% == T goto thingplus
 if %_ans2% == f goto feather
 if %_ans2% == F goto feather
-if %_ans2% == s goto s2
-if %_ans2% == S goto s2
+if %_ans2% == s goto s2feather
+if %_ans2% == S goto s2feather
+if %_ans2% == e goto ESPs2feather
+if %_ans2% == E goto ESPs2feather
 if %_ans2% == n goto nanoconnect
 if %_ans2% == N goto nanoconnect
 if %_ans2% == p goto tinypico
@@ -36,6 +38,7 @@ if %_ans2% == O goto other
 echo Invalid selection (T,F,N,S,P or O)
 goto board
 :tinypico
+set _ans2 = P
 if %_ans% == C goto tinypicoCP
 copy /mpython/TinyPico/* /
 goto other
@@ -45,22 +48,33 @@ if not exist /lib mkdir /lib
 copy /cpython/ESP32S2/lib/* /lib/
 goto other
 :thingplus
+set _ans2 = T
 if %_ans% == C goto other
 copy /mpython/ThingPlus/* /
 goto other
 :feather
+set _ans2 = F
 if %_ans% == M goto other
 copy /cpython/Feather/* /
 if not exist /lib mkdir /lib
 copy /cpython/Feather/lib/* /lib/
 goto other
-:s2
+:s2feather
+set _ans2 = S
+if %_ans% == M goto other
+copy /cpython/ESP32S2/* /
+if not exist /lib mkdir /lib
+copy /cpython/ESP32S2/lib/* /lib/
+goto feather
+:ESPs2feather
+set _ans2 = E
 if %_ans% == M goto other
 copy /cpython/ESP32S2/* /
 if not exist /lib mkdir /lib
 copy /cpython/ESP32S2/lib/* /lib/
 goto feather
 :nanoconnect
+set _ans2 = N
 if %_ans% == M goto other
 copy /cpython/NanoConnect/* /
 if not exist /lib mkdir /lib
@@ -71,24 +85,49 @@ if not exist /lib/adafruit_bus_device mkdir /lib/adafruit_bus_device
 copy /cpython/NanoConnect/lib/adafruit_bus_device/* /lib/adafruit_bus_device/
 goto other
 :other
+set _ans2 = O
+if %_ans% == M goto Cytron
 set/p _ans3 = Are you using a Keyboard FeatherWing (Y/N)?:
-if %_ans3% == N goto done
-if %_ans3% == n goto done
+if %_ans3% == N goto Cytron
+if %_ans3% == n goto Cytron
 if %_ans3% == Y goto kbdFeatherW
 if %_ans3% == y goto kbdFeatherW
 echo Invalid Selection (Y or N)
 goto other
 :kbdFeatherW
-del /lib/pydos_ui.py
-copy /cpython/kbdFeatherWing/* /
+copy/y /cpython/kbdFeatherWing/* /
 if not exist /lib mkdir /lib
-if exist /lib/neopixel.mpy del /lib/neopixel.mpy 
-copy /cpython/kbdFeatherWing/lib/* /lib/
+copy/y /cpython/kbdFeatherWing/lib/* /lib/
 if not exist /PyBasic mkdir /PyBasic
-del /PyBasic/eliza.bas
-del /PyBasic/startrek.bas
-copy /cpython/kbdFeatherWing/PyBasic/* /PyBasic
+copy/y /cpython/kbdFeatherWing/PyBasic/* /PyBasic
+if %_ans2% == O del /lib/kfw_s2_board.py
+if %_ans2% == S del /lib/kfw_pico_board.py
+goto done
+:Cytron
+set/p _ans3 = Are you using a Cytron Maker Pi Pico (Y/N)?:
+if %_ans3% == N goto done
+if %_ans3% == n goto done
+if %_ans3% == Y goto MakerPiPico
+if %_ans3% == y goto MakerPiPico
+echo Invalid Selection (Y or N)
+goto Cytron
+:MakerPiPico
+if %_ans% == C goto CPCytron
+copy/y /mpython/CytronMPP/* /
+if not exist /lib mkdir /lib
+copy/y /mpython/CytronMPP/lib/* /lib/
+goto done
+:CPCytron
+copy/y /cpython/CytronMPP/* /
+if not exist /lib mkdir /lib
+copy/y /cpython/CytronMPP/lib/* /lib/
 :done
 set _ans=
 set _ans2=
 set _ans3=
+echo .
+echo Restarting PyDOS....
+echo If PyDOS doesn't load, press Ctrl-D at the >>> REPL prompt
+echo .
+echo .
+reboot
