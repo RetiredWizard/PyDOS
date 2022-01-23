@@ -1,9 +1,9 @@
-# Rainbow algorithm adapted from
-# https://learnembeddedsystems.co.uk/using-the-rgb-led-on-the-arduino-nano-rp2040-connect
-
-import time
 import sys
 from pydos_ui import Pydos_ui
+try:
+    from pydos_ui import input
+except:
+    pass
 
 if sys.implementation.name.upper() == 'CIRCUITPYTHON':
     import neopixel
@@ -43,48 +43,36 @@ elif sys.implementation.name.upper() == 'MICROPYTHON':
     elif uname().machine == 'Raspberry Pi Pico with RP2040':
         import neopixel
         pixels = neopixel.NeoPixel(machine.Pin(28), 1)
+   
+
+if __name__ != "PyDOS":
+    passedIn = ""
+
+if passedIn == "":
+    ans = input("R,G,B: ")
+else:
+    ans = passedIn
+
+if len(ans.split(",")) == 3:
+    r = max(0,min(255,int((ans.split(',')[0] if ans.split(",")[0].isdigit() else 0))))
+    g = max(0,min(255,int((ans.split(',')[1] if ans.split(",")[1].isdigit() else 0))))
+    b = max(0,min(255,int((ans.split(',')[2] if ans.split(",")[2].isdigit() else 0))))
+else:
+    r = 0
+    g = 0
+    b = 0
 
 
-rgbValues = [255,0,0]
-upIndex = 0
-downIndex = 1
-cmnd = ""
 
-# Cycle colours.
-print("listening... 'q' to quit")
-
-while cmnd.upper() != "Q":
-
-    if Pydos_ui.serial_bytes_available():
-        cmnd = Pydos_ui.read_keyboard(1)
-
-    rgbValues[upIndex] += 1
-    rgbValues[downIndex] -= 1
-
-    if rgbValues[upIndex] > 255:
-        rgbValues[upIndex] = 255
-        upIndex = (upIndex + 1) % 3
-
-    if rgbValues[downIndex] < 0:
-        rgbValues[downIndex] = 0
-        downIndex = (downIndex + 1) % 3
-
-    if cmnd.upper() == "Q":
-        rgbValues[0] = 0
-        rgbValues[1] = 0
-        rgbValues[2] = 0
-
-    if sys.implementation.name.upper() == 'CIRCUITPYTHON':
-        pixels.fill((rgbValues[1], rgbValues[2], rgbValues[0]))
-        time.sleep(0.005)
-    elif sys.implementation.name.upper() == 'MICROPYTHON':
-        if uname().machine == 'TinyPICO with ESP32-PICO-D4':
-            pixels.fill((rgbValues[1], rgbValues[2], rgbValues[0]))
-            time.sleep(0.005)
-        else:
-            pixels[0] = (rgbValues[1], rgbValues[2], rgbValues[0])
-            pixels.write()
-            time.sleep(0.005)
+if sys.implementation.name.upper() == 'CIRCUITPYTHON':
+    pixels.fill((r, g, b))
+    time.sleep(0.005)
+elif sys.implementation.name.upper() == 'MICROPYTHON':
+    if uname().machine == 'TinyPICO with ESP32-PICO-D4':
+        pixels.fill((r, g, b))
+    else:
+        pixels[0] = (r, g, b)
+        pixels.write()
 
 try:
     pixels.deinit()
