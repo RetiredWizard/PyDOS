@@ -2,10 +2,6 @@
 from sys import implementation
 if implementation.name.upper() == "CIRCUITPYTHON":
     import board
-    try:
-        board.SCK
-    except:
-        import kfw_pico_board as board
     import digitalio
     import storage
 
@@ -19,10 +15,15 @@ if implementation.name.upper() == "CIRCUITPYTHON":
     # switch = digitalio.DigitalInOut(board.D2)
 
 # For Feather M0/M4 Express
-    switch = digitalio.DigitalInOut(board.D5)
+    #switch = digitalio.DigitalInOut(board.D5)
 
 # For Circuit Playground Express, Circuit Playground Bluefruit
     # switch = digitalio.DigitalInOut(board.D7)
+
+    if board.board_id == 'raspberry_pi_pico':
+        switch = digitalio.DigitalInOut(board.GP6)
+    else:
+        switch = digitalio.DigitalInOut(board.D5)
 
     switch.direction = digitalio.Direction.INPUT
     switch.pull = digitalio.Pull.UP
@@ -39,3 +40,5 @@ if implementation.name.upper() == "CIRCUITPYTHON":
             print("FS is ReadOnly")
         else:
             print("FS is ReadWrite")
+
+    switch.deinit()
