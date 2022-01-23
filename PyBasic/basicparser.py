@@ -38,7 +38,10 @@ elif implementation.name.upper() == 'CIRCUITPYTHON':
         from board import A5 as sndPin
     elif board_id == "raspberry_pi_pico":
         #D12 is GP11 on the Raspberry PICO
-        from board import GP11 as sndPin
+        try:
+            from cyt_mpp_board import SNDPIN as sndPin
+        except:
+            from board import GP11 as sndPin
     elif board_id == "cytron_maker_pi_rp2040":
         from board import GP22 as sndPin
     else:
