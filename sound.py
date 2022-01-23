@@ -2,6 +2,18 @@ import time
 import sys
 if sys.implementation.name.upper() == 'MICROPYTHON':
     import machine
+    from os import uname
+
+    if uname().machine == 'TinyPICO with ESP32-PICO-D4':
+        sndPin = machine.Pin(19)
+    elif uname().machine == 'SparkFun Thing Plus RP2040 with RP2040':
+        sndPin = machine.Pin(19)
+    elif uname().machine == 'Raspberry Pi Pico with RP2040':
+        try:
+            import cyt_mpp_board
+            sndPin = machine.Pin(18)
+        except:
+            sndPin = machine.Pin(19)
 elif sys.implementation.name.upper() == 'CIRCUITPYTHON':
     from pwmio import PWMOut
     from board import board_id
@@ -11,7 +23,10 @@ elif sys.implementation.name.upper() == 'CIRCUITPYTHON':
         from board import A5 as sndPin
     elif board_id == "raspberry_pi_pico":
         #D12 is GP11 on the Raspberry PICO
-        from board import GP11 as sndPin
+        try:
+            from cyt_mpp_board import SNDPIN as sndPin
+        except:
+            from board import GP11 as sndPin
     elif board_id == "cytron_maker_pi_rp2040":
         from board import GP22 as sndPin
     else:
@@ -39,7 +54,7 @@ dur = int(args[1])
 vol = int(args[2])
 
 if sys.implementation.name.upper() == "MICROPYTHON":
-    pwm=machine.PWM(machine.Pin(19))
+    pwm=machine.PWM(sndPin)
     pwm.freq(freq)
     if 'duty_u16' in dir(pwm):
         pwm.duty_u16(vol)
