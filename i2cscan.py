@@ -13,7 +13,7 @@ if sys.implementation.name.upper() == 'MICROPYTHON':
     elif uname().machine == 'SparkFun Thing Plus RP2040 with RP2040':
         # i2c pins for qwic connect on thingplus SCL=7, SDA=6;
         i2c = machine.I2C(1,scl=machine.Pin(7), sda=machine.Pin(6))
-    elseif uname().machine == 'Raspberry Pi Pico with RP2040':
+    elif uname().machine == 'Raspberry Pi Pico with RP2040':
         # raspberry pi pico physical pins 5,4 Gpio SCL=3, SDA=2
         i2c = machine.I2C(1,scl=machine.Pin(3), sda=machine.Pin(2))
 elif sys.implementation.name.upper() == 'CIRCUITPYTHON':
