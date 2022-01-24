@@ -83,9 +83,8 @@ if not exist /lib/adafruit_esp32spi mkdir /lib/adafruit_esp32spi
 copy /cpython/NanoConnect/lib/adafruit_esp32spi/* /lib/adafruit_esp32spi/
 if not exist /lib/adafruit_bus_device mkdir /lib/adafruit_bus_device
 copy /cpython/NanoConnect/lib/adafruit_bus_device/* /lib/adafruit_bus_device/
-goto other
 :other
-set _ans2 = O
+if %_ans2% == o set _ans2 = O
 if %_ans% == M goto Cytron
 set/p _ans3 = Are you using a Keyboard FeatherWing (Y/N)?:
 if %_ans3% == N goto Cytron
@@ -126,9 +125,4 @@ copy/y /cpython/CytronMPP/lib/* /lib/
 set _ans=
 set _ans2=
 set _ans3=
-echo .
-echo Restarting PyDOS....
-echo If PyDOS doesn't load, press Ctrl-D at the >>> REPL prompt
-echo .
-echo .
 reboot
