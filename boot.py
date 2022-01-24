@@ -11,16 +11,10 @@ if implementation.name.upper() == "CIRCUITPYTHON":
 
     PyDOSReadOnly = False
 
+    if board.board_id == 'arduino_nano_rp2040_connect':
 # For Gemma M0, Trinket M0, Metro M0/M4 Express, ItsyBitsy M0/M4 Express
-    # switch = digitalio.DigitalInOut(board.D2)
-
-# For Feather M0/M4 Express
-    #switch = digitalio.DigitalInOut(board.D5)
-
-# For Circuit Playground Express, Circuit Playground Bluefruit
-    # switch = digitalio.DigitalInOut(board.D7)
-
-    if board.board_id == 'raspberry_pi_pico':
+        switch = digitalio.DigitalInOut(board.D2)
+    elif board.board_id == 'raspberry_pi_pico':
         switch = digitalio.DigitalInOut(board.GP6)
     else:
         switch = digitalio.DigitalInOut(board.D5)
