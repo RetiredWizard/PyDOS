@@ -104,6 +104,7 @@ if %_ans2% == O del /lib/kfw_s2_board.py
 if %_ans2% == S del /lib/kfw_pico_board.py
 goto done
 :Cytron
+if not %_ans2% == O goto done
 set/p _ans3 = Are you using a Cytron Maker Pi Pico (Y/N)?:
 if %_ans3% == N goto done
 if %_ans3% == n goto done
