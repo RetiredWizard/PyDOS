@@ -89,7 +89,7 @@ file in the root of the microcontroller flash, to be sure the file system doesn'
 switch modes and try the copy again. 
 
 If you do find your self locked out of the flash from the host computer and PyDOS is not running, the easiest way to recover is to
-connect to the REPL and type: 
+connect to the REPL, remove the boot.py file and then power cycle the microcontroller board. 
 
         import os
         os.remove("boot.py")
