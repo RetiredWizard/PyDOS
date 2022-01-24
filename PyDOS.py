@@ -497,7 +497,7 @@ def PyDOS():
             else:
                 if _ == "%":
                     envFound = False
-                    newCmdLine += envVars.get(fndVar,"")
+                    newCmdLine += str(envVars.get(fndVar,""))
                     fndVar = ""
                 else:
                     fndVar += _
