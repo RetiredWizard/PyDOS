@@ -9,7 +9,7 @@ echo Invalid selection (C or M)
 goto tryagain
 :cpython
 set _ans = C
-copy /cpython/* /
+copy/y /cpython/* /
 if not exist /lib mkdir /lib
 copy /cpython/lib/* /lib/
 goto board
