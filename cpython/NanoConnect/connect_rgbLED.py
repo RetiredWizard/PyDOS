@@ -62,13 +62,13 @@ r = 0
 g = 0
 b = 0
 
-print("listening... 'q' to quit")
+print("listening... Enter value to alter speed, 'q' to quit")
 
 while True:
 
     kbdInt, cmnd = kbdInterrupt()
     if kbdInt:
-        if cmnd == "q":
+        if cmnd.upper() == "Q":
             break
         if cmnd.isdigit():
             steps = max(1,min(800,int(cmnd)))
