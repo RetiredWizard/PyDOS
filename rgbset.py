@@ -6,29 +6,61 @@ except:
     pass
 
 if sys.implementation.name.upper() == 'CIRCUITPYTHON':
-    import neopixel
     import board
 
-    if 'NEOPIXEL' not in dir(board):
-        try:
-            import cyt_mpp_board as board
-            foundBoard = True
-        except:
-            foundBoard = False
+    if board.board_id == 'arduino_nano_rp2040_connect':
+        import busio
+        from digitalio import DigitalInOut
+        import adafruit_requests as requests
+        import adafruit_esp32spi.adafruit_esp32spi_socket as socket
+        from adafruit_esp32spi import adafruit_esp32spi
 
-        if not foundBoard:
-            if board.board_id == "raspberry_pi_pico":
-                try:
-                    import kfw_pico_board as board
-                except:
-                    pass
-            else:
-                try:
-                    import kfw_s2_board as board
-                except:
-                    pass
+        #  Nano LED Pins
+        LEDG = 25
+        LEDB = 26
+        LEDR = 27
 
-    pixels = neopixel.NeoPixel(board.NEOPIXEL, 1)
+        OUT = 1   # I/O Direction
+
+        #  ESP32 pins
+        esp32_cs = DigitalInOut(board.CS1)
+        esp32_ready = DigitalInOut(board.ESP_BUSY)
+        esp32_reset = DigitalInOut(board.ESP_RESET)
+
+        #  uses the secondary SPI connected through the ESP32
+        spi = busio.SPI(board.SCK1, board.MOSI1, board.MISO1)
+
+        esp = adafruit_esp32spi.ESP_SPIcontrol(spi, esp32_cs, esp32_ready, esp32_reset)
+
+        requests.set_socket(socket, esp)
+
+    else:
+        import neopixel
+
+        if 'NEOPIXEL' not in dir(board):
+            try:
+                import cyt_mpp_board as board
+                foundBoard = True
+            except:
+                foundBoard = False
+
+            if not foundBoard:
+                if board.board_id == "raspberry_pi_pico":
+                    try:
+                        import kfw_pico_board as board
+                    except:
+                        pass
+                else:
+                    try:
+                        import kfw_s2_board as board
+                    except:
+                        pass
+
+        if ".neopixel" in envVars.keys():
+            pixels = envVars['.neopixel']
+        else:
+            pixels = neopixel.NeoPixel(board.NEOPIXEL, 1)
+            envVars[".neopixel"] = pixels
 
 elif sys.implementation.name.upper() == 'MICROPYTHON':
     import machine
@@ -65,16 +97,29 @@ else:
 
 
 if sys.implementation.name.upper() == 'CIRCUITPYTHON':
-    pixels.fill((r, g, b))
-    time.sleep(0.005)
+    if board.board_id == 'arduino_nano_rp2040_connect':
+        if r+g+b != 0:
+            esp.set_pin_mode(LEDR,OUT)
+            esp.set_pin_mode(LEDG,OUT)
+            esp.set_pin_mode(LEDB,OUT)
+
+            esp.set_analog_write(LEDR,(255-r)/255)
+            esp.set_analog_write(LEDG,(255-g)/255)
+            esp.set_analog_write(LEDB,(255-b)/255)
+
+        esp32_cs.deinit()
+        esp32_ready.deinit()
+        esp32_reset.deinit()
+        spi.deinit()
+
+    elif r+g+b == 0:
+        pixels.deinit()
+        envVars.pop('.neopixel',None)
+    else:
+        pixels.fill((r, g, b))
 elif sys.implementation.name.upper() == 'MICROPYTHON':
     if uname().machine == 'TinyPICO with ESP32-PICO-D4':
         pixels.fill((r, g, b))
     else:
         pixels[0] = (r, g, b)
         pixels.write()
-
-try:
-    pixels.deinit()
-except:
-    pass
