@@ -2,71 +2,50 @@ import time
 import sys
 if sys.implementation.name.upper() == 'MICROPYTHON':
     from machine import Pin
-    import uselect
+    from os import uname
+
+    if uname().machine == 'Adafruit Feather RP2040 with RP2040':
+        led = Pin(13, Pin.OUT)
+    elif uname().machine == 'Arduino Nano RP2040 Connect with RP2040':
+        led = Pin(6, Pin.OUT)
+    else:
+        led = Pin(25, Pin.OUT)
+
 elif sys.implementation.name.upper() == 'CIRCUITPYTHON':
     import board
     from digitalio import DigitalInOut, Direction
 
+    # LED setup for onboard LED
+    led = DigitalInOut(board.LED)
+    led.direction = Direction.OUTPUT
+
 from pydos_ui import Pydos_ui
-try:
-    from pydos_ui import input
-except:
-    pass
 
 def blink():
-    def kbdInterrupt():
-
-        cmnd = ""
-        sba = False
-
-        if sys.implementation.name.upper() == "CIRCUITPYTHON":
-            if Pydos_ui.serial_bytes_available():
-                cmnd = input().strip()
-        else:
-            spoll = uselect.poll()
-            spoll.register(sys.stdin,uselect.POLLIN)
-            cmnd = sys.stdin.read(1) if spoll.poll(0) else ""
-            spoll.unregister(sys.stdin)
-
-        if cmnd == "":
-            sba = False
-        else:
-            sba = True
-
-        return sba,cmnd
-
-
 
     print("listening..., Enter q to quit")
+    cmnd = ""
+    blinkstate = True
+    while cmnd.upper() != "Q":
 
-    if sys.implementation.name.upper() == "MICROPYTHON":
-
-        led = Pin(25, Pin.OUT)
-        cmnd = ""
-
-        while cmnd.upper() != "Q":
-            kbdInt, cmnd = kbdInterrupt()
+        while Pydos_ui.serial_bytes_available():
+            cmnd = Pydos_ui.read_keyboard(1)
             print(cmnd, end="", sep="")
+            if cmnd in "qQ":
+                break
 
-            led.value(not led.value())
-            time.sleep(1)
+        if sys.implementation.name.upper() == "MICROPYTHON":
+            led.value(blinkstate)
+        elif sys.implementation.name.upper() == "CIRCUITPYTHON":
+            led.value = blinkstate
 
-    elif sys.implementation.name.upper() == "CIRCUITPYTHON":
-        # LED setup for onboard LED
-        led = DigitalInOut(board.LED)
-        led.direction = Direction.OUTPUT
+        blinkstate = not blinkstate
+        time.sleep(1)
 
-        cmnd = ""
-
-        while cmnd.upper() != "Q":
-            kbdInt, cmnd = kbdInterrupt()
-
-            led.value = True
-            time.sleep(1)
-
-            led.value = False
-            time.sleep(1)
-
+    if sys.implementation.name.upper() == "CIRCUITPYTHON":
         led.deinit()
+    else:
+        led.value(False)
+
 
 blink()

@@ -1,19 +1,16 @@
 import sys
 from time import sleep
+from pydos_hw import PyDOS_HW
+from pydos_ui import Pydos_ui
 try:
     from pydos_ui import input
 except:
     pass
 
 if sys.implementation.name.upper() == "CIRCUITPYTHON":
-    import board
-    import busio
     import supervisor
     from circuitpython_i2c_lcd import I2cLcd
-    from pydos_ui import PyDOS_UI
 else:
-    import machine
-    from os import uname
     import lcd2004
     import uselect
 
@@ -23,29 +20,9 @@ DEFAULT_I2C_ADDR = 0x27
 
 def lcdScroll(argv):
 
-    def kbdInterrupt():
-
-        cmnd = ""
-        sba = False
-
-        if sys.implementation.name.upper() == "CIRCUITPYTHON":
-            if supervisor.runtime.serial_bytes_available:
-                cmnd = input().strip()
-        else:
-            spoll = uselect.poll()
-            spoll.register(sys.stdin,uselect.POLLIN)
-            cmnd = sys.stdin.read(1) if spoll.poll(0) else ""
-            spoll.unregister(sys.stdin)
-
-        if cmnd == "":
-            sba = False
-        else:
-            sba = True
-
-        return sba,cmnd
+    i2c = PyDOS_HW.I2C()
 
     if sys.implementation.name.upper() == "CIRCUITPYTHON":
-        i2c = PyDOS_UI.I2C()
 
         # circuitpython seems to require locking the i2c bus
         while i2c.try_lock():
@@ -69,27 +46,19 @@ def lcdScroll(argv):
 
     else:
 
-        if uname().machine == 'TinyPICO with ESP32-PICO-D4':
-            SCL=22
-            SDA=21
-        elif uname().machine == 'SparkFun Thing Plus RP2040 with RP2040':
-            # Sparkfun thingplus QWIC SCL=7 SDA=6
-            SCL=7
-            SDA=6
-        else:
-            # Raspberry PI Pico SCL = GPIO3,pin5 SDA = GPIO2,pin4
-            SCL=3
-            SDA=2
-
         ID=1
-        i2c=machine.I2C(ID,scl=machine.Pin(SCL),sda=machine.Pin(SDA),freq=400000)
-        lcd=lcd2004.lcd(ID,39,SCL,SDA)
+        lcd=lcd2004.lcd(DEFAULT_I2C_ADDR,i2c)
         lcd.lcd_backlight(True)
         lcd.lcd_clear()
 
     if argv == "":
         if envVars.get("stopthread","") == "":
+            if envVars.get("_UI","") == "Keyboard FeatherWing":
+                i2c.unlock()
             argv = input("Say what?: ")
+            if envVars.get("_UI","") == "Keyboard FeatherWing":
+                while i2c.try_lock():
+                    pass
         else:
             print('\nUse "passedIn" environment variable to define text for threaded run.')
 
@@ -127,7 +96,18 @@ def lcdScroll(argv):
         cmnd = ""
 
         while cmnd.upper() != "Q" and envVars.get("stopthread") == "go":
-            kbdInt, cmnd = kbdInterrupt()
+
+            if envVars.get("_UI","") == "Keyboard FeatherWing":
+                i2c.unlock()
+            while Pydos_ui.serial_bytes_available():
+                cmnd = Pydos_ui.read_keyboard(1)
+                print(cmnd, end="", sep="")
+                if cmnd in "qQ":
+                    break
+
+            if envVars.get("_UI","") == "Keyboard FeatherWing":
+                while i2c.try_lock():
+                    pass
 
             i += 1
             if i >= len(mess):

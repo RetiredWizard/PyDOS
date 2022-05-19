@@ -1,5 +1,5 @@
 """
-    Terminal abstraction layer for USB UART
+    Screen/Keyboard abstraction layer
 
 """
 from sys import stdin,stdout,implementation
@@ -7,43 +7,18 @@ if implementation.name.upper() == "MICROPYTHON":
     import uselect
 elif implementation.name.upper() == "CIRCUITPYTHON":
     from supervisor import runtime
-    import digitalio
-    import board
-    if board.board_id == "cytron_maker_pi_rp2040":
-        import busio
 
 class PyDOS_UI:
-
-    _I2C = None
-    _I2C_power = None
 
     def __init__(self):
         pass
 
-    if implementation.name.upper() == "CIRCUITPYTHON":
-
-        def serial_bytes_available(self):
+    def serial_bytes_available(self):
+        if implementation.name.upper() == "CIRCUITPYTHON":
             # Does the same function as supervisor.runtime.serial_bytes_available
-            return runtime.serial_bytes_available
+            retval = runtime.serial_bytes_available
 
-        def I2C():
-            if board.board_id == "cytron_maker_pi_rp2040":
-                if not PyDOS_UI._I2C:
-                    # Grove #1, GP1 & GP2
-                    PyDOS_UI._I2C = busio.I2C(board.GP1, board.GP0)
-
-                return PyDOS_UI._I2C
-            else:
-                if 'I2C_POWER_INVERTED' in dir(board) and not PyDOS_UI._I2C_power:
-                    PyDOS_UI._I2C_power = digitalio.DigitalInOut(board.I2C_POWER_INVERTED)
-                    PyDOS_UI._I2C_power.direction = digitalio.Direction.OUTPUT
-                    PyDOS_UI._I2C_power.value = False
-
-                return board.I2C()
-
-    elif implementation.name.upper() == "MICROPYTHON":
-        def serial_bytes_available(self):
-
+        elif implementation.name.upper() == "MICROPYTHON":
             spoll = uselect.poll()
             spoll.register(stdin,uselect.POLLIN)
 
@@ -53,7 +28,7 @@ class PyDOS_UI:
             if not retval:
                 retval = 0
 
-            return retval
+        return retval
 
     def read_keyboard(self,num):
         # Does the same function as sys.stdin.read(num)
@@ -62,7 +37,7 @@ class PyDOS_UI:
         return stdin.read(num)
 
     def get_screensize(self):
-        print("Press any key...",end="")
+        print("Screen set to 24 rows, 80 col. Press any key to coninue...",end="")
         stdout.write('\x1b[2K')
         stdout.write('\x1b[999;999H\x1b[6n')
         pos = ''
@@ -88,5 +63,8 @@ class PyDOS_UI:
             height = 24
 
         return(height,width)
+
+    def version(self):
+        return("Serial Console")
 
 Pydos_ui = PyDOS_UI()

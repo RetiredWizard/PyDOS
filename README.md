@@ -86,10 +86,15 @@ with PyDOS will switch the mode so that
 PyDOS has Read/Write access and the host computer will only have ReadOnly access. This change won't take effect until you power cycle the micro controller board so **be
 sure that the PyDOS files are all copied before turning the power off on your microcontroller board**. If the copy is interrupted for any reason you can delete the boot.py
 file in the root of the microcontroller flash, to be sure the file system doesn't
-switch modes and try the copy again. If you do find your self locked out of the flash from the host computer and PyDOS is not running, see the **Recovering from 
-Circuitpython Read Only Flash** section below.
+switch modes and try the copy again. 
 
-At this point, if the copy worked without any errors, you should power cycle the microcontroller board so that the file system is configured to allow
+If you do find your self locked out of the flash from the host computer and PyDOS is not running, the easiest way to recover is to
+connect to the REPL, remove the boot.py file and then power cycle the microcontroller board. 
+
+        import os
+        os.remove("boot.py")
+
+If the copy worked without any errors, you should power cycle the microcontroller board so that the file system is configured to allow
 the microcontroller to have Read/Write access.
 
 To interact with the microcontroller you will need to connect using a terminal program. On a PC you can use putty and on linux minicom works well. To start minicom
@@ -131,40 +136,3 @@ To interact with the microcontroller you can connect to the REPL by simply typin
 (>>>) is displayed.
 
 At the REPL prompt type "**import PyDOS*** to start PyDOS and then type **setup** to run the customization script.
-
-## Recovering from Circuitpython Read Only Flash
-
-If you do find your self locked out with a read only flash drive from the host computer you can recover using one
-of the following options.
-
-+ Ground Pin D5 and power cycle the microcontroller board
-+ If the **fs.py** file was copied to the cpython folder you can launch it from the REPL as follow:
-
-	    import os
-	    os.chdir("/cpython")
-	    import fs
-	    This program will set the CircuitPython filesystem access mode AFTER the next
-	    Powercycle. A Control-D will NOT reset the filesystem access mode.
-	    
-	    Enter RO or RW: RO                 # Entering an RO here will all the Host compter to have Read Write access
-
-+ If the **edit.py** file was copied you can launch edit from the REPL by typing "import edit". You can then use edit to modify line 16 of boot.py as follows:
-
-	   import edit
-	   h for command list
-	   : o boot.py
-	   boot.py: 15L
-	      * 15 PyDOSReadOnly = False    # If this line isn't displayed you may need to enter the L command to locate it
-	   boot.py: 15R"False","True"
-	   boot.py: e
-
-* If the **boot.ro** file was copied to the cpython folder you can copy it to /boot.py from the repl as follows:
-
-	    file1 = open("/cpython/boot.ro")
-	    file2 = open("/boot.py","w")
-	    file2.write(file1.read())
-	    
-+ If none of these options work, you may need to erase everything on the flash and start the PyDOS copy again:
-
-	    import storage
-	    storage.erase_filesystem()

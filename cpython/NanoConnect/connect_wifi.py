@@ -3,7 +3,6 @@ library example esp32spi_simpletest.py:
 https://github.com/adafruit/Adafruit_CircuitPython_ESP32SPI/
 blob/master/examples/esp32spi_simpletest.py '''
 
-import time
 import board
 import busio
 from digitalio import DigitalInOut

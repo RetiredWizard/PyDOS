@@ -1,6 +1,7 @@
 """Example for Pico (pin 25), Nano Connect (Pin 6). Blinks the built-in LED."""
 import time
 from machine import Pin
+from os import uname
 
 import _thread
 global threadLock
@@ -12,7 +13,12 @@ if __name__ != "PyDOS":
 threadLock = _thread.allocate_lock()
 envVars['stopthread'] = 'go'
 
-led = Pin(25, Pin.OUT)
+if uname().machine == 'Adafruit Feather RP2040 with RP2040':
+    led = Pin(13, Pin.OUT)
+elif uname().machine == 'Arduino Nano RP2040 Connect with RP2040':
+    led = Pin(6, Pin.OUT)
+else:
+    led = Pin(25, Pin.OUT)
 
 print("blinking started....")
 

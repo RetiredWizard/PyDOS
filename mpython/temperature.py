@@ -4,7 +4,7 @@ import uselect
 import time
 import lcd2004
 
-def displayTemp():
+def displayTemp(passedIn):
 
     def kbdInterrupt():
 
@@ -35,7 +35,7 @@ def displayTemp():
     tempsensor = machine.ADC(4)
     conversionFact = 3.3 /65535
 
-    if passedIN == "":
+    if passedIn == "":
         avgCount = 50
     else:
         avgCount = int(passedIn)
@@ -58,4 +58,7 @@ def displayTemp():
         time.sleep(5)
         cmd = kbdInterrupt()
 
-displayTemp()
+if __name__ != "PyDOS":
+    passedIn = ""
+
+displayTemp(passedIn)

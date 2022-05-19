@@ -1,7 +1,10 @@
 import os
 from time import localtime
-from sys import implementation
-from pydos_ui import PyDOS_UI
+from sys import stdin,implementation
+try:
+    from pydos_ui import PyDOS_UI
+except:
+    pass
 try:
     from pydos_ui import input
 except:
@@ -9,12 +12,12 @@ except:
 
 import gc
 if implementation.name.upper() == "MICROPYTHON":
-    from sys import stdin
     from micropython import mem_info
     import uselect
     gc.collect()
     gc.threshold(gc.mem_free() // 4 + gc.mem_alloc())
 else:
+    from supervisor import runtime
     gc.collect()
 
 # The first string may contain wildcard characters
@@ -38,45 +41,57 @@ def _match(first, second):
 
     return False
 
+def calcWildCardLen(wildcardLen,recursiveFail):
+    wildcardLen += 1
+    if not recursiveFail and wildcardLen < 70:
+        try:
+            (wildcardLen,recursiveFail) = calcWildCardLen(wildcardLen,recursiveFail)
+        except:
+            recursiveFail = True
+
+    return (wildcardLen,recursiveFail)
+
 def PyDOS():
 
     global envVars
-
-    pydos_ui = PyDOS_UI()
-
     envVars = {}
 
-    (envVars["_scrHeight"],envVars["_scrWidth"]) = pydos_ui.get_screensize()
+    try:
+        pydos_ui = PyDOS_UI()
+        envVars["_UI"] = pydos_ui.version()
+    except:
+        pydos_ui = None
+        envVars["_UI"] = "None"
 
-    if implementation.name.upper() == "MICROPYTHON":
-        wildcardLen = 16
+    print("Starting Py-DOS...")
+    if pydos_ui:
+        (envVars["_scrHeight"],envVars["_scrWidth"]) = pydos_ui.get_screensize()
     else:
-        wildcardLen = 65
+        envVars["_scrHeight"] = 24
+        envVars["_scrWidth"] = 80
+
+    wildcardLen = 0
+    recursiveFail = False
+
+    (wildcardLen,recursiveFail) = calcWildCardLen(wildcardLen,recursiveFail)
+
+    wildcardLen = max(18,wildcardLen) - 2
+    if wildcardLen < 40:
+        print("*Warning* wild card length set to: ",wildcardLen)
+    gc.collect()
 
     def anyKey():
-
-        if implementation.name.upper() == "CIRCUITPYTHON":
-
-            keyIn = input("Press enter to continue . . . .")
-
+        print("Press any key to continue . . . .",end="")
+        if pydos_ui:
+            while not pydos_ui.serial_bytes_available():
+                pass
+            keyIn = pydos_ui.read_keyboard(1)
         else:
-
-            spoll = uselect.poll()
-            spoll.register(stdin,uselect.POLLIN)
-
-            while spoll.poll(0):
-                stdin.read(1)
-
-            print("Press any key to continue . . . .",end="")
-
-            keyIn=chr(1)
-            while ord(keyIn) < 30 and ord(keyIn) != 10:
-                spoll.poll(-1)  # [0][1] != uselect.POLLIN
-                keyIn = stdin.read(1)
-
-            spoll.unregister(stdin)
-            print("")
-
+            if implementation.name.upper() == "CIRCUITPYTHON":
+                while not runtime.serial_bytes_available:
+                    pass
+            keyIn = stdin.read(1)
+        print("")
         return(keyIn)
 
     def weekDay():
@@ -268,8 +283,6 @@ def PyDOS():
                     lastDir = ""
 
             tmpDir = os.getcwd()
-            # listdir() doesn't return sd mount point in some cases if chdir not done here
-            # os.chdir(tmpDir)
 
             if lastDir in os.listdir() or lastDir in ".." or "*" in lastDir or "?" in lastDir:
 
@@ -279,18 +292,22 @@ def PyDOS():
                     nLines = 1
                     dPath = tmpDir+("/" if tmpDir[-1] != "/" else "")
                     print("Directory of", tmpDir)
-                    for dir in os.listdir():
+                    for dir in sorted(os.listdir(), key=lambda v: (v.upper(), v[0].isupper())):
                         if os.stat(dPath+dir)[0] & (2**15) == 0 and _match(lastDir,dir[:wildcardLen]):
                             fTime = txtFileTime(dPath+dir)
-                            if swPause and nLines == int(envVars["_scrHeight"])-1:
-                                anyKey()
-                                nLines = 0
+
                             if swWide:
                                 if wideCount == wideCols:
                                     wideCount = 0
                                     print()
                                     nLines += 1
                                 wideCount += 1
+
+                            if swPause and nLines == int(envVars["_scrHeight"])-1:
+                                key = anyKey()
+                                nLines = 0
+                                if key in "QqCc" and key != "":
+                                    break
 
                             dirLine("D",dir,0,fTime,swWide)
                             nDirs += 1
@@ -302,20 +319,22 @@ def PyDOS():
                         availDisk = os.statvfs(tmpDir)[1]*os.statvfs(tmpDir)[4]
                     except:
                         availDisk = 0
-                    for dir in os.listdir():
+                    for dir in sorted(os.listdir(), key=lambda v: (v.upper(), v[0].isupper())):
                         if os.stat(dPath+dir)[0] & (2**15) != 0 and _match(lastDir,dir[:wildcardLen]):
                             fSize = str(os.stat(dPath+dir)[6])
                             tFSize += os.stat(dPath+dir)[6]
                             fTime = txtFileTime(dPath+dir)
-                            if swPause and nLines == int(envVars["_scrHeight"])-1:
-                                anyKey()
-                                nLines = 0
                             if swWide:
                                 if wideCount == wideCols:
                                     wideCount = 0
                                     print()
                                     nLines += 1
                                 wideCount += 1
+                            if swPause and nLines == int(envVars["_scrHeight"])-1:
+                                key = anyKey()
+                                nLines = 0
+                                if key in "QqCc" and key != "":
+                                    break
 
                             dirLine("F",dir,fSize,fTime,swWide)
                             nFiles += 1
@@ -351,18 +370,20 @@ def PyDOS():
                         scrAdj1 = 52 - min(int(envVars["_scrWidth"]),52)
                         print("."+" "*(23-scrAdj1)+"<DIR>")
                         print(".."+" "*(22-scrAdj1)+"<DIR>")
-                    for dir in os.listdir(lastDir):
+                    for dir in sorted(os.listdir(lastDir), key=lambda v: (v.upper(), v[0].isupper())):
                         if os.stat(lastDir+"/"+dir)[0] & (2**15) == 0:
                             fTime = txtFileTime(lastDir+"/"+dir)
-                            if swPause and nLines == int(envVars["_scrHeight"])-1:
-                                anyKey()
-                                nLines = 0
                             if swWide:
                                 if wideCount == wideCols:
                                     wideCount = 0
                                     print()
                                     nLines += 1
                                 wideCount += 1
+                            if swPause and nLines == int(envVars["_scrHeight"])-1:
+                                key = anyKey()
+                                nLines = 0
+                                if key in "QqCc" and key != "":
+                                    break
 
                             dirLine("D",dir,0,fTime,swWide)
                             nDirs += 1
@@ -374,20 +395,22 @@ def PyDOS():
                         availDisk = os.statvfs(dPath)[1]*os.statvfs(dPath)[4]
                     except:
                         availDisk = 0
-                    for dir in os.listdir(lastDir):
+                    for dir in sorted(os.listdir(lastDir), key=lambda v: (v.upper(), v[0].isupper())):
                         if os.stat(lastDir+"/"+dir)[0] & (2**15) != 0:
                             fSize = str(os.stat(lastDir+"/"+dir)[6])
                             tFSize += int(fSize)
                             fTime = txtFileTime(lastDir+"/"+dir)
-                            if swPause and nLines == int(envVars["_scrHeight"])-1:
-                                anyKey()
-                                nLines = 0
                             if swWide:
                                 if wideCount == wideCols:
                                     wideCount = 0
                                     print()
                                     nLines += 1
                                 wideCount += 1
+                            if swPause and nLines == int(envVars["_scrHeight"])-1:
+                                key = anyKey()
+                                nLines = 0
+                                if key in "QqCc" and key != "":
+                                    break
 
                             dirLine("F",dir,fSize,fTime,swWide)
                             nFiles += 1
@@ -427,7 +450,6 @@ def PyDOS():
         return
 
     def filecpy(file1,file2):
-        #if (len(file1) >=3 and file1[-3:].upper() == "CON") or (len(file1) >=4 and file1[-4:] == "CON:)":
         gc.collect()
         fOrig = open(file1)
         fCopy = open(file2, "wb")
@@ -505,7 +527,7 @@ def PyDOS():
             else:
                 if _ == "%":
                     envFound = False
-                    newCmdLine += envVars.get(fndVar,"")
+                    newCmdLine += str(envVars.get(fndVar,""))
                     fndVar = ""
                 else:
                     fndVar += _
@@ -585,7 +607,7 @@ def PyDOS():
                         break
 
         elif cmd == "VER":
-            print("PyDOS [Version 1.03]")
+            print("PyDOS [Version 1.07]")
 
         elif cmd == "ECHO":
             if len(args) == 1:
@@ -719,7 +741,7 @@ def PyDOS():
 
         elif cmd == "SET":
             if len(args) == 1:
-                for _ in envVars:
+                for _ in sorted(envVars):
                     print(_+"=",envVars[_],sep="")
             else:
                 args = cmdLine.split(" ")
@@ -773,7 +795,7 @@ def PyDOS():
 
 
         elif cmd == "RENAME" or cmd == "REN" or cmd == "MOVE" or cmd == "MV":
-# Move command should really work more like copy where source can be file and target can be a directory
+# Move command should work like copy where source can be file and target can be a directory
 # Wildcard renames should be implemented
 
             if len(args) == 3:
@@ -972,7 +994,18 @@ def PyDOS():
 
         elif cmd == "COPY":
 
-            if len(args) == 3 or len(args) == 2:
+            swError = False
+            swConf = False
+            for i in range(len(switches)):
+                if switches[i][0] == 'Y':
+                    swConf = True
+                else:
+                    print("Illeagal switch:",switches[i][0],"Command Format: COPY[/y] [path]file [path][file]")
+                    swError = True
+                    break
+
+
+            if (len(args) == 3 or len(args) == 2) and not swError:
                 if len(args) == 2:
                     args.append('.')
 
@@ -1031,7 +1064,7 @@ def PyDOS():
                                 elif sourcePath == targetPath and newdir == newdir2:
                                     print("The file cannot be copied onto itself")
 
-                                elif input("Overwrite "+args[2]+"? (y/n): ").upper() == "Y":
+                                elif swConf or input("Overwrite "+args[2]+"? (y/n): ").upper() == "Y":
                                     os.remove(targetPath+("/" if targetPath[-1] != "/" else "")+newdir2)
                                     filecpy(sourcePath+("/" if sourcePath[-1] != "/" else "")+newdir,targetPath+("/" if targetPath[-1] != "/" else "")+newdir2)
                                     nFiles += 1
@@ -1053,9 +1086,9 @@ def PyDOS():
                                                     print("The file cannot be copied onto itself")
                                                     break
                                                 else:
-                                                    if ans != "A":
+                                                    if ans != "A" and not swConf:
                                                         ans = input("Overwrite "+targetPath+newdir2+("" if newdir2 == "" else "/")+dir+"? (y/n/(q)uit/(a)ll): ").upper()
-                                                    if ans  == "Y" or ans == "A":
+                                                    if ans  == "Y" or ans == "A" or swConf:
                                                         filecpy(sourcePath+dir,targetPath+newdir2+("" if newdir2 == "" else "/")+dir)
                                                         nFiles += 1
                                                     elif ans == "Q":
@@ -1068,7 +1101,7 @@ def PyDOS():
                                 elif newdir in os.listdir(targetPath+newdir2):
                                     if sourcePath == targetPath+newdir2+("" if newdir2 == "" else "/"):
                                         print("The file cannot be copied onto itself")
-                                    elif input("Overwrite "+targetPath+newdir2+("" if newdir2 == "" else "/")+newdir+"? (y/n): ").upper() == "Y":
+                                    elif swConf or input("Overwrite "+targetPath+newdir2+("" if newdir2 == "" else "/")+newdir+"? (y/n): ").upper() == "Y":
                                         os.remove(targetPath+newdir2+("" if newdir2 == "" else "/")+newdir)
                                         filecpy(sourcePath+newdir,targetPath+newdir2+("" if newdir2 == "" else "/")+newdir)
                                         nFiles += 1
@@ -1094,7 +1127,8 @@ def PyDOS():
                 else:
                     print("No such file:",args[1])
             else:
-                print("Wrong number of arguments")
+                if not swError:
+                    print("Wrong number of arguments")
 
         elif cmd == "EXIT":
             if activeBAT:
@@ -1137,16 +1171,12 @@ def PyDOS():
                 passedIn = args[1]
                 batParams = args[1:]
 
-#            if args[0] in os.listdir() and os.stat(args[0])[0] & (2**15)!= 0 and ((args[0].split("."))[1]).upper() == "PY":
-
             gc.collect()
-            #gc.threshold(gc.mem_free() // 4 + gc.mem_alloc())
             batFound = -1
             curDLst = os.listdir(tmpDir[:(-1 if tmpDir != "/" else None)])
             if  ((newdir.split("."))[-1]).upper() == "PY":
                 if validPath and newdir in curDLst and os.stat(tmpDir+newdir)[0] & (2**15) != 0:
 
-#               __import__((args[0].split("."))[0])
                     exCmd(tmpDir+newdir,passedIn)
                 else:
                     print("Illegal command:",args[0])
@@ -1186,9 +1216,9 @@ def PyDOS():
                 batIndex = [0]
                 batLabels = {}
                 for batLine in BATfile:
+                    batIndex.append(batIndex[batLineNo]+len(batLine))
+                    batLineNo += 1
                     if batLine.strip() != "":
-                        batIndex.append(batIndex[batLineNo]+len(batLine))
-                        batLineNo += 1
                         if batLine.strip()[0] == ":" and len(batLine.strip().split(" ")[0]) > 1:
                             batLabels[batLine.strip().split(" ")[0][1:]] = [batLineNo,batIndex[batLineNo]]
                 BATfile.seek(0)
