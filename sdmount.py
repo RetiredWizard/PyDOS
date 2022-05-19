@@ -1,13 +1,13 @@
-from sys import implementation,print_exception
+from sys import implementation
 
 if implementation.name.upper() == "MICROPYTHON":
+    from sys import print_exception
     import sdcard
     from os import uname
 elif implementation.name.upper() == "CIRCUITPYTHON":
     import adafruit_sdcard
     import storage
-    import digitalio
-    from pydos_ui import PyDOS_UI
+    from pydos_hw import PyDOS_HW
 
 drive = "/sd"
 
@@ -29,7 +29,7 @@ if implementation.name.upper() == "MICROPYTHON":
 
 elif implementation.name.upper() == "CIRCUITPYTHON":
     try:
-        sd = adafruit_sdcard.SDCard(PyDOS_UI.SPI(), PyDOS_UI.SD_CS)
+        sd = adafruit_sdcard.SDCard(PyDOS_HW.SD_SPI(), PyDOS_HW.SD_CS)
         vfs = storage.VfsFat(sd)
         storage.mount(vfs, drive)
     except Exception as e:

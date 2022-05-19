@@ -1,52 +1,24 @@
 import sys
 from pydos_ui import Pydos_ui
+from pydos_hw import Pydos_hw
 
 if sys.implementation.name.upper() == 'MICROPYTHON':
     import machine
     from time import ticks_ms,sleep
     from os import uname
-    if uname().machine == 'TinyPICO with ESP32-PICO-D4':
-        sndPin = machine.Pin(19)
-    elif uname().machine == 'SparkFun Thing Plus RP2040 with RP2040':
-        sndPin = machine.Pin(19)
-    elif uname().machine == 'Raspberry Pi Pico with RP2040':
-        try:
-            import cyt_mpp_board
-            sndPin = machine.Pin(18)
-        except:
-            sndPin = machine.Pin(19)
-
-    foundPin = True
 elif sys.implementation.name.upper() == 'CIRCUITPYTHON':
     from time import sleep
     from supervisor import ticks_ms
     from pwmio import PWMOut
     from board import board_id
-    foundPin = True
-    if board_id == "arduino_nano_rp2040_connect":
-        #A5 is GPIO D19 on Nano Connect
-        from board import A5 as sndPin
-    elif board_id == "raspberry_pi_pico":
-        #D12 is GP11 on the Raspberry PICO
-        try:
-            from cyt_mpp_board import SNDPIN as sndPin
-        except:
-            from board import GP11 as sndPin
-    elif board_id == "cytron_maker_pi_rp2040":
-        from board import GP22 as sndPin
-    else:
-        try:
-            #Use D12 on Feathers
-            from board import D12 as sndPin
-        except:
-            foundPin = False
 
 def piano():
 
     if sys.implementation.name.upper() == 'MICROPYTHON':
-        pwm=machine.PWM(sndPin)
+        pwm=machine.PWM(Pydos_hw.sndPin)
     elif sys.implementation.name.upper() == 'CIRCUITPYTHON':
-        pwm=PWMOut(sndPin, duty_cycle=0, frequency=440, variable_frequency=True)
+        Pydos_hw.sndGPIO.deinit() # Workaround for ESP32-S2 GPIO issue
+        pwm=PWMOut(Pydos_hw.sndPin, duty_cycle=0, frequency=440, variable_frequency=True)
 
     print ("\nPress +/- to change volume, 'q' to quit...")
 
@@ -131,7 +103,7 @@ def piano():
             elif sys.implementation.name.upper() == 'CIRCUITPYTHON':
                 pwm.frequency = note
                 pwm.duty_cycle = volume
-                if "s2" in board_id:
+                if "s2" in board_id or "s3" in board_id:
                     sleep(.1)
 
             #time.sleep(.1)
@@ -151,8 +123,9 @@ def piano():
 
     if sys.implementation.name.upper() == 'CIRCUITPYTHON':
         pwm.deinit()
+        Pydos_hw.quietSnd() # Workaround for ESP32-S2 GPIO issue
 
-if foundPin:
+if Pydos_hw.sndPin:
     piano()
 else:
     print("Sound Pin not found")

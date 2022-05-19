@@ -1,17 +1,13 @@
 import sys
+from pydos_hw import PyDOS_HW
 try:
     from pydos_ui import input
 except:
     pass
 
 if sys.implementation.name.upper() == "CIRCUITPYTHON":
-    import board
-    import busio
     from circuitpython_i2c_lcd import I2cLcd
-    from pydos_ui import PyDOS_UI
 else:
-    import machine
-    from os import uname
     import lcd2004
 
 
@@ -20,9 +16,13 @@ DEFAULT_I2C_ADDR = 0x27
 
 def lcdPrint(passedIn):
 
-    if sys.implementation.name.upper() == "CIRCUITPYTHON":
-        i2c = PyDOS_UI.I2C()
+    mess = passedIn
+    if mess == "":
+        mess = input("Say what?: ")
 
+    i2c = PyDOS_HW.I2C()
+
+    if sys.implementation.name.upper() == "CIRCUITPYTHON":
         # circuitpython seems to require locking the i2c bus
         while i2c.try_lock():
             pass
@@ -44,28 +44,10 @@ def lcdPrint(passedIn):
         lcd.custom_char(2, grin)
 
     else:
-
-        if uname().machine == 'TinyPICO with ESP32-PICO-D4':
-            SCL=22
-            SDA=21
-        elif uname().machine == 'SparkFun Thing Plus RP2040 with RP2040':
-            # Sparkfun thingplus QWIC SCL=7 SDA=6
-            SCL=7
-            SDA=6
-        else:
-            # Raspberry PI Pico SCL = GPIO3,pin5 SDA = GPIO2,pin4
-            SCL=3
-            SDA=2
-
         ID=1
-        i2c=machine.I2C(ID,scl=machine.Pin(SCL),sda=machine.Pin(SDA),freq=400000)
-        lcd=lcd2004.lcd(ID,39,SCL,SDA)
+        lcd=lcd2004.lcd(DEFAULT_I2C_ADDR,i2c)
         lcd.lcd_backlight(True)
         lcd.lcd_clear()
-
-    mess = passedIn
-    if mess == "":
-        mess = input("Say what?: ")
 
     if mess == "":
         if sys.implementation.name.upper() == "CIRCUITPYTHON":

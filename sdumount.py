@@ -1,5 +1,5 @@
 from sys import implementation
-from pydos_ui import PyDOS_UI
+from pydos_hw import PyDOS_HW
 if implementation.name.upper() == "MICROPYTHON":
     from os import umount
 elif implementation.name.upper() == "CIRCUITPYTHON":
@@ -15,4 +15,4 @@ if passedIn != "":
 
 umount(drive)
 if implementation.name.upper() == "CIRCUITPYTHON":
-    PyDOS_UI.SD_CSdeinit()
+    PyDOS_HW.SD_CSdeinit()

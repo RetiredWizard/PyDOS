@@ -1,7 +1,10 @@
 import os
 from time import localtime
-from sys import implementation
-from pydos_ui import PyDOS_UI
+from sys import stdin,implementation
+try:
+    from pydos_ui import PyDOS_UI
+except:
+    pass
 try:
     from pydos_ui import input
 except:
@@ -9,12 +12,12 @@ except:
 
 import gc
 if implementation.name.upper() == "MICROPYTHON":
-    from sys import stdin
     from micropython import mem_info
     import uselect
     gc.collect()
     gc.threshold(gc.mem_free() // 4 + gc.mem_alloc())
 else:
+    from supervisor import runtime
     gc.collect()
 
 # The first string may contain wildcard characters
@@ -38,26 +41,56 @@ def _match(first, second):
 
     return False
 
+def calcWildCardLen(wildcardLen,recursiveFail):
+    wildcardLen += 1
+    if not recursiveFail and wildcardLen < 70:
+        try:
+            (wildcardLen,recursiveFail) = calcWildCardLen(wildcardLen,recursiveFail)
+        except:
+            recursiveFail = True
+
+    return (wildcardLen,recursiveFail)
+
 def PyDOS():
 
     global envVars
-
-    pydos_ui = PyDOS_UI()
-
     envVars = {}
 
-    (envVars["_scrHeight"],envVars["_scrWidth"]) = pydos_ui.get_screensize()
+    try:
+        pydos_ui = PyDOS_UI()
+        envVars["_UI"] = pydos_ui.version()
+    except:
+        pydos_ui = None
+        envVars["_UI"] = "None"
 
-    if implementation.name.upper() == "MICROPYTHON":
-        wildcardLen = 16
+    print("Starting Py-DOS...")
+    if pydos_ui:
+        (envVars["_scrHeight"],envVars["_scrWidth"]) = pydos_ui.get_screensize()
     else:
-        wildcardLen = 65
+        envVars["_scrHeight"] = 24
+        envVars["_scrWidth"] = 80
+
+    wildcardLen = 0
+    recursiveFail = False
+
+    (wildcardLen,recursiveFail) = calcWildCardLen(wildcardLen,recursiveFail)
+
+    wildcardLen = max(18,wildcardLen) - 2
+    if wildcardLen < 40:
+        print("*Warning* wild card length set to: ",wildcardLen)
+    gc.collect()
 
     def anyKey():
         print("Press any key to continue . . . .",end="")
-        while not pydos_ui.serial_bytes_available():
-            pass
-        keyIn = pydos_ui.read_keyboard(1)
+        if pydos_ui:
+            while not pydos_ui.serial_bytes_available():
+                pass
+            keyIn = pydos_ui.read_keyboard(1)
+        else:
+            if implementation.name.upper() == "CIRCUITPYTHON":
+                while not runtime.serial_bytes_available:
+                    pass
+            keyIn = stdin.read(1)
         print("")
         return(keyIn)
 
@@ -250,8 +283,6 @@ def PyDOS():
                     lastDir = ""
 
             tmpDir = os.getcwd()
-            # listdir() doesn't return sd mount point in some cases if chdir not done here
-            # os.chdir(tmpDir)
 
             if lastDir in os.listdir() or lastDir in ".." or "*" in lastDir or "?" in lastDir:
 
@@ -419,7 +450,6 @@ def PyDOS():
         return
 
     def filecpy(file1,file2):
-        #if (len(file1) >=3 and file1[-3:].upper() == "CON") or (len(file1) >=4 and file1[-4:] == "CON:)":
         gc.collect()
         fOrig = open(file1)
         fCopy = open(file2, "wb")
@@ -577,7 +607,7 @@ def PyDOS():
                         break
 
         elif cmd == "VER":
-            print("PyDOS [Version 1.04]")
+            print("PyDOS [Version 1.07]")
 
         elif cmd == "ECHO":
             if len(args) == 1:
@@ -711,7 +741,7 @@ def PyDOS():
 
         elif cmd == "SET":
             if len(args) == 1:
-                for _ in envVars:
+                for _ in sorted(envVars):
                     print(_+"=",envVars[_],sep="")
             else:
                 args = cmdLine.split(" ")
@@ -765,7 +795,7 @@ def PyDOS():
 
 
         elif cmd == "RENAME" or cmd == "REN" or cmd == "MOVE" or cmd == "MV":
-# Move command should really work more like copy where source can be file and target can be a directory
+# Move command should work like copy where source can be file and target can be a directory
 # Wildcard renames should be implemented
 
             if len(args) == 3:
@@ -1141,16 +1171,12 @@ def PyDOS():
                 passedIn = args[1]
                 batParams = args[1:]
 
-#            if args[0] in os.listdir() and os.stat(args[0])[0] & (2**15)!= 0 and ((args[0].split("."))[1]).upper() == "PY":
-
             gc.collect()
-            #gc.threshold(gc.mem_free() // 4 + gc.mem_alloc())
             batFound = -1
             curDLst = os.listdir(tmpDir[:(-1 if tmpDir != "/" else None)])
             if  ((newdir.split("."))[-1]).upper() == "PY":
                 if validPath and newdir in curDLst and os.stat(tmpDir+newdir)[0] & (2**15) != 0:
 
-#               __import__((args[0].split("."))[0])
                     exCmd(tmpDir+newdir,passedIn)
                 else:
                     print("Illegal command:",args[0])
@@ -1190,9 +1216,9 @@ def PyDOS():
                 batIndex = [0]
                 batLabels = {}
                 for batLine in BATfile:
+                    batIndex.append(batIndex[batLineNo]+len(batLine))
+                    batLineNo += 1
                     if batLine.strip() != "":
-                        batIndex.append(batIndex[batLineNo]+len(batLine))
-                        batLineNo += 1
                         if batLine.strip()[0] == ":" and len(batLine.strip().split(" ")[0]) > 1:
                             batLabels[batLine.strip().split(" ")[0][1:]] = [batLineNo,batIndex[batLineNo]]
                 BATfile.seek(0)

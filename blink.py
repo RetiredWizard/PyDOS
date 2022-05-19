@@ -2,8 +2,14 @@ import time
 import sys
 if sys.implementation.name.upper() == 'MICROPYTHON':
     from machine import Pin
+    from os import uname
 
-    led = Pin(25, Pin.OUT)
+    if uname().machine == 'Adafruit Feather RP2040 with RP2040':
+        led = Pin(13, Pin.OUT)
+    elif uname().machine == 'Arduino Nano RP2040 Connect with RP2040':
+        led = Pin(6, Pin.OUT)
+    else:
+        led = Pin(25, Pin.OUT)
 
 elif sys.implementation.name.upper() == 'CIRCUITPYTHON':
     import board
@@ -38,6 +44,8 @@ def blink():
 
     if sys.implementation.name.upper() == "CIRCUITPYTHON":
         led.deinit()
+    else:
+        led.value(False)
 
 
 blink()

@@ -1,40 +1,11 @@
 import time
 import sys
-if sys.implementation.name.upper() == 'MICROPYTHON':
+from pydos_hw import Pydos_hw
+if sys.implementation.name.upper() == "MICROPYTHON":
     import machine
-    from os import uname
-
-    if uname().machine == 'TinyPICO with ESP32-PICO-D4':
-        sndPin = machine.Pin(19)
-    elif uname().machine == 'SparkFun Thing Plus RP2040 with RP2040':
-        sndPin = machine.Pin(19)
-    elif uname().machine == 'Raspberry Pi Pico with RP2040':
-        try:
-            import cyt_mpp_board
-            sndPin = machine.Pin(18)
-        except:
-            sndPin = machine.Pin(19)
 elif sys.implementation.name.upper() == 'CIRCUITPYTHON':
+    from supervisor import ticks_ms
     from pwmio import PWMOut
-    from board import board_id
-    foundPin = True
-    if board_id == "arduino_nano_rp2040_connect":
-        #A5 is GPIO D19 on Nano Connect
-        from board import A5 as sndPin
-    elif board_id == "raspberry_pi_pico":
-        #D12 is GP11 on the Raspberry PICO
-        try:
-            from cyt_mpp_board import SNDPIN as sndPin
-        except:
-            from board import GP11 as sndPin
-    elif board_id == "cytron_maker_pi_rp2040":
-        from board import GP22 as sndPin
-    else:
-        try:
-            #Use D12 on Feathers
-            from board import D12 as sndPin
-        except:
-            foundPin = False
 
 if __name__ != "PyDOS":
     passedIn = ""
@@ -54,7 +25,7 @@ dur = int(args[1])
 vol = int(args[2])
 
 if sys.implementation.name.upper() == "MICROPYTHON":
-    pwm=machine.PWM(sndPin)
+    pwm=machine.PWM(Pydos_hw.sndPin)
     pwm.freq(freq)
     if 'duty_u16' in dir(pwm):
         pwm.duty_u16(vol)
@@ -66,12 +37,14 @@ if sys.implementation.name.upper() == "MICROPYTHON":
     else:
         pwm.duty(0)
 elif sys.implementation.name.upper() == "CIRCUITPYTHON":
-    if not foundPin:
+    if not Pydos_hw.sndPin:
         print("Sound Pin not found")
     else:
-        audioPin = PWMOut(sndPin, duty_cycle=0, frequency=440, variable_frequency=True)
+        Pydos_hw.sndGPIO.deinit() # Workaround for ESP32-S2 GPIO issue
+        audioPin = PWMOut(Pydos_hw.sndPin, duty_cycle=0, frequency=440, variable_frequency=True)
         audioPin.frequency = freq
         audioPin.duty_cycle = vol
         time.sleep(dur/1000)
         audioPin.duty_cycle = 0
         audioPin.deinit()
+        Pydos_hw.quietSnd() # Workaround for ESP32-S2 GPIO issue
