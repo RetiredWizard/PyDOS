@@ -1,0 +1,7 @@
+{
+    "ssid": "Enter_Wifi_SSID",
+    "ssid_password": "Enter_Wifi_Password",
+    "appkeyid": "Enter_GooleApps_API_Key",
+    "channelid": "Enter_YT_Channel_ID",
+    "query_interval_sec": 60
+}

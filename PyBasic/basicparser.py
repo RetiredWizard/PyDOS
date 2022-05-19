@@ -25,38 +25,28 @@ try:
     from pydos_ui import input
 except:
     pass
+try:
+    from pydos_hw import Pydos_hw
+except:
+    Pydos_hw.sndPin = None
+
 if implementation.name.upper() == 'MICROPYTHON':
-    from machine import Pin, PWM
+    if Pydos_hw.sndPin:
+        from machine import PWM
     from time import ticks_ms as monotonic
+
 elif implementation.name.upper() == 'CIRCUITPYTHON':
     from time import monotonic
     from board import board_id
-    if board_id != 'raspberrypi_zero2w': # temporary? until broadcom port supports pwmio
-        from pwmio import PWMOut
-    if board_id == "arduino_nano_rp2040_connect":
-        #A5 is GPIO D19 on Nano Connect
-        from board import A5 as sndPin
-    elif board_id == "raspberry_pi_pico":
-        #D12 is GP11 on the Raspberry PICO
-        try:
-            from cyt_mpp_board import SNDPIN as sndPin
-        except:
-            from board import GP11 as sndPin
-    elif board_id == "cytron_maker_pi_rp2040":
-        from board import GP22 as sndPin
-    else:
-        try:
-            #Use D12 on Feathers
-            from board import D12 as sndPin
-        except:
-            pass
+    if Pydos_hw.sndPin:
+        if board_id != 'raspberrypi_zero2w': # temporary? until broadcom port supports pwmio
+            from pwmio import PWMOut
 else:
     import winsound
     from time import monotonic
+
 import gc
 gc.collect()
-#if implementation.name.upper() == 'MICROPYTHON':
-    #gc.threshold(gc.mem_free() // 4 + gc.mem_alloc())
 
 """Implements a BASIC array, which may have up
 to three dimensions of fixed size.
@@ -132,10 +122,11 @@ class BASICParser:
         self.__file_handles = {}
 
         if implementation.name.upper() == 'MICROPYTHON':
-            try:
-                self.__pwm = PWM(Pin(19),freq=0)
-            except:
-                self.__pwm = PWM(Pin(19))
+            if Pydos_hw.sndPin:
+                try:
+                    self.__pwm = PWM(Pydos_hw.sndPin,freq=0)
+                except:
+                    self.__pwm = PWM(Pydos_hw.sndPin)
 
     def parse(self, tokenlist, line_number, cstmt_number, infile, tmpfile, datastmts):
         """Must be initialised with the list of
@@ -897,23 +888,26 @@ class BASICParser:
             volume = 800
 
         if implementation.name.upper() == 'MICROPYTHON':
-            self.__pwm.freq(freq)
-            if "duty_u16" in dir(self.__pwm):
-                self.__pwm.duty_u16(volume)
-                sleep(duration/18.2)
-                self.__pwm.duty_u16(0)
-            else:
-                self.__pwm.duty(int((volume/65535)*1023))
-                sleep(duration/18.2)
-                self.__pwm.duty(0)
+            if Pydos_hw.sndPin:
+                self.__pwm.freq(freq)
+                if "duty_u16" in dir(self.__pwm):
+                    self.__pwm.duty_u16(volume)
+                    sleep(duration/18.2)
+                    self.__pwm.duty_u16(0)
+                else:
+                    self.__pwm.duty(int((volume/65535)*1023))
+                    sleep(duration/18.2)
+                    self.__pwm.duty(0)
         elif implementation.name.upper() == 'CIRCUITPYTHON':
             try:
-                audioPin = PWMOut(sndPin, duty_cycle=0, frequency=440, variable_frequency=True)
+                Pydos_hw.sndGPIO.deinit() # Workaround for ESP32-S2 GPIO issue
+                audioPin = PWMOut(Pydos_hw.sndPin, duty_cycle=0, frequency=440, variable_frequency=True)
                 audioPin.frequency = freq
                 audioPin.duty_cycle = volume
                 sleep(duration/18.2)
                 audioPin.duty_cycle = 0
                 audioPin.deinit()
+                Pydos_hw.quietSnd() # Workaround for ESP32-S2 GPIO issue
             except:
                 pass
         else:

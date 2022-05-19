@@ -81,6 +81,7 @@ IO44 = board.IO44
 LDO2 = board.LDO2
 LED = board.LED
 board_id = board.board_id
+NEOPIXEL = D11
 
 
 def SPI():

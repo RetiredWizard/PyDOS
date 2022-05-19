@@ -25,7 +25,6 @@ elif board.board_id == 'unexpectedmaker_feathers2':
     import kfw_s2_board as board
 
 import adafruit_ili9341
-import digitalio
 import displayio
 
 class PyDOS_UI:
@@ -33,7 +32,6 @@ class PyDOS_UI:
     SHIFT = 1
     ALT = 2
     #_kbd = None
-    _I2C_power = None
 
     def __init__(self):
         # Release any resources currently in use for the displays
@@ -52,14 +50,6 @@ class PyDOS_UI:
         self.shift_Mode = self.SHIFT # Default Cap lock/Long Press mode
 
         self.lastCmdLine = ""
-
-    def I2C():
-        if 'I2C_POWER_INVERTED' in dir(board) and not PyDOS_UI._I2C_power:
-            PyDOS_UI._I2C_power = digitalio.DigitalInOut(board.I2C_POWER_INVERTED)
-            PyDOS_UI._I2C_power.direction = digitalio.Direction.OUTPUT
-            PyDOS_UI._I2C_power.value = False
-
-        return board.I2C()
 
     def serial_bytes_available(self):
         # Does the same function as supervisor.runtime.serial_bytes_available
@@ -140,9 +130,10 @@ class PyDOS_UI:
         return input_text
 
     def get_screensize(self):
-
         return(17,49)
 
+    def version(self):
+        return("Keyboard FeatherWing")
 
 Pydos_ui = PyDOS_UI()
 
