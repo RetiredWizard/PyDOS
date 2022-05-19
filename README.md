@@ -11,6 +11,8 @@ Microcontroller flash.
 
 External programs included:
 
+**pydospins.py** - Displays the GPIO pins for sound output and I2C for the particular board PyDOS is running on.
+
 **runasthread.py** (Micropython only) - This program will attempt to launch a python program on the second RP2040 core. Threading is
 experimental on Micropython so it's not difficult to crash the microcontroller using this program. I have not found a way to kill
 a thread started on the second core so be sure any threads you launch will shutdown on their own or monitor a global variable or
