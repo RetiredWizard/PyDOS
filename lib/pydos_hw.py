@@ -6,20 +6,21 @@ from sys import implementation
 if implementation.name.upper() == "MICROPYTHON":
     from os import uname
     from machine import Pin
+    from machine import SoftI2C as s_I2C
     from machine import I2C as m_I2C
 
 elif implementation.name.upper() == "CIRCUITPYTHON":
     import digitalio
     import busio
     import board
+    from adafruit_bus_device.i2c_device import I2CDevice
+
     if board.board_id == "unexpectedmaker_feathers2":
         try:
             import kfw_s2_board as board
-            foundBoard = True
         except:
-            foundBoard = False
-
-    if board.board_id == "raspberry_pi_pico":
+            pass
+    elif board.board_id == "raspberry_pi_pico":
         try:
             import kfw_pico_board as board
             foundBoard = True
@@ -34,6 +35,7 @@ elif implementation.name.upper() == "CIRCUITPYTHON":
 
 class PyDOS_HW:
 
+    _KFW = False
     _I2C = None
     _I2C_power = None
     _SPI = None
@@ -44,6 +46,7 @@ class PyDOS_HW:
     neoPixel = None
     SCL = None
     SDA = None
+    I2CbbqDevice = None
 
 
     def __init__(self):
@@ -65,7 +68,8 @@ class PyDOS_HW:
                 PyDOS_HW.SDA=12
             elif uname().machine == 'Raspberry Pi Pico with RP2040':
                 try:
-                    import cyt_mpp_board
+                    chkForFile = open('/lib/cyt_mpp_board.py')
+                    chkForFile.close()
                     PyDOS_HW.sndPin = Pin(18)
                     PyDOS_HW.neoPixel = Pin(28)
                 except:
@@ -77,10 +81,21 @@ class PyDOS_HW:
                 PyDOS_HW.neoPixel = Pin(48)
                 PyDOS_HW.SCL=7
                 PyDOS_HW.SDA=6
+            elif uname().machine == 'ESP32C3 module with ESP32C3':
+                PyDOS_HW.sndPin = Pin(0)
+                PyDOS_HW.neoPixel = Pin(2)
+                PyDOS_HW.SCL=6
+                PyDOS_HW.SDA=5
             else:
                 #Use D12 on Feathers
-                PyDOS_HW.sndPin = Pin(12)
-                PyDOS_HW.neoPixel = Pin(16)
+                try:
+                    PyDOS_HW.sndPin = Pin(12)
+                except:
+                    pass
+                try:
+                    PyDOS_HW.neoPixel = Pin(16)
+                except:
+                    pass
                 PyDOS_HW.SCL=3
                 PyDOS_HW.SDA=2
 
@@ -90,7 +105,8 @@ class PyDOS_HW:
             elif "BUZZER" in dir(board):
                 PyDOS_HW.sndPin = board.BUZZER
             else:
-                if board.board_id in ["arduino_nano_rp2040_connect","adafruit_qtpy_esp32s2"]:
+                if board.board_id in ["arduino_nano_rp2040_connect","adafruit_qtpy_esp32s2",
+                    "adafruit_qtpy_esp32c3","sparkfun_nrf52840_mini"]:
                     PyDOS_HW.sndPin = board.A3
                 elif board.board_id == "raspberry_pi_pico":
                     #D12 is GP11 on the Raspberry PICO
@@ -115,9 +131,24 @@ class PyDOS_HW:
                 PyDOS_HW.sndGPIO.direction = digitalio.Direction.OUTPUT
                 PyDOS_HW.sndGPIO.value = False
 
-            if "NEOPIXEL" in dir(board):
-                PyDOS_HW.neoPixel = board.NEOPIXEL
+            try:
+                chkForFile = open('/lib/kfw_pico_board.py','r')
+                chkForFile.close()
+                PyDOS_HW._KFW = True
+            except:
+                pass
+            if not PyDOS_HW._KFW:
+                try:
+                    chkForFile = open('/lib/kfw_s2_board.py','r')
+                    chkForFile.close()
+                    PyDOS_HW._KFW = True
+                except:
+                    pass
 
+            if PyDOS_HW._KFW:
+                PyDOS_HW.neoPixel = board.D11
+            elif "NEOPIXEL" in dir(board):
+                PyDOS_HW.neoPixel = board.NEOPIXEL
 
     def quietSnd(self):
 
@@ -129,43 +160,58 @@ class PyDOS_HW:
 
     def I2C():
 
-        if implementation.name.upper() == "CIRCUITPYTHON":
+        if not PyDOS_HW._I2C:
+            if implementation.name.upper() == "CIRCUITPYTHON":
 
-            if board.board_id == "cytron_maker_pi_rp2040":
-                if not PyDOS_HW._I2C:
+                if board.board_id == "cytron_maker_pi_rp2040":
                     # Grove #2, GP3 & GP2
                     PyDOS_HW._I2C = busio.I2C(board.GP3, board.GP2)
-            else:
-                if 'I2C_POWER_INVERTED' in dir(board) and not PyDOS_HW._I2C_power:
-                    PyDOS_HW._I2C_power = digitalio.DigitalInOut(board.I2C_POWER_INVERTED)
-                    PyDOS_HW._I2C_power.direction = digitalio.Direction.OUTPUT
-                    PyDOS_HW._I2C_power.value = False
-
-                if 'STEMMA_I2C' in dir(board) and not PyDOS_HW._I2C:
-                    PyDOS_HW._I2C = board.STEMMA_I2C()
-                elif 'I2C' in dir(board) and not PyDOS_HW._I2C:
-                    PyDOS_HW._I2C = board.I2C()
-                elif not PyDOS_HW._I2C:
-                    if "SCL" not in dir(board):
-                        if board.board_id == "raspberry_pi_pico":
-                            PyDOS_HW._I2C = busio.I2C(board.GP3, board.GP2)
-                        elif board.board_id == 'espressif_esp32s3_devkitc_1_n8r2':
-                            PyDOS_HW._I2C = busio.I2C(board.IO7, board.IO6)
-                    else:
-                        PyDOS_HW._I2C = busio.I2C(board.SCL, board.SDA)
-        elif implementation.name.upper() == "MICROPYTHON":
-            if not PyDOS_HW._I2C:
-                if uname().machine == 'Arduino Nano RP2040 Connect with RP2040':
-                    PyDOS_HW._I2C = m_I2C(0,scl=Pin(PyDOS_HW.SCL),sda=Pin(PyDOS_HW.SDA))
                 else:
+                    if 'I2C_POWER_INVERTED' in dir(board) and not PyDOS_HW._I2C_power:
+                        PyDOS_HW._I2C_power = digitalio.DigitalInOut(board.I2C_POWER_INVERTED)
+                        PyDOS_HW._I2C_power.direction = digitalio.Direction.OUTPUT
+                        PyDOS_HW._I2C_power.value = False
+
+                    if 'STEMMA_I2C' in dir(board):
+                        PyDOS_HW._I2C = board.STEMMA_I2C()
+                    elif 'I2C' in dir(board):
+                        PyDOS_HW._I2C = board.I2C()
+                    else:
+                        if "SCL" not in dir(board):
+                            if board.board_id == "raspberry_pi_pico":
+                                PyDOS_HW._I2C = busio.I2C(board.GP3, board.GP2)
+                            elif board.board_id == 'espressif_esp32s3_devkitc_1_n8r2':
+                                PyDOS_HW._I2C = busio.I2C(board.IO7, board.IO6)
+                        else:
+                            PyDOS_HW._I2C = busio.I2C(board.SCL, board.SDA)
+
+                    if PyDOS_HW._KFW and not PyDOS_HW.I2CbbqDevice:
+                        PyDOS_HW.I2CbbqDevice = I2CDevice(PyDOS_HW._I2C, 0x1F)
+            elif implementation.name.upper() == "MICROPYTHON":
+                if uname().machine in ['Arduino Nano RP2040 Connect with RP2040']:
+                    PyDOS_HW._I2C = m_I2C(0,scl=Pin(PyDOS_HW.SCL),sda=Pin(PyDOS_HW.SDA))
+                elif uname().machine in ['Raspberry Pi Pico with RP2040']:
                     PyDOS_HW._I2C = m_I2C(1,scl=Pin(PyDOS_HW.SCL),sda=Pin(PyDOS_HW.SDA))
+                else:
+                    PyDOS_HW._I2C = s_I2C(scl=Pin(PyDOS_HW.SCL),sda=Pin(PyDOS_HW.SDA))
 
         return PyDOS_HW._I2C
 
+    def I2C_deinit():
+        if implementation.name.upper() == "CIRCUITPYTHON":
+            if PyDOS_HW._I2C_power:
+                PyDOS_HW._I2C_power.deinit()
+                PyDOS_HW._I2C_power = None
+
+            if PyDOS_HW._I2C:
+                PyDOS_HW._I2C.deinit()
+            PyDOS_HW._I2C = None
+            PyDOS_HW.I2CbbqDevice = None
 
     def SD_CSdeinit():
         if implementation.name.upper() == "CIRCUITPYTHON":
-            PyDOS_HW.SD_CS.deinit()
+            if PyDOS_HW.SD_CS:
+                PyDOS_HW.SD_CS.deinit()
             PyDOS_HW.SD_CS = None
 
 
