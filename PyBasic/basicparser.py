@@ -27,20 +27,22 @@ except:
     pass
 try:
     from pydos_hw import Pydos_hw
+    sndPin = Pydos_hw.sndPin
 except:
-    Pydos_hw.sndPin = None
+    sndPin = None
 
 if implementation.name.upper() == 'MICROPYTHON':
-    if Pydos_hw.sndPin:
+    if sndPin:
         from machine import PWM
     from time import ticks_ms as monotonic
 
 elif implementation.name.upper() == 'CIRCUITPYTHON':
     from time import monotonic
-    from board import board_id
-    if Pydos_hw.sndPin:
-        if board_id != 'raspberrypi_zero2w': # temporary? until broadcom port supports pwmio
+    if sndPin:
+        try: # temporary? until broadcom port supports pwmio
             from pwmio import PWMOut
+        except:
+            pass
 else:
     import winsound
     from time import monotonic
@@ -122,11 +124,11 @@ class BASICParser:
         self.__file_handles = {}
 
         if implementation.name.upper() == 'MICROPYTHON':
-            if Pydos_hw.sndPin:
+            if sndPin:
                 try:
-                    self.__pwm = PWM(Pydos_hw.sndPin,freq=0)
+                    self.__pwm = PWM(sndPin,freq=0)
                 except:
-                    self.__pwm = PWM(Pydos_hw.sndPin)
+                    self.__pwm = PWM(sndPin)
 
     def parse(self, tokenlist, line_number, cstmt_number, infile, tmpfile, datastmts):
         """Must be initialised with the list of
@@ -888,7 +890,7 @@ class BASICParser:
             volume = 800
 
         if implementation.name.upper() == 'MICROPYTHON':
-            if Pydos_hw.sndPin:
+            if sndPin:
                 self.__pwm.freq(freq)
                 if "duty_u16" in dir(self.__pwm):
                     self.__pwm.duty_u16(volume)
@@ -901,7 +903,7 @@ class BASICParser:
         elif implementation.name.upper() == 'CIRCUITPYTHON':
             try:
                 Pydos_hw.sndGPIO.deinit() # Workaround for ESP32-S2 GPIO issue
-                audioPin = PWMOut(Pydos_hw.sndPin, duty_cycle=0, frequency=440, variable_frequency=True)
+                audioPin = PWMOut(sndPin, duty_cycle=0, frequency=440, variable_frequency=True)
                 audioPin.frequency = freq
                 audioPin.duty_cycle = volume
                 sleep(duration/18.2)
