@@ -1212,12 +1212,12 @@ def PyDOS():
                 else:
                     print("Illegal command:",args[0])
             elif validPath:
-                if newdir+".py" in curDLst_LC:
-                    curDLst_indx = curDLst_LC.index(newdir+".py")
+                if newdir.lower()+".py" in curDLst_LC:
+                    curDLst_indx = curDLst_LC.index(newdir.lower()+".py")
                     if os.stat(tmpDir+curDLst[curDLst_indx])[0] & (2**15) != 0:
                         exCmd(tmpDir+curDLst[curDLst_indx],passedIn)
-                elif newdir+".bat" in curDLst_LC:
-                    curDLst_indx = curDLst_LC.index(newdir+".bat")
+                elif newdir.lower()+".bat" in curDLst_LC:
+                    curDLst_indx = curDLst_LC.index(newdir.lower()+".bat")
                     if os.stat(tmpDir+curDLst[curDLst_indx])[0] & (2**15) != 0:
                         batFound = curDLst[curDLst_indx]
                 else:
