@@ -15,10 +15,17 @@ else:
     import uselect
 
 
-# The PCF8574 has a jumper selectable address: 0x20 - 0x27
-DEFAULT_I2C_ADDR = 0x27
 
 def lcdScroll(argv):
+
+    if argv == "":
+        if envVars.get("stopthread","") == "":
+            argv = input("Say what?: ")
+        else:
+            print('\nUse "passedIn" environment variable to define text for threaded run.')
+
+    # The PCF8574 has a jumper selectable address: 0x20 - 0x27
+    DEFAULT_I2C_ADDR = 0x27
 
     i2c = PyDOS_HW.I2C()
 
@@ -50,17 +57,6 @@ def lcdScroll(argv):
         lcd=lcd2004.lcd(DEFAULT_I2C_ADDR,i2c)
         lcd.lcd_backlight(True)
         lcd.lcd_clear()
-
-    if argv == "":
-        if envVars.get("stopthread","") == "":
-            if envVars.get("_UI","") == "Keyboard FeatherWing":
-                i2c.unlock()
-            argv = input("Say what?: ")
-            if envVars.get("_UI","") == "Keyboard FeatherWing":
-                while i2c.try_lock():
-                    pass
-        else:
-            print('\nUse "passedIn" environment variable to define text for threaded run.')
 
     if argv == "":
         if sys.implementation.name.upper() == "CIRCUITPYTHON":

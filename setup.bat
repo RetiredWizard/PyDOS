@@ -21,7 +21,7 @@ if not exist /lib mkdir /lib
 copy /mpython/lib/* /lib/
 
 :board
-set/p _ans2 = (N)anoConnect, (E) ESP32 board, (O)ther RP2040 board:
+set/p _ans2 = (N)anoConnect, (E) ESP32 board, (O)ther RP2040, STM32 board:
 if %_ans2% == N goto nanoconnect
 if %_ans2% == n goto nanoconnect
 if %_ans2% == e goto tinypico

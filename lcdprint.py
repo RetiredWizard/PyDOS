@@ -10,11 +10,10 @@ if sys.implementation.name.upper() == "CIRCUITPYTHON":
 else:
     import lcd2004
 
-
-# The PCF8574 has a jumper selectable address: 0x20 - 0x27
-DEFAULT_I2C_ADDR = 0x27
-
 def lcdPrint(passedIn):
+
+    # The PCF8574 has a jumper selectable address: 0x20 - 0x27
+    DEFAULT_I2C_ADDR = 0x27
 
     mess = passedIn
     if mess == "":

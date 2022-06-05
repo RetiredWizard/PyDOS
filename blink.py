@@ -16,7 +16,10 @@ elif sys.implementation.name.upper() == 'CIRCUITPYTHON':
     from digitalio import DigitalInOut, Direction
 
     # LED setup for onboard LED
-    led = DigitalInOut(board.LED)
+    if 'LED1' in dir(board):
+        led = DigitalInOut(board.LED1)
+    else:
+        led = DigitalInOut(board.LED)
     led.direction = Direction.OUTPUT
 
 from pydos_ui import Pydos_ui

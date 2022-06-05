@@ -24,6 +24,8 @@ if implementation.name.upper() == "CIRCUITPYTHON":
         switch = digitalio.DigitalInOut(board.D2)
     elif board.board_id in ['raspberry_pi_pico','cytron_maker_pi_rp2040']:
         switch = digitalio.DigitalInOut(board.GP6)
+    elif board.board_id == 'adafruit_qtpy_esp32c3':
+        switch = digitalio.DigitalInOut(board.A1)
     else:
         if "D5" in dir(board):
             switch = digitalio.DigitalInOut(board.D5)

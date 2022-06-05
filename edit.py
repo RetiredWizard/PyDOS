@@ -56,7 +56,7 @@ def open_text(name):
 
     text = []
     if chkPath(aPath) and newdir in os.listdir(name[0:len(name)-len(newdir)]) and os.stat(name)[0] & (2**15) != 0:
-        f = open(name, "rU")
+        f = open(name, "r")
 
         for line in f:
             text.append(line.replace("\n",""))
