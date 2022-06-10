@@ -70,11 +70,11 @@ echo Invalid Selection (Y or N)
 goto other
 
 :kbdFeatherW
-copy/y /cpython/kbdFeatherWing/* /
+copy /cpython/kbdFeatherWing/* /
 if not exist /lib mkdir /lib
-copy/y /cpython/kbdFeatherWing/lib/* /lib/
-copy /lib/pydos_ui.py /lib/pydos_ui_uart.py
-copy/y /lib/pydos_ui_kfw.py /lib/pydos_ui.py
+copy /cpython/kbdFeatherWing/lib/* /lib/
+rename /lib/pydos_ui.py /lib/pydos_ui_uart.py
+copy /lib/pydos_ui_kfw.py /lib/pydos_ui.py
 if not exist /PyBasic mkdir /PyBasic
 copy/y /cpython/kbdFeatherWing/PyBasic/* /PyBasic
 if %_ans2% == O del /lib/kfw_s2_board.py
