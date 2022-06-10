@@ -18,6 +18,7 @@
 
 from bbq10keyboard import BBQ10Keyboard, STATE_PRESS, STATE_RELEASE, STATE_LONG_PRESS
 import board
+from pydos_hw import PyDOS_HW
 
 if board.board_id == 'raspberry_pi_pico':
     import kfw_pico_board as board
@@ -42,7 +43,7 @@ class PyDOS_UI:
         _display_bus = displayio.FourWire(board.SPI(), command=_tft_dc, chip_select=_tft_cs)
         _display = adafruit_ili9341.ILI9341(_display_bus, width=320, height=240)
 
-        self.kbd = BBQ10Keyboard(board.I2C())
+        self.kbd = BBQ10Keyboard(PyDOS_HW.I2C(),BBQI2CDevice=PyDOS_HW.I2CbbqDevice)
 
         self._contrl_seq = []
 
@@ -50,6 +51,7 @@ class PyDOS_UI:
         self.shift_Mode = self.SHIFT # Default Cap lock/Long Press mode
 
         self.lastCmdLine = ""
+        self.commandHistory = []
 
     def serial_bytes_available(self):
         # Does the same function as supervisor.runtime.serial_bytes_available
@@ -163,12 +165,14 @@ def input(disp_text=None):
         pass
 
     k = Pydos_ui.kbd.key
+    histPntr = len(Pydos_ui.commandHistory)
+    currEditLine = Pydos_ui.lastCmdLine
     loop = True
     time_Param = None
     while loop:
         if k != None:
             if k[0] == STATE_RELEASE:
-                if k[1] not in  '\n\x07\x11':
+                if k[1] not in  '\n\x07\x11\x01\x02':
                     if k[1] == '\x08': # Backspace
                         if len(input_text) > 0:
                             input_text = input_text[:-1]
@@ -185,17 +189,42 @@ def input(disp_text=None):
                         input_text += retKey
                         time_Param = None
                         print(retKey,end="")
+                elif k[1] == '\x01': # Up Arrow
+                    if len(Pydos_ui.commandHistory) > 0:
+                        print('\x08'*(len(input_text))+" "*(len(input_text))+'\x08'*(len(input_text)),end="")
+
+                        histPntr -= 1
+                        if histPntr < 0:
+                            histPntr = len(Pydos_ui.commandHistory) - 1
+                        print(Pydos_ui.commandHistory[histPntr],end="")
+                        input_text = Pydos_ui.commandHistory[histPntr]
+                        currEditLine = input_text
+                elif k[1] == '\x02': # Down Arrow
+                    if len(Pydos_ui.commandHistory) > 0:
+                        print('\x08'*(len(input_text))+" "*(len(input_text))+'\x08'*(len(input_text)),end="")
+
+                        histPntr += 1
+                        if histPntr >= len(Pydos_ui.commandHistory):
+                            histPntr = 0
+                        print(Pydos_ui.commandHistory[histPntr],end="")
+                        input_text = Pydos_ui.commandHistory[histPntr]
+                        currEditLine = input_text
                 elif k[1] == '\x07': # F3 pressed
-                    print(Pydos_ui.lastCmdLine[len(input_text):],end="")
-                    input_text += Pydos_ui.lastCmdLine[len(input_text):]
+
+                    print(currEditLine[len(input_text):],end="")
+                    input_text += currEditLine[len(input_text):]
                 elif k[1] == '\x11': # F2 Pressed
-                    searchLoc = Pydos_ui.lastCmdLine[len(input_text):].find(Pydos_ui.read_keyboard(1))
+                    searchLoc = currEditLine[len(input_text):].find(Pydos_ui.read_keyboard(1))
                     if searchLoc >= 0:
-                        print(Pydos_ui.lastCmdLine[len(input_text):len(input_text)+searchLoc],end="")
-                        input_text += Pydos_ui.lastCmdLine[len(input_text):len(input_text)+searchLoc]
+                        print(currEditLine[len(input_text):len(input_text)+searchLoc],end="")
+                        input_text += currEditLine[len(input_text):len(input_text)+searchLoc]
                 else: # Enter pressed
                     print()
-                    Pydos_ui.lastCmdLine = input_text
+                    if input_text != "":
+                        Pydos_ui.lastCmdLine = input_text
+                        Pydos_ui.commandHistory.append(input_text)
+                        if len(Pydos_ui.commandHistory) > 10:
+                            Pydos_ui.commandHistory.pop(0)
                     loop = False
             elif k[0] == STATE_LONG_PRESS:
                 if k[1] not in '\x08\x09\x7c':

@@ -1,4 +1,4 @@
-import network, json
+import network
 import socket
 
 def http_get(url):
@@ -20,13 +20,16 @@ def http_get(url):
 
 TEXT_URL = "http://wifitest.adafruit.com/testwifi/index.html"
 
-# Read config
-with open('config.json') as f:
-    config = json.load(f)
+# Get wifi details and more from a secrets.py file
+try:
+    from secrets import secrets
+except ImportError:
+    print("WiFi secrets are kept in secrets.py, please add them there!")
+    raise
 
-# Check config.json has updated credentials
-if config['ssid'] == 'Enter_Wifi_SSID':
-    assert False, ("config.json has not been updated with your unique keys and data")
+# Check secrets.py has updated credentials
+if secrets['ssid'] == 'your-ssid-here':
+    assert False, ("WiFi secrets are kept in secrets.py, please add them there!")
 
 # Create WiFi connection and turn it on
 wlan = network.WLAN(network.STA_IF)
@@ -34,11 +37,11 @@ if not wlan.active():
     wlan.active(True)
 
     # Connect to WiFi router
-    print ("Connecting to WiFi: {}".format( config['ssid'] ) )
-    wlan.connect( config['ssid'], config['ssid_password'])
+    print ("Connecting to WiFi: {}".format( secrets['ssid'] ) )
+    wlan.connect( secrets['ssid'], secrets['password'])
 
 # Wait until wifi is connected
-while not wlan.isconnected:
+while not wlan.isconnected():
     pass
 
 print("Fetching text from", TEXT_URL)

@@ -7,6 +7,12 @@ if sys.implementation.name.upper() == 'MICROPYTHON':
     if uname().machine == 'Adafruit Feather RP2040 with RP2040':
         led = Pin(13, Pin.OUT)
     elif uname().machine == 'Arduino Nano RP2040 Connect with RP2040':
+        from os import umount
+        try:
+            umount(drive) # Nano Connect uses LED pin for SPI SCK
+            print("Unmounting SD card because of shared SCK pin")
+        except:
+            pass
         led = Pin(6, Pin.OUT)
     else:
         led = Pin(25, Pin.OUT)
@@ -16,7 +22,10 @@ elif sys.implementation.name.upper() == 'CIRCUITPYTHON':
     from digitalio import DigitalInOut, Direction
 
     # LED setup for onboard LED
-    led = DigitalInOut(board.LED)
+    if 'LED1' in dir(board):
+        led = DigitalInOut(board.LED1)
+    else:
+        led = DigitalInOut(board.LED)
     led.direction = Direction.OUTPUT
 
 from pydos_ui import Pydos_ui
