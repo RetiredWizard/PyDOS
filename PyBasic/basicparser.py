@@ -129,6 +129,11 @@ class BASICParser:
                     self.__pwm = PWM(sndPin,freq=0)
                 except:
                     self.__pwm = PWM(sndPin)
+            if 'duty_u16' in dir(self.__pwm):
+                self.__pwm.duty_u16(0)
+            else:
+                self.__pwm.duty(0)
+
 
     def parse(self, tokenlist, line_number, cstmt_number, infile, tmpfile, datastmts):
         """Must be initialised with the list of
