@@ -13,6 +13,8 @@ set _ans = C
 copy/y /cpython/* /
 if not exist /lib mkdir /lib
 copy /cpython/lib/* /lib/
+if not exist /lib/adafruit_bus_device mkdir /lib/adafruit_bus_device
+copy /cpython/lib/adafruit_bus_device/* /lib/adafruit_bus_device/
 goto board
 :mpython
 set _ans=M
@@ -24,8 +26,8 @@ copy /mpython/lib/* /lib/
 set/p _ans2 = (N)anoConnect, (E) ESP32 board, (O)ther RP2040, STM32 board:
 if %_ans2% == N goto nanoconnect
 if %_ans2% == n goto nanoconnect
-if %_ans2% == e goto tinypico
-if %_ans2% == E goto tinypico
+if %_ans2% == e goto esp32
+if %_ans2% == E goto esp32
 if %_ans2% == o goto other
 if %_ans2% == O goto other
 echo Invalid selection (N,E or O)
@@ -39,21 +41,19 @@ if not exist /lib mkdir /lib
 copy /cpython/NanoConnect/lib/* /lib/
 if not exist /lib/adafruit_esp32spi mkdir /lib/adafruit_esp32spi
 copy /cpython/NanoConnect/lib/adafruit_esp32spi/* /lib/adafruit_esp32spi/
-if not exist /lib/adafruit_bus_device mkdir /lib/adafruit_bus_device
-copy /cpython/NanoConnect/lib/adafruit_bus_device/* /lib/adafruit_bus_device/
-goto other
+goto done
 :nanoconnectMP
 copy /mpython/NanoConnect/* /
 if not exist /lib mkdir /lib
 copy /mpython/NanoConnect/lib/* /lib/
-goto other
+goto done
 
-:tinypico
+:esp32
 set _ans2 = E
-if %_ans% == C goto tinypicoCP
+if %_ans% == C goto esp32CP
 copy /mpython/ESP32/* /
 goto other
-:tinypicoCP
+:esp32CP
 copy/y /cpython/ESP32/* /
 if not exist /lib mkdir /lib
 copy /cpython/ESP32/lib/* /lib/

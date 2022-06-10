@@ -15,4 +15,4 @@ if passedIn != "":
 
 umount(drive)
 if implementation.name.upper() == "CIRCUITPYTHON":
-    PyDOS_HW.SD_CSdeinit()
+    PyDOS_HW.SD_deinit()

@@ -507,6 +507,7 @@ def PyDOS():
         batParams = []
     else:
         activeBAT = False
+        gc.collect()
 
     while True:
         if condCmd != "":

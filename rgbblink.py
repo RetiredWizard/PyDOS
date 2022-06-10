@@ -53,6 +53,13 @@ elif sys.implementation.name.upper() == 'MICROPYTHON':
     import machine
     from os import uname
     if uname().machine == 'TinyPICO with ESP32-PICO-D4':
+        from os import umount
+        try:
+            umount(drive) # Nano Connect uses LED pin for SPI SCK
+            print("Unmounting SD card to free up SPI bus")
+        except:
+            pass
+
         from dotstar import DotStar
         import tinypico
 
