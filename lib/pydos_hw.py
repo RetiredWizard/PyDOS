@@ -13,7 +13,6 @@ elif implementation.name.upper() == "CIRCUITPYTHON":
     import digitalio
     import busio
     import board
-    from adafruit_bus_device.i2c_device import I2CDevice
 
     if board.board_id == "unexpectedmaker_feathers2":
         try:
@@ -35,7 +34,6 @@ elif implementation.name.upper() == "CIRCUITPYTHON":
 
 class PyDOS_HW:
 
-    _KFW = False
     _I2C = None
     _I2C_power = None
     _SPI = None
@@ -47,6 +45,7 @@ class PyDOS_HW:
     SCL = None
     SDA = None
     I2CbbqDevice = None
+    KFW = False
 
 
     def __init__(self):
@@ -54,7 +53,7 @@ class PyDOS_HW:
         if implementation.name.upper() == 'MICROPYTHON':
 
             if uname().machine == 'TinyPICO with ESP32-PICO-D4':
-                PyDOS_HW.sndPin = Pin(19)
+                PyDOS_HW.sndPin = Pin(27)
                 PyDOS_HW.SCL=22
                 PyDOS_HW.SDA=21
             elif uname().machine == 'SparkFun Thing Plus RP2040 with RP2040':
@@ -70,14 +69,14 @@ class PyDOS_HW:
                 try:
                     chkForFile = open('/lib/cyt_mpp_board.py')
                     chkForFile.close()
-                    PyDOS_HW.sndPin = Pin(18)
                     PyDOS_HW.neoPixel = Pin(28)
                 except:
-                    PyDOS_HW.sndPin = Pin(11)
+                    pass
+                PyDOS_HW.sndPin = Pin(18)
                 PyDOS_HW.SCL=3
                 PyDOS_HW.SDA=2
-            elif 'ESP32S3 module' in uname().machine:
-                PyDOS_HW.sndPin = Pin(12)
+            elif uname().machine == 'ESP32S3 module (spiram) with ESP32S3' or 'ESP32S3' in uname().machine:
+                PyDOS_HW.sndPin = Pin(10)
                 PyDOS_HW.neoPixel = Pin(48)
                 PyDOS_HW.SCL=7
                 PyDOS_HW.SDA=6
@@ -100,6 +99,30 @@ class PyDOS_HW:
                 PyDOS_HW.SDA=2
 
         elif implementation.name.upper() == 'CIRCUITPYTHON':
+            if "SD_CS" in dir(board):
+                PyDOS_HW.SD_CS = digitalio.DigitalInOut(board.SD_CS)
+            else:
+                if 'D5' in dir(board):
+                    PyDOS_HW.SD_CS = digitalio.DigitalInOut(board.D5)
+                elif 'GP5' in dir(board):
+                    PyDOS_HW.SD_CS = digitalio.DigitalInOut(board.GP5)
+                elif 'IO5' in dir(board):
+                    PyDOS_HW.SD_CS = digitalio.DigitalInOut(board.IO5)
+
+            if board.board_id in ["cytron_maker_pi_rp2040","raspberry_pi_pico"]:
+                # Grove #2, GP3 & GP2
+                PyDOS_HW.SCL=board.GP3
+                PyDOS_HW.SDA=board.GP2
+            elif 'SCL' in dir(board):
+                PyDOS_HW.SCL=board.SCL
+                PyDOS_HW.SDA=board.SDA
+            elif 'STEMMA_I2C' in dir(board) or 'I2C' in dir(board):
+                pass
+            else:
+                if 'IO7' in dir(board): # esp32s3_devkitc_1_n8r2, LILYGO_S2
+                    PyDOS_HW.SCL=board.IO7
+                    PyDOS_HW.SDA=board.IO6
+
             if "SNDPIN" in dir(board):
                 PyDOS_HW.sndPin = board.SNDPIN
             elif "BUZZER" in dir(board):
@@ -110,11 +133,15 @@ class PyDOS_HW:
                     PyDOS_HW.sndPin = board.A3
                 elif board.board_id == "raspberry_pi_pico":
                     #D12 is GP11 on the Raspberry PICO
-                    PyDOS_HW.sndPin = board.GP11
+                    PyDOS_HW.sndPin = board.GP18
                 elif board.board_id == "sparkfun_thing_plus_rp2040":
                     PyDOS_HW.sndPin = board.D19
                 elif board.board_id == "adafruit_kb2040":
                     PyDOS_HW.sndPin = board.D3
+                elif board.board_id == "lilygo_ttgo_t8_s2_st7789":
+                    PyDOS_HW.sndPin = board.IO3
+                elif board.board_id == "espressif_esp32s3_devkitc_1_n8r2":
+                    PyDOS_HW.sndPin = board.IO10
                 else:
                     #Use D12 on Feathers
                     if 'D12' in dir(board):
@@ -134,18 +161,19 @@ class PyDOS_HW:
             try:
                 chkForFile = open('/lib/kfw_pico_board.py','r')
                 chkForFile.close()
-                PyDOS_HW._KFW = True
+                PyDOS_HW.KFW = True
             except:
                 pass
-            if not PyDOS_HW._KFW:
+            if not PyDOS_HW.KFW:
                 try:
                     chkForFile = open('/lib/kfw_s2_board.py','r')
                     chkForFile.close()
-                    PyDOS_HW._KFW = True
+                    PyDOS_HW.KFW = True
                 except:
                     pass
 
-            if PyDOS_HW._KFW:
+            if PyDOS_HW.KFW:
+                from adafruit_bus_device.i2c_device import I2CDevice
                 PyDOS_HW.neoPixel = board.D11
             elif "NEOPIXEL" in dir(board):
                 PyDOS_HW.neoPixel = board.NEOPIXEL
@@ -163,30 +191,20 @@ class PyDOS_HW:
         if not PyDOS_HW._I2C:
             if implementation.name.upper() == "CIRCUITPYTHON":
 
-                if board.board_id == "cytron_maker_pi_rp2040":
-                    # Grove #2, GP3 & GP2
-                    PyDOS_HW._I2C = busio.I2C(board.GP3, board.GP2)
+                if 'I2C_POWER_INVERTED' in dir(board) and not PyDOS_HW._I2C_power:
+                    PyDOS_HW._I2C_power = digitalio.DigitalInOut(board.I2C_POWER_INVERTED)
+                    PyDOS_HW._I2C_power.direction = digitalio.Direction.OUTPUT
+                    PyDOS_HW._I2C_power.value = False
+
+                if 'STEMMA_I2C' in dir(board):
+                    PyDOS_HW._I2C = board.STEMMA_I2C()
+                elif 'I2C' in dir(board):
+                    PyDOS_HW._I2C = board.I2C()
                 else:
-                    if 'I2C_POWER_INVERTED' in dir(board) and not PyDOS_HW._I2C_power:
-                        PyDOS_HW._I2C_power = digitalio.DigitalInOut(board.I2C_POWER_INVERTED)
-                        PyDOS_HW._I2C_power.direction = digitalio.Direction.OUTPUT
-                        PyDOS_HW._I2C_power.value = False
+                    PyDOS_HW._I2C = busio.I2C(PyDOS_HW.SCL, PyDOS_HW.SDA)
 
-                    if 'STEMMA_I2C' in dir(board):
-                        PyDOS_HW._I2C = board.STEMMA_I2C()
-                    elif 'I2C' in dir(board):
-                        PyDOS_HW._I2C = board.I2C()
-                    else:
-                        if "SCL" not in dir(board):
-                            if board.board_id == "raspberry_pi_pico":
-                                PyDOS_HW._I2C = busio.I2C(board.GP3, board.GP2)
-                            elif board.board_id == 'espressif_esp32s3_devkitc_1_n8r2':
-                                PyDOS_HW._I2C = busio.I2C(board.IO7, board.IO6)
-                        else:
-                            PyDOS_HW._I2C = busio.I2C(board.SCL, board.SDA)
-
-                    if PyDOS_HW._KFW and not PyDOS_HW.I2CbbqDevice:
-                        PyDOS_HW.I2CbbqDevice = I2CDevice(PyDOS_HW._I2C, 0x1F)
+                if PyDOS_HW.KFW and not PyDOS_HW.I2CbbqDevice:
+                    PyDOS_HW.I2CbbqDevice = I2CDevice(PyDOS_HW._I2C, 0x1F)
             elif implementation.name.upper() == "MICROPYTHON":
                 if uname().machine in ['Arduino Nano RP2040 Connect with RP2040']:
                     PyDOS_HW._I2C = m_I2C(0,scl=Pin(PyDOS_HW.SCL),sda=Pin(PyDOS_HW.SDA))
@@ -208,50 +226,60 @@ class PyDOS_HW:
             PyDOS_HW._I2C = None
             PyDOS_HW.I2CbbqDevice = None
 
-    def SD_CSdeinit():
+    def SD_deinit():
         if implementation.name.upper() == "CIRCUITPYTHON":
-            if PyDOS_HW.SD_CS:
-                PyDOS_HW.SD_CS.deinit()
-            PyDOS_HW.SD_CS = None
-
+            if PyDOS_HW._SD_SPI:
+                PyDOS_HW.SD_SPI().deinit()
+                if PyDOS_HW._SPI == PyDOS_HW._SD_SPI:
+                    PyDOS_HW._SPI = None
+                PyDOS_HW._SD_SPI = None
 
     def SPI():
         if implementation.name.upper() == "CIRCUITPYTHON":
-            if PyDOS_HW.SD_CS == None:
-                if "SD_CS" in dir(board):
-                    PyDOS_HW.SD_CS = digitalio.DigitalInOut(board.SD_CS)
+            if not PyDOS_HW._SPI:
+                if 'SPI' in dir(board):
+                    PyDOS_HW._SPI = board.SPI()
                 else:
-                    PyDOS_HW.SD_CS = digitalio.DigitalInOut(board.D5)
-
-            if 'SPI' in dir(board) and not PyDOS_HW._SPI:
-                PyDOS_HW._SPI = board.SPI()
-            elif not PyDOS_HW._SPI:
-                if 'SCK' in dir(board):
-                    if 'MOSI' in dir(board):
-                        PyDOS_HW._SPI = busio.SPI(board.SCK, board.MOSI, board.MISO)
-                    elif 'COPI' in dir(board):
-                        PyDOS_HW._SPI = busio.SPI(board.SCK, board.COPI, board.CIPO)
+                    _SCK = None
+                    if 'SCK' in dir(board):
+                        _SCK = board.SCK
+                    elif 'CLK' in dir(board):
+                        _SCK = board.CLK
+                    if _SCK:
+                        if 'MOSI' in dir(board):
+                            PyDOS_HW._SPI = busio.SPI(_SCK, board.MOSI, board.MISO)
+                        elif 'COPI' in dir(board):
+                            PyDOS_HW._SPI = busio.SPI(_SCK, board.COPI, board.CIPO)
+                    else:
+                        if 'D14' in dir(board):
+                            PyDOS_HW._SPI = busio.SPI(board.D14, board.D15, board.D12)
+                        elif 'GP14' in dir(board):
+                            PyDOS_HW._SPI = busio.SPI(board.GP14, board.GP15, board.GP12)
+                        elif 'IO14' in dir(board):
+                            PyDOS_HW._SPI = busio.SPI(board.IO14, board.IO15, board.IO12)
 
         return PyDOS_HW._SPI
 
     def SD_SPI():
         if implementation.name.upper() == "CIRCUITPYTHON":
-            if PyDOS_HW.SD_CS == None:
-                if "SD_CS" in dir(board):
-                    PyDOS_HW.SD_CS = digitalio.DigitalInOut(board.SD_CS)
+            if not PyDOS_HW._SD_SPI:
+                if 'SD_SPI' in dir(board):
+                    PyDOS_HW._SD_SPI = board.SD_SPI()
+                elif board.board_id == "raspberry_pi_pico":
+                    PyDOS_HW._SD_SPI = busio.SPI(board.GP10, board.GP11, board.GP12)
                 else:
-                    PyDOS_HW.SD_CS = digitalio.DigitalInOut(board.D5)
-
-            if 'SD_SPI' in dir(board) and not PyDOS_HW._SD_SPI:
-                PyDOS_HW._SD_SPI = board.SD_SPI()
-            elif not PyDOS_HW._SD_SPI:
-                if 'SD_SCK' in dir(board):
-                    if 'SD_MOSI' in dir(board):
-                        PyDOS_HW._SD_SPI = busio.SPI(board.SD_SCK, board.SD_MOSI, board.SD_MISO)
-                    elif 'SD_COPI' in dir(board):
-                        PyDOS_HW._SD_SPI = busio.SPI(board.SD_SCK, board.SD_COPI, board.SD_CIPO)
-                else:
-                    PyDOS_HW._SD_SPI = PyDOS_HW.SPI()
+                    _SCK = None
+                    if 'SD_SCK' in dir(board):
+                        _SCK = board.SD_SCK
+                    elif 'SD_CLK' in dir(board):
+                        _SCK = board.SD_CLK
+                    if _SCK:
+                        if 'SD_MOSI' in dir(board):
+                            PyDOS_HW._SD_SPI = busio.SPI(_SCK, board.SD_MOSI, board.SD_MISO)
+                        elif 'SD_COPI' in dir(board):
+                            PyDOS_HW._SD_SPI = busio.SPI(_SCK, board.SD_COPI, board.SD_CIPO)
+                    else:
+                        PyDOS_HW._SD_SPI = PyDOS_HW.SPI()
 
         return PyDOS_HW._SD_SPI
 
