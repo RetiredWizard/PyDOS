@@ -14,5 +14,3 @@ if passedIn != "":
     drive = passedIn
 
 umount(drive)
-if implementation.name.upper() == "CIRCUITPYTHON":
-    PyDOS_HW.SD_deinit()
