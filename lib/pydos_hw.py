@@ -10,6 +10,7 @@ if implementation.name.upper() == "MICROPYTHON":
     from machine import I2C as m_I2C
 
 elif implementation.name.upper() == "CIRCUITPYTHON":
+    from adafruit_bus_device.i2c_device import I2CDevice
     import digitalio
     import busio
     import board
@@ -173,7 +174,6 @@ class PyDOS_HW:
                     pass
 
             if PyDOS_HW.KFW:
-                from adafruit_bus_device.i2c_device import I2CDevice
                 PyDOS_HW.neoPixel = board.D11
             elif "NEOPIXEL" in dir(board):
                 PyDOS_HW.neoPixel = board.NEOPIXEL
