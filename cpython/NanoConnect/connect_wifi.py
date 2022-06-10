@@ -57,16 +57,23 @@ if esp.is_connected:
     print("Connected to", str(esp.ssid, "utf-8"), "\tRSSI:", esp.rssi)
     print("My IP address is", esp.pretty_ip(esp.ip_address))
 
-    print(
-        "IP lookup adafruit.com: %s" % esp.pretty_ip(esp.get_host_by_name("adafruit.com"))
-    )
+    try:
+        print(
+            "IP lookup adafruit.com: %s" % esp.pretty_ip(esp.get_host_by_name("adafruit.com"))
+        )
+    except:
+        print("*ERROR* Exception: Failed to request hostname")
 
     print("Fetching text from", TEXT_URL)
-    r = requests.get(TEXT_URL)
-    print("-" * 40)
-    print(r.text)
-    print("-" * 40)
-    r.close()
+    try:
+        r = requests.get(TEXT_URL)
+        print("-" * 40)
+        print(r.text)
+        print("-" * 40)
+        r.close()
+    except:
+        print("*ERROR* Exception: ESP32 not responding")
+
 
 print("Done!")
 
