@@ -134,7 +134,7 @@ class PyDOS_HW:
                     PyDOS_HW.sndPin = board.A3
                 elif board.board_id == "raspberry_pi_pico":
                     #D12 is GP11 on the Raspberry PICO
-                    PyDOS_HW.sndPin = board.GP18
+                    PyDOS_HW.sndPin = board.GP7
                 elif board.board_id == "sparkfun_thing_plus_rp2040":
                     PyDOS_HW.sndPin = board.D19
                 elif board.board_id == "adafruit_kb2040":
