@@ -546,14 +546,18 @@ def PyDOS():
             if not envFound:
                 if _ == "%":
                     envFound = True
+                    doublepct = True
                 else:
                     newCmdLine += _
             else:
                 if _ == "%":
+                    if doublepct:
+                        newCmdLine += "%"
                     envFound = False
                     newCmdLine += str(envVars.get(fndVar,""))
                     fndVar = ""
                 else:
+                    doublepct = False
                     fndVar += _
         cmdLine = newCmdLine
 
