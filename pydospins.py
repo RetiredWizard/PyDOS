@@ -3,7 +3,21 @@ import pydos_hw
 
 if implementation.name.upper() == "CIRCUITPYTHON":
     import board
-elif implementation.name.upper() == "MICROPYTHON":
+    if board.board_id = 'raspberry_pi_pico':
+        try:
+            import kfw_pico_board as board
+        except:
+            pass
+
+        try:
+            import cyt_mpp_board as board
+        except:
+            pass
+    elif board.board_id = 'unexpectedmaker_feathers2':
+        try:
+            import kfw_s2_board as board
+        except:
+            elif implementation.name.upper() == "MICROPYTHON":
     from os import uname
 
 
@@ -61,9 +75,9 @@ def printPinAssignments():
                     print("SD_COPI                ",board.COPI)
                     print("SD_CIPO                ",board.CIPO)
             elif board.board_id == 'raspberry_pi_pico':
-                print("SD_SCK                 ",board.GP10)
-                print("SD_MOSI                ",board.GP11)
-                print("SD_MISO                ",board.GP12)
+                print("SD_SCK                 ",board.GP18)
+                print("SD_MOSI                ",board.GP19)
+                print("SD_MISO                ",board.GP16)
             elif 'D14' in dir(board):
                 print("SD_SCK                 ",board.D14)
                 print("SD_MOSI                ",board.D15)
