@@ -61,9 +61,14 @@ def printPinAssignments():
                     print("SD_COPI                ",board.COPI)
                     print("SD_CIPO                ",board.CIPO)
             elif board.board_id == 'raspberry_pi_pico':
-                print("SD_SCK                 ",board.GP18)
-                print("SD_MOSI                ",board.GP19)
-                print("SD_MISO                ",board.GP16)
+                if pydos_hw.PyDOS_HW.KFW:
+                    print("SD_SCK                 ",board.GP18)
+                    print("SD_MOSI                ",board.GP19)
+                    print("SD_MISO                ",board.GP16)
+                else:
+                    print("SD_SCK                 ",board.GP14)
+                    print("SD_MOSI                ",board.GP15)
+                    print("SD_MISO                ",board.GP12)
             elif 'D14' in dir(board):
                 print("SD_SCK                 ",board.D14)
                 print("SD_MOSI                ",board.D15)
