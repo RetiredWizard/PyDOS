@@ -110,13 +110,13 @@ class PyDOS_HW:
                 elif 'IO5' in dir(board):
                     PyDOS_HW.SD_CS = digitalio.DigitalInOut(board.IO5)
 
-            if board.board_id in ["cytron_maker_pi_rp2040","raspberry_pi_pico"]:
+            if 'SCL' in dir(board):
+                PyDOS_HW.SCL=board.SCL
+                PyDOS_HW.SDA=board.SDA
+            elif board.board_id in ["cytron_maker_pi_rp2040","raspberry_pi_pico"]:
                 # Grove #2, GP3 & GP2
                 PyDOS_HW.SCL=board.GP3
                 PyDOS_HW.SDA=board.GP2
-            elif 'SCL' in dir(board):
-                PyDOS_HW.SCL=board.SCL
-                PyDOS_HW.SDA=board.SDA
             elif 'STEMMA_I2C' in dir(board) or 'I2C' in dir(board):
                 pass
             else:
@@ -133,7 +133,6 @@ class PyDOS_HW:
                     "adafruit_qtpy_esp32c3","sparkfun_nrf52840_mini"]:
                     PyDOS_HW.sndPin = board.A3
                 elif board.board_id == "raspberry_pi_pico":
-                    #D12 is GP11 on the Raspberry PICO
                     PyDOS_HW.sndPin = board.GP7
                 elif board.board_id == "sparkfun_thing_plus_rp2040":
                     PyDOS_HW.sndPin = board.D19
@@ -265,8 +264,6 @@ class PyDOS_HW:
             if not PyDOS_HW._SD_SPI:
                 if 'SD_SPI' in dir(board):
                     PyDOS_HW._SD_SPI = board.SD_SPI()
-                elif board.board_id == "raspberry_pi_pico":
-                    PyDOS_HW._SD_SPI = busio.SPI(board.GP10, board.GP11, board.GP12)
                 else:
                     _SCK = None
                     if 'SD_SCK' in dir(board):
