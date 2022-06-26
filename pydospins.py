@@ -3,21 +3,7 @@ import pydos_hw
 
 if implementation.name.upper() == "CIRCUITPYTHON":
     import board
-    if board.board_id = 'raspberry_pi_pico':
-        try:
-            import kfw_pico_board as board
-        except:
-            pass
-
-        try:
-            import cyt_mpp_board as board
-        except:
-            pass
-    elif board.board_id = 'unexpectedmaker_feathers2':
-        try:
-            import kfw_s2_board as board
-        except:
-            elif implementation.name.upper() == "MICROPYTHON":
+elif implementation.name.upper() == "MICROPYTHON":
     from os import uname
 
 
