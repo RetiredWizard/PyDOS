@@ -31,9 +31,7 @@ class PyDOS_UI:
         return retval
 
     def read_keyboard(self,num):
-        # Does the same function as sys.stdin.read(num)
-        # Reads num characters from keyboard and returns
-        # This is a blocking read, ie the program will wait for the input
+        # Does the same function as sys.stdin.read(num), blocking read
         return stdin.read(num)
 
     def get_screensize(self):
@@ -63,8 +61,5 @@ class PyDOS_UI:
             height = 24
 
         return(height,width)
-
-    def version(self):
-        return("Serial Console")
 
 Pydos_ui = PyDOS_UI()
