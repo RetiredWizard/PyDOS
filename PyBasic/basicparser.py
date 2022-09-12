@@ -281,9 +281,6 @@ class BASICParser:
             return None
 
         elif self.__token.category == Token.DIM:
-            #gc.collect()
-            #if implementation.name.upper() == 'MICROPYTHON':
-                #gc.threshold(gc.mem_free() // 4 + gc.mem_alloc())
             self.__dimstmt()
             return None
 
@@ -908,11 +905,8 @@ class BASICParser:
         elif implementation.name.upper() == 'CIRCUITPYTHON':
             try:
                 Pydos_hw.sndGPIO.deinit() # Workaround for ESP32-S2 GPIO issue
-                audioPin = PWMOut(sndPin, duty_cycle=0, frequency=440, variable_frequency=True)
-                audioPin.frequency = freq
-                audioPin.duty_cycle = volume
+                audioPin = PWMOut(sndPin, duty_cycle=volume, frequency=freq, variable_frequency=True)
                 sleep(duration/18.2)
-                audioPin.duty_cycle = 0
                 audioPin.deinit()
                 Pydos_hw.quietSnd() # Workaround for ESP32-S2 GPIO issue
             except:
