@@ -20,16 +20,25 @@ def http_get(url):
 
 TEXT_URL = "http://wifitest.adafruit.com/testwifi/index.html"
 
-# Get wifi details and more from a secrets.py file
+# Read config
+config = {}
+envfound = True
 try:
-    from secrets import secrets
-except ImportError:
-    print("WiFi secrets are kept in secrets.py, please add them there!")
-    raise
+    envfile = open('/.env')
+except:
+    envfound = False
 
-# Check secrets.py has updated credentials
-if secrets['ssid'] == 'your-ssid-here':
-    assert False, ("WiFi secrets are kept in secrets.py, please add them there!")
+if envfound:
+    for line in envfile:
+        try:
+            config[line.split('=')[0].strip()] = line.split('=')[1].strip()
+        except:
+            pass
+    envfile.close()
+
+# Check .env has updated credentials
+if not envfound or config.get('CIRCUITPY_WIFI_SSID','') == '':
+    assert False, ("/.env has not been updated with your unique keys and data")
 
 # Create WiFi connection and turn it on
 wlan = network.WLAN(network.STA_IF)
@@ -37,8 +46,8 @@ if not wlan.active():
     wlan.active(True)
 
     # Connect to WiFi router
-    print ("Connecting to WiFi: {}".format( secrets['ssid'] ) )
-    wlan.connect( secrets['ssid'], secrets['password'])
+    print ("Connecting to WiFi: {}".format( config['CIRCUITPY_WIFI_SSID'] ) )
+    wlan.connect( config['CIRCUITPY_WIFI_SSID'], config['CIRCUITPY_WIFI_PASSWORD'])
 
 # Wait until wifi is connected
 while not wlan.isconnected():

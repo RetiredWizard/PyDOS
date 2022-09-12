@@ -2,6 +2,7 @@
 import time
 from machine import Pin
 from os import uname
+from pydos_hw import Pydos_hw
 
 import _thread
 global threadLock
@@ -15,8 +16,12 @@ envVars['stopthread'] = 'go'
 
 if uname().machine == 'Adafruit Feather RP2040 with RP2040':
     led = Pin(13, Pin.OUT)
+elif uname().machine == 'Adafruit ItsyBitsy RP2040 with RP2040':
+    led = Pin(11, Pin.OUT)
 elif uname().machine == 'Arduino Nano RP2040 Connect with RP2040':
     led = Pin(6, Pin.OUT)
+elif Pydos_hw.led:
+    led = Pin(Pydos_hw.led, Pin.OUT)
 else:
     led = Pin(25, Pin.OUT)
 
