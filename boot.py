@@ -26,6 +26,8 @@ if implementation.name.upper() == "CIRCUITPYTHON":
         switch = digitalio.DigitalInOut(board.GP6)
     elif board.board_id == 'adafruit_qtpy_esp32c3':
         switch = digitalio.DigitalInOut(board.A1)
+    elif board.board_id == 'adafruit_itsybitsy_rp2040':
+        switch = digitalio.DigitalInOut(board.D7)
     else:
         if "D5" in dir(board):
             switch = digitalio.DigitalInOut(board.D5)
@@ -72,3 +74,13 @@ if implementation.name.upper() == "CIRCUITPYTHON":
         print("To set the PyDOS FS readonly and give the host write access enter the following command")
         print("at the PyDOS prompt: fs ro")
         storage.remount("/", PyDOSReadOnly )
+elif implementation.name.upper() == "MICROPYTHON":
+    from os import uname
+    if uname().machine == 'Teensy 4.1 with MIMXRT1062DVJ6A':
+        import uos, sys
+        uos.umount("/flash")
+        uos.mount(vfs,"/")
+        sys.path.pop(-1)
+        sys.path.pop(-1)
+        sys.path.append("/")
+        sys.path.append("/lib")

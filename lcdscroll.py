@@ -1,20 +1,16 @@
 import sys
 from time import sleep
-from pydos_hw import PyDOS_HW
+from pydos_hw import Pydos_hw
 from pydos_ui import Pydos_ui
 try:
     from pydos_ui import input
-except:
+except ImportError:
     pass
 
 if sys.implementation.name.upper() == "CIRCUITPYTHON":
-    import supervisor
     from circuitpython_i2c_lcd import I2cLcd
 else:
     import lcd2004
-    import uselect
-
-
 
 def lcdScroll(argv):
 
@@ -27,7 +23,7 @@ def lcdScroll(argv):
     # The PCF8574 has a jumper selectable address: 0x20 - 0x27
     DEFAULT_I2C_ADDR = 0x27
 
-    i2c = PyDOS_HW.I2C()
+    i2c = Pydos_hw.I2C()
 
     if sys.implementation.name.upper() == "CIRCUITPYTHON":
 
@@ -93,15 +89,14 @@ def lcdScroll(argv):
 
         while cmnd.upper() != "Q" and envVars.get("stopthread") == "go":
 
-            if envVars.get("_UI","") == "Keyboard FeatherWing":
+            if Pydos_hw.KFW:
                 i2c.unlock()
             while Pydos_ui.serial_bytes_available():
                 cmnd = Pydos_ui.read_keyboard(1)
                 print(cmnd, end="", sep="")
                 if cmnd in "qQ":
                     break
-
-            if envVars.get("_UI","") == "Keyboard FeatherWing":
+            if Pydos_hw.KFW:
                 while i2c.try_lock():
                     pass
 

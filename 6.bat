@@ -1,2 +1,3 @@
-@edit %1
+@dir/w/p
+@pause
 @menu

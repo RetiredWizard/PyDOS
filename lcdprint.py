@@ -1,8 +1,8 @@
 import sys
-from pydos_hw import PyDOS_HW
+from pydos_hw import Pydos_hw
 try:
     from pydos_ui import input
-except:
+except ImportError:
     pass
 
 if sys.implementation.name.upper() == "CIRCUITPYTHON":
@@ -19,7 +19,7 @@ def lcdPrint(passedIn):
     if mess == "":
         mess = input("Say what?: ")
 
-    i2c = PyDOS_HW.I2C()
+    i2c = Pydos_hw.I2C()
 
     if sys.implementation.name.upper() == "CIRCUITPYTHON":
         # circuitpython seems to require locking the i2c bus

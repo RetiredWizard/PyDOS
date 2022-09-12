@@ -19,6 +19,11 @@ def piano():
     elif sys.implementation.name.upper() == 'CIRCUITPYTHON':
         Pydos_hw.sndGPIO.deinit() # Workaround for ESP32-S2 GPIO issue
         pwm=PWMOut(Pydos_hw.sndPin, duty_cycle=0, frequency=440, variable_frequency=True)
+        # Hack for Teensy 4.1 PWM bug
+        pwm.deinit()
+        pwm = PWMOut(Pydos_hw.sndPin,duty_cycle=0,frequency=440,variable_frequency=True)
+        pwm.deinit()
+        pwm = PWMOut(Pydos_hw.sndPin,duty_cycle=0,frequency=440,variable_frequency=True)
 
     print ("\nPress +/- to change volume, 'q' to quit...")
 
@@ -101,8 +106,10 @@ def piano():
                 if "ESP32" in uname().machine or "S2" in uname().machine:
                     sleep(.1)
             elif sys.implementation.name.upper() == 'CIRCUITPYTHON':
-                pwm.frequency = note
-                pwm.duty_cycle = volume
+                if pwm.frequency != note:
+                    pwm.frequency = note
+                if pwm.duty_cycle != volume:
+                    pwm.duty_cycle = volume
                 if "s2" in board_id or "s3" in board_id:
                     sleep(.1)
 
@@ -118,7 +125,8 @@ def piano():
                 else:
                     pwm.duty(0)
             elif sys.implementation.name.upper() == 'CIRCUITPYTHON':
-                pwm.duty_cycle = 0
+                if pwm.duty_cycle != 0:
+                    pwm.duty_cycle = 0
             #print("Release")
 
     if sys.implementation.name.upper() == 'CIRCUITPYTHON':

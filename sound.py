@@ -41,10 +41,16 @@ elif sys.implementation.name.upper() == "CIRCUITPYTHON":
         print("Sound Pin not found")
     else:
         Pydos_hw.sndGPIO.deinit() # Workaround for ESP32-S2 GPIO issue
-        audioPin = PWMOut(Pydos_hw.sndPin, duty_cycle=0, frequency=440, variable_frequency=True)
-        audioPin.frequency = freq
-        audioPin.duty_cycle = vol
+        # Hack for Teensy 4.1 PWM bug
+        audioPin = PWMOut(Pydos_hw.sndPin,duty_cycle=0,frequency=freq,variable_frequency=True)
+        audioPin.deinit()
+        audioPin = PWMOut(Pydos_hw.sndPin,duty_cycle=0,frequency=freq,variable_frequency=True)
+        audioPin.deinit()
+
+        audioPin = PWMOut(Pydos_hw.sndPin, duty_cycle=vol, frequency=freq, variable_frequency=True)
+        #audioPin.frequency = freq
+        #audioPin.duty_cycle = vol
         time.sleep(dur/1000)
-        audioPin.duty_cycle = 0
+        #audioPin.duty_cycle = 0
         audioPin.deinit()
         Pydos_hw.quietSnd() # Workaround for ESP32-S2 GPIO issue

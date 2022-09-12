@@ -1,46 +1,171 @@
 from sys import implementation
+from pydos_hw import Pydos_hw
+import os
 
 if implementation.name.upper() == "MICROPYTHON":
     from sys import print_exception
+    from machine import Pin,SoftSPI,SPI
+    try:
+        from machine import SDCard
+    except:
+        pass
     import sdcard
-    from os import uname
 elif implementation.name.upper() == "CIRCUITPYTHON":
     import adafruit_sdcard
     import storage
-    from pydos_hw import PyDOS_HW
+
+
+def sdMount(drive):
+
+    def chkPath(tstPath):
+        validPath = True
+
+        simpPath = ""
+        if tstPath == []:
+            validPath = True
+            simpPath = ""
+        else:
+
+            savDir = os.getcwd()
+
+            for path in tstPath:
+                if path == "":
+                    os.chdir("/")
+
+                elif os.getcwd() == "/" and path == "..":
+                    validPath = False
+                    break
+
+                elif path == ".":
+                    continue
+
+                elif path == ".." and len(os.getcwd().split('/')) == 2:
+                    os.chdir('/')
+
+                elif path == "..":
+                    os.chdir("..")
+
+                elif path in os.listdir() and (os.stat(path)[0] & (2**15) == 0):
+                    os.chdir(path)
+
+                else:
+                    validPath = False
+                    simpPath = ""
+                    break
+
+            if validPath:
+                simpPath = os.getcwd()
+            os.chdir(savDir)
+
+        return((validPath,simpPath))
+
+    def absolutePath(argPath,currDir):
+
+        if argPath[0] == '/':
+            fullPath = argPath
+        elif currDir == '/':
+            fullPath = '/'+argPath
+        else:
+            fullPath = currDir+'/'+argPath
+
+        if len(fullPath) > 1 and fullPath[-1] == '/':
+            fullPath = fullPath[:-1]
+
+        return(fullPath)
+
+    def do_mount(drive):
+        sdMounted = False
+
+        if implementation.name.upper() == "MICROPYTHON":
+            if Pydos_hw.SD_SCK and not altSPI:
+                try:
+                    os.mount(SDCard(), drive)
+                    sdMounted = True
+                except:
+                    pass
+
+                if not sdMounted:
+                    try:
+                        sd = sdcard.SDCard(Pydos_hw.SD_SPI(), Pin(Pydos_hw.SD_CS,Pin.OUT))
+                        os.mount( sd, drive)
+                        sdMounted = True
+                    except Exception as e:
+                        print_exception(e)
+            else:
+                try:
+                    sd = sdcard.SDCard(Pydos_hw.SPI(), Pin(Pydos_hw.CS,Pin.OUT))
+                    os.mount( sd, drive)
+                    sdMounted = True
+                except Exception as e:
+                    print_exception(e)
+
+        elif implementation.name.upper() == "CIRCUITPYTHON":
+            if not Pydos_hw.SD_CS and not Pydos_hw.CS:
+                print("CS Pin not allocated for SDCard SPI interface")
+            else:
+                try:
+                    if altSPI:
+                        sd = adafruit_sdcard.SDCard(Pydos_hw.SPI(), Pydos_hw.CS)
+                    else:
+                        if Pydos_hw.SD_CS:
+                            sd = adafruit_sdcard.SDCard(Pydos_hw.SD_SPI(), Pydos_hw.SD_CS)
+                        elif Pydos_hw.CS:
+                            sd = adafruit_sdcard.SDCard(Pydos_hw.SD_SPI(), Pydos_hw.CS)
+                    vfs = storage.VfsFat(sd)
+                    storage.mount(vfs, drive)
+                    sdMounted = True
+                except Exception as e:
+                    print('SD-Card: Fail,', e)
+
+        if sdMounted:
+            print(drive+" mounted")
+            # nano connect/Tennsy 4.1 are special cases becuase LED uses the SPI SCK pin
+            if os.uname().machine in ["Arduino Nano RP2040 Connect with rp2040", \
+                "Arduino Nano RP2040 Connect with RP2040", \
+                "TinyPICO with ESP32-PICO-D4"] and not altSPI:
+
+                envVars[".sd_drive"] = drive
+
+            if os.uname().machine in ["Teensy 4.1 with IMXRT1062DVJ6A", \
+                'Teensy 4.1 with MIMXRT1062DVJ6A'] and altSPI:
+
+                envVars[".sd_drive"] = drive
+
+        return
+
+    savDir = os.getcwd()
+    args = absolutePath(drive,savDir)
+
+    aPath = drive.split("/")
+    newdir = aPath.pop(-1)
+    (validPath, tmpDir) = chkPath(aPath)
+    if tmpDir == "" or tmpDir[-1] != "/":
+        tmpDir += "/"
+
+    if validPath:
+        if newdir not in os.listdir(tmpDir[:(-1 if tmpDir != "/" else None)]):
+            if (tmpDir+newdir)[1:].find('/') != -1:
+                print("Target must be in root")
+            else:
+                do_mount(tmpDir+newdir)
+        else:
+            print("Target name already exists")
+    else:
+        print("Invalid path")
+
+    return
 
 drive = "/sd"
+altSPI = False
 
 if __name__ != "PyDOS":
     passedIn = ""
+    envVars = {}
 
 if passedIn != "":
-    drive = passedIn
+    drive = passedIn.split(',')
+    if len(drive) > 1:
+        altSPI = True
+    drive = drive[0]
 
-if implementation.name.upper() == "MICROPYTHON":
-    try:
-        if uname().machine == 'Raspberry Pi Pico with RP2040':
-            sd = sdcard.SDCard(spi=1, sck=10, mosi=11, miso=12, cs=15, drive=drive)
-        elif uname().machine == 'Arduino Nano RP2040 Connect with RP2040':
-            sd = sdcard.SDCard(spi=0, sck=6, mosi=7, miso=4, cs=5, drive=drive)
-        elif uname().machine == 'Adafruit Feather RP2040 with RP2040':
-            sd = sdcard.SDCard(spi=0,sck=18,mosi=19,miso=20,cs=9,drive=drive)
-        elif uname().machine == 'ESP32S3 module (spiram) with ESP32S3':
-            sd = sdcard.SDCard(spi=2, sck=14, mosi=15, miso=12, cs=9, drive=drive)
-        elif uname().machine == 'TinyPICO with ESP32-PICO-D4':
-            sd = sdcard.SDCard(spi=1,sck=18,mosi=19,miso=23,cs=5,drive=drive)
-        else:
-            sd = sdcard.SDCard(spi=1, sck=14, mosi=15, miso=12, cs=9, drive=drive)
-    except Exception as e:
-        print_exception(e)
-
-elif implementation.name.upper() == "CIRCUITPYTHON":
-    if not PyDOS_HW.SD_CS:
-        print("CS Pin not allocated for SDCard SPI interface")
-    else:
-        try:
-            sd = adafruit_sdcard.SDCard(PyDOS_HW.SD_SPI(), PyDOS_HW.SD_CS)
-            vfs = storage.VfsFat(sd)
-            storage.mount(vfs, drive)
-        except Exception as e:
-            print('SD-Card: Fail,', e)
+sdMount(drive)

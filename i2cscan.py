@@ -7,10 +7,10 @@
 # your I2C bus from the REPL with
 #  >>> import board
 #  >>> board.I2C().unlock()
-from pydos_hw import PyDOS_HW
+from pydos_hw import Pydos_hw
 from sys import implementation
 
-i2c = PyDOS_HW.I2C()
+i2c = Pydos_hw.I2C()
 
 print('Scan i2c bus...')
 
