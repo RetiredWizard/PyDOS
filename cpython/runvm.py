@@ -83,7 +83,8 @@ def runvm(runargv):
         t.write("global envVars\n")
         t.write("envVars = {}\n")
         for _ in envVars:
-            t.write("envVars['"+_+"']='"+str(envVars[_]).replace("'",chr(92)+"'")+"'\n")
+            if _ != ".neopixel":
+                t.write("envVars['"+_+"']='"+str(envVars[_]).replace("'",chr(92)+"'")+"'\n")
 
         t.write("__name__ = 'PyDOS'\n")
         t.write(r.read())

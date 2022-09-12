@@ -7,15 +7,14 @@ import wifi
 import socketpool
 import ssl
 import adafruit_requests
+from os import getenv
 
-# Get wifi details and more from a secrets.py file
-try:
-    from secrets import secrets
-except ImportError:
-    print("WiFi secrets are kept in secrets.py, please add them there!")
-    raise
-ssid=secrets["ssid"]
-passwd=secrets["password"]
+# Get wifi details and more from a .env file
+if getenv('CIRCUITPY_WIFI_SSID') is None:
+    raise Exception("WiFi secrets are kept in .env, please add them there!")
+
+ssid=getenv('CIRCUITPY_WIFI_SSID')
+passwd=getenv('CIRCUITPY_WIFI_PASSWORD')
 
 print('Hello World!')
 
