@@ -96,9 +96,9 @@ to return control to PyDOS.
 
 **sdumount.py** - dismounts an sd card from the file system
 
-**setdate.py** - initalizes the RP2040 real time clock to an entered date
+**setdate.py** - initalizes the real time clock to an entered date
 
-**settime.py** - initalizes the RP2040 real time clock to an entered time
+**settime.py** - initalizes the real time clock to an entered time
 
 **diff.py** - performs a file comparison
 
