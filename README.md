@@ -67,6 +67,8 @@ spaces must not be enclosed in quotes.
 
 **PEXEC [python command]** - Executes a single python command.
 
+An **autoexec.bat** batch file will automatically execute when PyDOS starts.
+
 ### External programs included:
 
 **pydospins.py** - Displays the GPIO pins for sound output and I2C for the particular board PyDOS is running on.
