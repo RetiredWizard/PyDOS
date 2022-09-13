@@ -44,7 +44,7 @@ spaces must not be enclosed in quotes.
 **IF [NOT] (string1)==(string2) (command) [parameters]** - Allows for conditional operations in batch processing.  
 **IF [NOT] ERRORLEVEL (number) (command) [parameters]**  
 
-**SET (string1)=(string2)** - Inserts strings into the command environment. The set values can be used later by programs.
+**SET[/P] (string1)=[(string2|prompt)]** - Inserts strings into the command environment. The set values can be used later by programs.
 
 **PROMPT [prompt text]** = Changes the DOS command prompt. Supported strings "$R,$D,$T,$P,$G,$C,$F,$A,$B,$E,$H,$L,$Q,$S,$V,$_,$."
 
