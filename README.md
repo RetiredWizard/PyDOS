@@ -102,23 +102,23 @@ to return control to PyDOS.
 
 **diff.py** - performs a file comparison
 
-**sound.py** - outputs a sound to a speaker cicruit connected to GPIO pin defined in lib/pydos_bcfg.py
-**tsound.py** - test program that plays a short sound sequence
+**sound.py** - outputs a sound to a speaker cicruit connected to GPIO pin defined in lib/pydos_bcfg.py  
+**tsound.py** - test program that plays a short sound sequence  
 **piano.py** - emulates a small piano keyboard
 
 **i2cscan.py** - scans the I2C bus and displays any found device addresses
 
-**lcdprint.py** - displays text on an I2C LCD display
-**lcdscroll.py** - scrolls text on an I2C LCD display
+**lcdprint.py** - displays text on an I2C LCD display  
+**lcdscroll.py** - scrolls text on an I2C LCD display  
 **temperature.py** - displays temperature value from onboard temperature sensor to screen and I2C LCD display
 
 **basicpython.py** - Shell modeled after basic interpreter shell from https://github.com/tannewt/basicpython
 
 **blink.py** - program to blink onboard LED
 
-**rgbset.py** - program to set the rgb color of an onboard neopixel or dotstar
-**rgbblink.py** - program to blink an onboard neopixel or dotstar
-**rgbrainbow.py** - program to color cycle an onboard neopixel or dotstar
+**rgbset.py** - program to set the rgb color of an onboard neopixel or dotstar  
+**rgbblink.py** - program to blink an onboard neopixel or dotstar  
+**rgbrainbow.py** - program to color cycle an onboard neopixel or dotstar  
 
 **reboot.py** - performs a soft reboot (Micropython requires a Ctrl-D to complete)
 
