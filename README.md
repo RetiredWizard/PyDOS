@@ -19,7 +19,7 @@ the Microcontroller flash.
 
 PyDOS requires all switches to immediatly following the command with no spaces between the command or switches.
 
-If a command argument contains spaces the argument must be enclosed in quotes, **however** arguments that do **not** contain  
+If a command argument contains spaces the argument must be enclosed in quotes, **however** arguments that do **not** contain
 spaces must not be enclosed in quotes.
 
 **REM [comment]** - Used in batch files to insert remarks (that will not be acted on).
@@ -126,6 +126,16 @@ to return control to PyDOS.
 
 **keys.bat** - (Keyboard Featherwing only) Displays keyboard mappings for hidden keys and functions  
 **ui.bat** - (Keyboard Featherwing only) Switches between using the Keyboard Featherwing and USB Serial port for PyDOS I/O
+
+**fs.py** - (Circuitpython only) By selecting the "RO" option the flash mode is set such that when the microcontroller
+is power cycled or hard reset, the host computer will have read/write access to the flash and the microcontoller will be
+restricted to read only access. To give PyDOS access to the flash after switching to this mode the boot.py file must be
+replaced or modified from the host computer so that it contains the following instructions:
+
+    import storage
+    storage.remount("/",False)
+    
+and then power cycled or hard reset.
 
 
 ## Installation
