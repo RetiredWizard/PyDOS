@@ -1,18 +1,79 @@
 ## PyDOS, PyBASIC, edit... All the functionality of the 1981 IBM PC on a PI Pico?
 
-**MicroPython/CircuitPython DOS-like shell for microcontroller (RP2040, ESP32-S2/S3) boards**   
+**MicroPython/CircuitPython DOS-like shell for microcontroller boards:**  
+**(RP2040, ESP32, ESP32 PICO-D4, ESP32-S2/S3, nRF52840, SAMD51, stm32L4+, NXM ARM Cortex-M7)**  
+
 **Check out the demo video at https://www.youtube.com/watch?v=Az_oiq8GE4Y**
 
 To start the shell type **import PyDOS** at the micropython REPL prompt.
 
-**setup.bat** in the root folder will prompt the user to indicate Circuit Python or Micropython and then the board they are using.
-The setup batch file will then copy the programs and libraries appropriate for the user's platform to the root folder of the
-Microcontroller flash.
+At the PyDOS prompt a python program (.py) or batch (.bat) file can be run by simply entering the filename with or without
+the extension.
 
-External programs included:
+**setup.bat** in the root folder will prompt the user to indicate Circuit Python or Micropython and then the board they are using.
+The setup batch file will then copy the programs and libraries appropriate for the user's platform to the root and /lib folders of
+the Microcontroller flash.
+
+## Implemented DOS Commands:  
+(syntax and descriptions taken from https://home.csulb.edu/~murdock/dosindex.html)
+
+PyDOS requires all switches to immediatly following the command with no spaces between the command or switches.
+
+If a command argument contains spaces the argument must be enclosed in quotes, **however** arguments that do **not** contain  
+spaces must not be enclosed in quotes.
+
+**REM [comment]** - Used in batch files to insert remarks (that will not be acted on).
+
+**DIR[/P][/W] [path][filename]** - Displays directory of files and directories stored on flash.
+
+**DATE** - Displays the current date.
+
+**TIME** - Displays the current time.
+
+**MEM[/D]** - Displays available RAM and performs a garbage collection operation
+
+**VER** - Displays PyDOS version
+
+**ECHO [ON|OFF][message]** - Displays messages or turns on or off the display of commands in a batch file.
+
+**PAUSE** - Suspends execution until a key is pressed.
+
+**GOTO label** Causes unconditional branch to the specified label. (labels are defined as :label in batch files)
+
+**IF [NOT] EXIST filename (command) [parameters]**  
+**IF [NOT] (string1)==(string2) (command) [parameters]** - Allows for conditional operations in batch processing.  
+**IF [NOT] ERRORLEVEL (number) (command) [parameters]**  
+
+**SET (string1)=(string2)** - Inserts strings into the command environment. The set values can be used later by programs.
+
+**PROMPT [prompt text]** = Changes the DOS command prompt. Supported strings "$R,$D,$T,$P,$G,$C,$F,$A,$B,$E,$H,$L,$Q,$S,$V,$_,$."
+
+**RENAME (REN, MOVE, MV) [path]filename [path]filename** - Changes the filename under which a file is stored.
+
+**DELETE (DEL) [path]filename** = Deletes files from disk.
+
+**TYPE (MORE)[/P] [path]filename** - Displays the contents of a file.
+
+**CD [[d:]path]** - Displays working (current) directory and/or changes to a different directory.  
+**CD ..** - Changes to parent directory of current directory.
+
+**MKDIR path** - Creates a new subdirectory.
+
+**RMDIR path** - Removes a subdirectory.
+
+**COPY[/Y] [path]filename [path][filename]** - copies files.
+
+**EXIT** - In a batch file returns to PyDOS, at PyDOS prompt terminates PyDOS and returns to REPL.
+
+**PEXEC [python command]** - Executes a single python command.
+
+### External programs included:
 
 **pydospins.py** - Displays the GPIO pins for sound output and I2C for the particular board PyDOS is running on.
 
+**PyBasic.py** - a Basic interpreter from https://github.com/richpl/PyBasic. Tweaked and modified to run on Micropython.
+	basicparser.py, basictoken.py, flowsignal.py, lexer.py, program.py, basicdata.py
+	
 **runasthread.py** (Micropython only) - This program will attempt to launch a python program on the second RP2040 core. Threading is
 experimental on Micropython so it's not difficult to crash the microcontroller using this program. I have not found a way to kill
 a thread started on the second core so be sure any threads you launch will shutdown on their own or monitor a global variable or
@@ -24,32 +85,42 @@ perform a reboot and launch the target script. The target script is "wrapped" in
 PyDOS environment variables to the newly booted environment as well as code that causes a second soft reboot after the script has completed
 to return control to PyDOS.
 
-**edit.py** - line editor inspired by DOS edlin. Intial program structure of line editor by Joesph Long
+**edlin.py** - line editor inspired by DOS edlin. Intial program structure of line editor by Joesph Long
     https://github.com/j-osephlong/Python-Text-Editor
     
-**fsedit.py** - shell to load full screen editor from https://github.com/robert-hh/Micropython-Editor
+**edit.py** - shell to load full screen editor from https://github.com/robert-hh/Micropython-Editor
 
 **fileview.py** - scrollable text file viewer
 
-**sdmount.py** (Micropython ThingPlus or Circuitpython Keyboard Featherwing) - mounts an sd card to the file system
+**sdmount.py** - mounts an sd card to the file system
 
-**sdumount.py** (Micropython ThingPlus only) - dismounts an sd card from the file system
+**sdumount.py** - dismounts an sd card from the file system
 
-**setdate.py** (Micropython only) - initalizes the RP2040 real time clock to an entered date
+**setdate.py** - initalizes the RP2040 real time clock to an entered date
 
-**settime.py** (Micropython only) - initalizes the RP2040 real time clock to an entered time
+**settime.py** - initalizes the RP2040 real time clock to an entered time
 
 **diff.py** - performs a file comparison
 
-**sound.py** - outputs a sound to a speaker cicruit connected to GPIO 19
+**sound.py** - outputs a sound to a speaker cicruit connected to GPIO pin defined in lib/pydos_bcfg.py
+**tsound.py** - test program that plays a short sound sequence
+**piano.py** - emulates a small piano keyboard
+
+**i2cscan.py** - scans the I2C bus and displays any found device addresses
 
 **lcdprint.py** - displays text on an I2C LCD display
+**lcdscroll.py** - scrolls text on an I2C LCD display
+**temperature.py** - displays temperature value from onboard temperature sensor to screen and I2C LCD display
 
-**PyBasic.py** - a Basic interpreter from https://github.com/richpl/PyBasic. Tweaked and modified to run on Micropython.
-	basicparser.py, basictoken.py, flowsignal.py, lexer.py, program.py, basicdata.py
+**basicpython.py** - Shell modeled after basic interpreter shell from https://github.com/tannewt/basicpython
 
-At the DOS prompt a python program (.py) or batch (.bat) file can be run by simply entering the filename with or without
-the extension
+**blink.py** - program to blink onboard LED
+
+**rgbset.py** - program to set the rgb color of an onboard neopixel or dotstar
+**rgbblink.py** - program to blink an onboard neopixel or dotstar
+**rgbrainbow.py** - program to color cycle an onboard neopixel or dotstar
+
+**reboot.py** - performs a soft reboot (Micropython requires a Ctrl-D to complete)
 
 ## Installation
 
@@ -118,18 +189,27 @@ The first is if you wan to connect up an old school serial terminal to the REPL 
 Micropython with this modification can be found in section 2.2 of the Raspberry Pi Pico Python SDK at https://datasheets.raspberrypi.com/pico/raspberry-pi-pico-python-sdk.pdf.
 
 The second is that PyDOS uses a recursive routine to process wildcard operations and the default stack in Micropython limits the recursion depth that can be obtained.
-This means that PyDOS has to limit wildcard operations to files of 16 characters or less, one impact of this is that files with longer file names will not appear
-in directory listings when wildcards are used. To mitigate this issue the MICROPY_STACKLESS parameter in **py/circuitpy_mpconfig.h** can be changed from **0** to **1**. If
-Micropython frimware is used with this modification the **wildcardLen** varaible in the PyDOS.py program file can be changed from 16 to 65 which will increase the
-length of files that can be processed using wildcards.
+This means that PyDOS has to limit wildcard operations to files, one impact of this is that files with longer file names will not appear
+in directory listings when wildcards are used. To mitigate this issue the MICROPY_STACKLESS parameter in **py/circuitpy_mpconfig.h** can be changed from **0** to **1**. 
 
 **MicroPython Setup**
 
 Once your microcontroller has Micropython installed and running the best way
-to copy the PyDOS files and interact with the repl is to use MPRemote. Detailed documentation on installing and using MPRemote can be found 
+to copy the PyDOS files and interact with the repl is to use Thonny. Adafruit has a good learning guide for getting started with Thonny here:
+https://learn.adafruit.com/circuitpython-libraries-on-micropython-using-the-raspberry-pi-pico/micropython-installation. 
+
+Download PyDOS from the github repository and after deleting the **cpython** folder if space is an issue, use the Thonny upload command as described in the Adafruit 
+learning guide to copy the downloaded files to the microcontroller.
+
+To interact with the microcontroller connect over the serial USB port (COMn: /dev/ttyACMx, etc) using a terminal program like puTTY or minicom. 
+One thing to note is that if you
+connect to your microcontroller with a terminal program after using Thonny to copy files, you may need to press CTRL-B to exit the raw REPL mode that 
+Thonny uses to transfer and execute files.
+
+Another option is to use MPRemote. Detailed documentation on installing and using MPRemote can be found 
 at https://docs.micropython.org/en/latest/reference/mpremote.html.
 
-To install PyDOS on the microcontroller board download PyDOS from github repository and after deleting the **cpython** folder if space is an issue, set your current
+To install PyDOS on the microcontroller board download PyDOS from the github repository and after deleting the **cpython** folder if space is an issue, set your current
 directory to the root folder of the downloaded PyDOS repository and use the following command:
 
 	mpremote fs cp -r * :
