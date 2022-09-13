@@ -1,36 +1,77 @@
 import time
 import sys
+from pydos_hw import Pydos_hw
+from pydos_ui import Pydos_ui
+
 if sys.implementation.name.upper() == 'MICROPYTHON':
     from machine import Pin
     from os import uname
-
-    if uname().machine == 'Adafruit Feather RP2040 with RP2040':
-        led = Pin(13, Pin.OUT)
-    elif uname().machine == 'Arduino Nano RP2040 Connect with RP2040':
-        from os import umount
-        try:
-            umount(drive) # Nano Connect uses LED pin for SPI SCK
-            print("Unmounting SD card because of shared SCK pin")
-        except:
-            pass
-        led = Pin(6, Pin.OUT)
-    else:
-        led = Pin(25, Pin.OUT)
-
 elif sys.implementation.name.upper() == 'CIRCUITPYTHON':
     import board
     from digitalio import DigitalInOut, Direction
 
-    # LED setup for onboard LED
-    if 'LED1' in dir(board):
-        led = DigitalInOut(board.LED1)
-    else:
-        led = DigitalInOut(board.LED)
-    led.direction = Direction.OUTPUT
+def blink(passed_envVars={}):
+    global envVars
 
-from pydos_ui import Pydos_ui
+    if "envVars" not in globals().keys():
+        envVars = passed_envVars
+    elif envVars == {}:
+        envVars = passed_envVars
 
-def blink():
+    if sys.implementation.name.upper() == 'MICROPYTHON':
+
+        # nano connect is special case becuase LED uses the SPI SCK pin
+        if uname().machine in ['Arduino Nano RP2040 Connect with RP2040','Teensy 4.1 with MIMXRT1062DVJ6A']:
+
+            if envVars.get('.sd_drive',None) != None:
+                from os import umount
+                drive = envVars['.sd_drive']
+                try:
+                    umount(drive) # Nano Connect uses LED pin for SPI SCK
+                    print("Unmounting SD card because of shared SCK pin")
+                    envVars.pop('.sd_drive',None)
+                except:
+                    pass
+
+            if uname().machine == 'Teensy 4.1 with MIMXRT1062DVJ6A':
+                Pydos_hw.SPI_deinit()
+            else:
+                Pydos_hw.SD_deinit()
+
+        if Pydos_hw.led:
+            led = Pin(Pydos_hw.led, Pin.OUT)
+        else:
+            led = Pin(25, Pin.OUT)
+
+    elif sys.implementation.name.upper() == 'CIRCUITPYTHON':
+
+        # nano connect/Tennsy 4.1 are special cases becuase LED uses the SPI SCK pin
+        if board.board_id in ["arduino_nano_rp2040_connect","teensy41"]:
+
+            if envVars.get('.sd_drive',None) != None:
+                from storage import umount
+                from pydos_hw import PyDOS_HW
+                drive = envVars['.sd_drive']
+                try:
+                    umount(drive) # Nano Connect uses LED pin for SPI SCK
+                    print("Unmounting SD card because of shared SCK pin")
+                    envVars.pop('.sd_drive',None)
+                except:
+                    pass
+            # If anything has used the SPI interface need to free up SCK
+            if board.board_id == "teensy41":
+                Pydos_hw.SPI_deinit()
+            else:
+                Pydos_hw.SD_deinit()
+
+        # LED setup for onboard LED
+        if Pydos_hw.led:
+            led = DigitalInOut(Pydos_hw.led)
+        elif 'LED1' in dir(board):
+            led = DigitalInOut(board.LED1)
+        else:
+            led = DigitalInOut(board.LED)
+        led.direction = Direction.OUTPUT
 
     print("listening..., Enter q to quit")
     cmnd = ""

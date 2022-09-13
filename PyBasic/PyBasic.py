@@ -38,10 +38,10 @@ if implementation.name.upper() == 'MICROPYTHON':
     from sys import print_exception
 
 gc.collect()
-if implementation.name.upper() == 'MICROPYTHON':
+if 'threshold' in dir(gc):
     gc.threshold(gc.mem_free() // 4 + gc.mem_alloc())
 
-def main():
+def main(passedIn=""):
 
     banner = (
 """
@@ -117,8 +117,7 @@ uuuu P        Y    BBBB   A   A  SSSS    I    CCC
                     remove('_pybTmp.tmp')
                     break
 
-                # Add a new program statement, beginning
-                # a line number
+                # Add a new program statement
                 elif tokenlist[0].category == Token.UNSIGNEDINT\
                      and len(tokenlist) > 1:
                     program.add_stmt(tokenlist,-1,tmpfile)
@@ -246,23 +245,20 @@ uuuu P        Y    BBBB   A   A  SSSS    I    CCC
                         else:
                             print("Program file not found")
 
-                # Unrecognised input
                 else:
                     print("Unrecognized input")
                     for token in tokenlist:
                         token.print_lexeme()
                     print("")
 
-        # Trap all exceptions so that interpreter
-        # keeps running
+        # Trap all exceptions so that interpreter keeps running
         except Exception as e:
             if implementation.name.upper() == 'MICROPYTHON':
-                #### print(e)
                 print_exception(e)
             else:
                 print(e)
 
-if __name__ != "PyDOS":
-    passedIn = ""
-
-main()
+if __name__ == "PyDOS":
+    main(passedIn)
+else:
+    print("Enter 'PyBasic.main()' in the REPL to run.")

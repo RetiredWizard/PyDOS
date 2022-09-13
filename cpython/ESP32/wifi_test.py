@@ -7,18 +7,16 @@ import ssl
 import wifi
 import socketpool
 import adafruit_requests
+from os import getenv
 
 # URLs to fetch from
 TEXT_URL = "http://wifitest.adafruit.com/testwifi/index.html"
 JSON_QUOTES_URL = "https://www.adafruit.com/api/quotes.php"
 JSON_STARS_URL = "https://api.github.com/repos/adafruit/circuitpython"
 
-# Get wifi details and more from a secrets.py file
-try:
-    from secrets import secrets
-except ImportError:
-    print("WiFi secrets are kept in secrets.py, please add them there!")
-    raise
+# Get wifi details and more from a .env file
+if getenv('CIRCUITPY_WIFI_SSID') is None:
+    raise Exception("WiFi secrets are kept in .env, please add them there!")
 
 print("ESP32-S2 WebClient Test")
 
@@ -30,9 +28,9 @@ for network in wifi.radio.start_scanning_networks():
             network.rssi, network.channel))
 wifi.radio.stop_scanning_networks()
 
-print("Connecting to %s"%secrets["ssid"])
-wifi.radio.connect(secrets["ssid"], secrets["password"])
-print("Connected to %s!"%secrets["ssid"])
+print("Connecting to %s" % getenv('CIRCUITPY_WIFI_SSID'))
+wifi.radio.connect(getenv('CIRCUITPY_WIFI_SSID'), getenv('CIRCUITPY_WIFI_PASSWORD'))
+print("Connected to %s!" % getenv('CIRCUITPY_WIFI_SSID'))
 print("My IP address is", wifi.radio.ipv4_address)
 
 ipv4 = ipaddress.ip_address("8.8.4.4")

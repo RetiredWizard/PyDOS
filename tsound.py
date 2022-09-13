@@ -7,10 +7,17 @@ if not Pydos_hw.sndPin:
 else:
     if sys.implementation.name.upper() == "MICROPYTHON":
         import machine
+        machine.PWM(Pydos_hw.sndPin)
+        machine.PWM(Pydos_hw.sndPin)
         piezo=machine.PWM(Pydos_hw.sndPin)
     elif sys.implementation.name.upper() == 'CIRCUITPYTHON':
         from pwmio import PWMOut
         Pydos_hw.sndGPIO.deinit() # Workaround for ESP32-S2 GPIO issue
+        piezo = PWMOut(Pydos_hw.sndPin,duty_cycle=0,frequency=440,variable_frequency=True)
+        # Hack for Teensy 4.1 PWM bug
+        piezo.deinit()
+        piezo = PWMOut(Pydos_hw.sndPin,duty_cycle=0,frequency=440,variable_frequency=True)
+        piezo.deinit()
         piezo = PWMOut(Pydos_hw.sndPin,duty_cycle=0,frequency=440,variable_frequency=True)
 
     cmnd = "Y"

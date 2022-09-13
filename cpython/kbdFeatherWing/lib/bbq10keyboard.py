@@ -175,7 +175,6 @@ class BBQ10Keyboard:
             self._i2c = BBQI2CDevice
 
         self._buffer = bytearray(2)
-
         self.reset()
 
     def reset(self):

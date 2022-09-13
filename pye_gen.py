@@ -1,12 +1,6 @@
 #
 # Front-end for Micropython standard console IO
 #
-from pydos_ui import Pydos_ui
-try:
-    from pydos_ui import input
-except:
-    pass
-
 try:
     import usys as sys
 except:

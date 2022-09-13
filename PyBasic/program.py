@@ -300,9 +300,6 @@ class Program:
             # sequential statement execution. The index
             # will be incremented by one, unless modified by
             # a jump
-            #gc.collect()
-            #if implementation.name.upper() == 'MICROPYTHON':
-                #gc.threshold(gc.mem_free() // 4 + gc.mem_alloc())
             index = 0
             self.set_next_line_number(line_numbers[index])
 

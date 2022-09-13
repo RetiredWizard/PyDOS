@@ -9,13 +9,11 @@ from digitalio import DigitalInOut
 import adafruit_requests as requests
 import adafruit_esp32spi.adafruit_esp32spi_socket as socket
 from adafruit_esp32spi import adafruit_esp32spi
+from os import getenv
 
-# Get wifi details and more from a secrets.py file
-try:
-    from secrets import secrets
-except ImportError:
-    print("WiFi secrets are kept in secrets.py, please add them there!")
-    raise
+# Get wifi details and more from a .env file
+if getenv('CIRCUITPY_WIFI_SSID') is None:
+    raise Exception("WiFi secrets are kept in .env, please add them there!")
 
 print("Arduino Nano RP2040 Connect webclient test")
 
@@ -48,7 +46,7 @@ while not esp.is_connected and ntrys < 3:
         print("Connecting to AP...")
     ntrys += 1
     try:
-        esp.connect_AP(secrets["ssid"], secrets["password"])
+        esp.connect_AP(getenv('CIRCUITPY_WIFI_SSID'), getenv('CIRCUITPY_WIFI_PASSWORD'))
     except RuntimeError as e:
         print("could not connect to AP, retrying: ", e)
         continue

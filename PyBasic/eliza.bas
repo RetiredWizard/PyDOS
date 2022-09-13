@@ -30,7 +30,7 @@
 180 REM *******USER INPUT SECTION********** 
 190 REM *********************************** 
 200 INPUT I$ 
-201 I$ = "  " + I$ + "  " 
+201 I$ = "  " + UPPER$(I$) + "  " 
 210 REM GET RID OF APOSTROPHES 
 220 FOR L = 1 TO LEN ( I$ ) 
 230 REM IF MID$(I$,L,1)="'"THEN I$=MID$(I$, 1 ,L-1)+MID$(I$,L+1,LEN(I$)-L):GOTO 230 

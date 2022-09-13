@@ -13,12 +13,14 @@
         Using the 2 second Shift or Shift Lock on the dollar sign ($) returns the percent symbal (%)
         Pressing the F3 key will return the last entered line
         Pressing the F2 and then pressing a key will return the last entered line up to the first instance of that key
+        Moving the joystick up/down will scroll through the last 10 entered lines
 
 """
 
 from bbq10keyboard import BBQ10Keyboard, STATE_PRESS, STATE_RELEASE, STATE_LONG_PRESS
 import board
-from pydos_hw import PyDOS_HW
+from os import uname
+from pydos_hw import Pydos_hw
 
 if board.board_id == 'raspberry_pi_pico':
     import kfw_pico_board as board
@@ -40,10 +42,11 @@ class PyDOS_UI:
 
         _tft_cs = board.D9
         _tft_dc = board.D10
-        _display_bus = displayio.FourWire(board.SPI(), command=_tft_dc, chip_select=_tft_cs)
-        _display = adafruit_ili9341.ILI9341(_display_bus, width=320, height=240)
+        _display_bus = displayio.FourWire(Pydos_hw.SPI(), command=_tft_dc, chip_select=_tft_cs)
+        _display = adafruit_ili9341.ILI9341(_display_bus, width=320,
+            height=(235 if int(uname().release.split('.')[0]) >=8 else 240))
 
-        self.kbd = BBQ10Keyboard(PyDOS_HW.I2C(),BBQI2CDevice=PyDOS_HW.I2CbbqDevice)
+        self.kbd = BBQ10Keyboard(Pydos_hw.I2C(),BBQI2CDevice=Pydos_hw.I2CbbqDevice)
 
         self._contrl_seq = []
 
@@ -132,10 +135,10 @@ class PyDOS_UI:
         return input_text
 
     def get_screensize(self):
-        return(17,49)
-
-    def version(self):
-        return("Keyboard FeatherWing")
+        if int(uname().release.split('.')[0]) >=8:
+            return(18,52)
+        else:
+            return(17,49)
 
 Pydos_ui = PyDOS_UI()
 
