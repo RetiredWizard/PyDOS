@@ -122,6 +122,10 @@ to return control to PyDOS.
 
 **reboot.py** - performs a soft reboot (Micropython requires a Ctrl-D to complete)
 
+**keys.bat** - (Keyboard Featherwing only) Displays keyboard mappings for hidden keys and functions  
+**ui.bat** - (Keyboard Featherwing only) Switches between using the Keyboard Featherwing and USB Serial port for PyDOS I/O
+
+
 ## Installation
 
 If the board you're using has limited flash storage you can delete either the **cpython** (if you're not using CircuitPython) or **mpython**
