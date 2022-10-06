@@ -137,38 +137,26 @@ def PyDOS():
 
     def chkPath(tstPath):
         validPath = True
-
         simpPath = ""
-        if tstPath == []:
-            validPath = True
-            simpPath = ""
-        else:
 
+        if tstPath != []:
             savDir = os.getcwd()
-
             for path in tstPath:
                 if path == "":
                     os.chdir(slh)
-
                 elif os.getcwd() == slh and path == "..":
                     validPath = False
                     break
-
                 elif path == ".":
                     continue
-
                 elif path == ".." and len(os.getcwd().split(slh)) == 2:
                     os.chdir(slh)
-
                 elif path == "..":
                     os.chdir("..")
-
                 elif path in os.listdir() and (os.stat(path)[0] & (2**15) == 0):
                     os.chdir(path)
-
                 else:
                     validPath = False
-                    simpPath = ""
                     break
 
             if validPath:
@@ -605,19 +593,27 @@ def PyDOS():
             print("Mismatched quotes.")
             cmd = ""
 
+        if cmd in ["DELETE","DEL","TYPE","MORE","MKDIR","MD","RMDIR","RD","COPY", \
+                   "CHDIR","CD","RENAME","REN","MOVE"]:
+            if len(args) > 1:
+                savDir = os.getcwd()
+                args[1] = absolutePath(args[1],savDir)
+                aPath = args[1].split(slh)
+                if cmd not in ["RMDIR","RD","CHDIR","CD"]:
+                    newdir = aPath.pop(-1)
+                (validPath,tmpDir) = chkPath(aPath)
+                if cmd in ["DELETE","DEL","TYPE","MORE","MKDIR","MD"]:
+                    if tmpDir == "" or tmpDir[-1] != slh:
+                        tmpDir += slh
+
         if cmd == "" or cmd == "REM":
             continue
         elif cmd == "DIR":
 # Command switches /p/w/a:[d]/o:[[-]n,e,s,d]/s needs to be implemented
-
             if len(args) == 1:
-
                 prDir(os.getcwd(),switches)
-
             elif len(args) == 2:
-
                 prDir(args[1],switches)
-
             else:
                 print("Too many arguments. Command Format: DIR/p/w/o:[[-]n,e,s,d]/s [path][file]")
 
@@ -833,56 +829,49 @@ def PyDOS():
             else:
                 envVars["PROMPT"] = args[1].upper()
 
-        elif cmd == "RENAME" or cmd == "REN" or cmd == "MOVE" or cmd == "MV":
-# Move command should work like copy where source can be file and target can be a directory
-# Wildcard renames should be implemented
+        elif cmd in ["RENAME","REN","MOVE"]:
+# todo: allow source to be file and target directory?
+# Wildcard renames
+# renames across sd mount points
 
             if len(args) == 3:
-                aPath = args[1].split(slh)
-                newdir = aPath.pop(-1)
-
 # Check that first argument has a valid path and exists
-                if chkPath(aPath)[0] and newdir in os.listdir(args[1][0:max(0,len(args[1])-len(newdir)-1)]) and args[1][-1] != slh:
+                if validPath and newdir in os.listdir(tmpDir) and args[1][-1] != slh:
 
+                    args[2] = absolutePath(args[2],savDir)
                     aPath2 = args[2].split(slh)
                     newdir2 = aPath2.pop(-1)
+                    (validPath, tmpDir2) = chkPath(aPath2)
 
+                    if newdir2 == '*':
+                        newdir2 = newdir
 # Second argument has valid path
-                    if chkPath(aPath2)[0] and args[2][-1] != slh:
-# Check that second argument doesn't specify an existing target
-                        if newdir2 not in os.listdir(args[2][0:max(0,len(args[2])-len(newdir2)-1)]):
+                    if validPath and args[2][-1] != slh and '?' not in newdir2 and \
+                        '*' not in newdir2 and newdir2 !="." and newdir2 != "..":
+                        
+# second argument doesn't specify an existing target
+                        if newdir2 not in os.listdir(tmpDir2):
                             currDRen = False
-                            savDir = os.getcwd()
-                            os.chdir(args[1][0:max(0,len(args[1])-len(newdir)-1)])
-                            if os.stat(newdir)[0] & (2**15) == 0:
-                                os.chdir(newdir)
-                                if savDir == os.getcwd():
+                            if os.stat(tmpDir+slh+newdir)[0] & (2**15) == 0:
+                                if tmpDir+slh+newdir == os.getcwd():
                                     currDRen = True
-                            os.chdir(savDir)
-                            os.rename(args[1],args[2])
+                            os.rename(tmpDir+("" if tmpDir[-1] == slh else slh)+newdir, \
+                                    tmpDir2+("" if tmpDir2[-1] == slh else slh)+newdir2)
                             if currDRen:
-                                os.chdir("..")
+                                os.chdir(tmpDir2)
 
                         else:
                             print("Target file exists")
                     else:
                         print("Invalid target:",args[2])
                 else:
-                    print("No such file:",args[1])
+                    print("Invalid source:",args[1])
             else:
                 print("Wrong number of arguments")
 
-        elif cmd == "DELETE" or cmd == "DEL":
+        elif cmd in ["DELETE","DEL"]:
 
             if len(args) == 2:
-                savDir = os.getcwd()
-                args[1] = absolutePath(args[1],savDir)
-
-                aPath = args[1].split(slh)
-                newdir = aPath.pop(-1)
-                (validPath, tmpDir) = chkPath(aPath)
-                if tmpDir == "" or tmpDir[-1] != slh:
-                    tmpDir += slh
                 if validPath:
                     if "*" in newdir or "?" in newdir:
                         ans = "Y"
@@ -908,19 +897,9 @@ def PyDOS():
             else:
                 print("Illegal Path.")
 
-        elif cmd == "TYPE" or cmd == "MORE":
+        elif cmd in ["TYPE","MORE"]:
 
             if len(args) == 2:
-
-                savDir = os.getcwd()
-                args[1] = absolutePath(args[1],savDir)
-
-                aPath = args[1].split(slh)
-                newdir = aPath.pop(-1)
-                (validPath, tmpDir) = chkPath(aPath)
-                if tmpDir == "" or tmpDir[-1] != slh:
-                    tmpDir += slh
-
                 if validPath and newdir in os.listdir(tmpDir[:(-1 if tmpDir != slh else None)]) and os.stat(tmpDir+newdir)[0] & (2**15) != 0:
                     swError = False
                     if cmd == "MORE":
@@ -970,37 +949,22 @@ def PyDOS():
                 print("Illegal Path.")
 
 
-        elif cmd == "CD":
+        elif cmd in ["CHDIR","CD"]:
 
             if len(args) == 1:
                 print(os.getcwd())
-
             else:
-                pathDirs = args[1].split(slh)
-                if chkPath(pathDirs)[0]:
-                    newdir = os.getcwd()
-                    os.chdir(args[1])
-                    # if change to .. did nothing assume we're in root of mount point
-                    if args[1] == ".." and newdir == os.getcwd():
-                        os.chdir(slh)
+                if validPath:
+                    os.chdir(tmpDir)
                 else:
                     print("Unable to change to:",args[1])
 
-        elif cmd == "MKDIR":
+        elif cmd in ["MKDIR","MD"]:
             if len(args) == 1:
                 print("Unable to make .")
             elif len(args) > 2:
                 print("Too many arguments")
             else:
-                savDir = os.getcwd()
-                args[1] = absolutePath(args[1],savDir)
-
-                aPath = args[1].split(slh)
-                newdir = aPath.pop(-1)
-                (validPath, tmpDir) = chkPath(aPath)
-                if tmpDir == "" or tmpDir[-1] != slh:
-                    tmpDir += slh
-
                 if validPath:
                     if newdir not in os.listdir(tmpDir[:(-1 if tmpDir != slh else None)]):
                         os.mkdir(tmpDir+newdir)
@@ -1009,17 +973,12 @@ def PyDOS():
                 else:
                     print("Invalid path")
 
-        elif cmd == "RMDIR":
+        elif cmd in ["RMDIR","RD"]:
             if len(args) == 1:
                 print("The syntax of the command is incorrect")
             elif len(args) > 2:
                 print("Too many arguments")
             else:
-                savDir = os.getcwd()
-                args[1] = absolutePath(args[1],savDir)
-
-                aPath = args[1].split(slh)
-                (validPath, tmpDir) = chkPath(aPath)
                 if validPath:
 # Directory must be empty to be removed
                     if os.listdir(tmpDir) == []:
@@ -1059,29 +1018,27 @@ def PyDOS():
                     earlyError = True
                 if args[2][-1] == slh:
                     trailingSlash = True
-                enteredArg = args[2]
-
-                savDir = os.getcwd()
-                args[1] = absolutePath(args[1],savDir)
-                args[2] = absolutePath(args[2],savDir)
-
-                aPath = args[1].split(slh)
-                newdir = aPath.pop(-1)
 
 # Check that first argument has a valid path, exists and is not a directory file
-                (validPath, tmpDir) = chkPath(aPath)
                 if not earlyError and validPath and ("*" in newdir or "?" in newdir or (newdir in os.listdir(tmpDir) and os.stat(tmpDir+(slh if tmpDir[-1] != slh else "")+newdir)[0] & (2**15))) != 0:
+
                     sourcePath = tmpDir
                     if "*" in newdir or "?" in newdir:
                         wildCardOp = True
                     else:
                         wildCardOp = False
 
+                    enteredArg = args[2]
+                    args[2] = absolutePath(args[2],savDir)
                     aPath2 = args[2].split(slh)
                     newdir2 = aPath2.pop(-1)
+                    (validPath, tmpDir) = chkPath(aPath2)
+                    if newdir2 == "*":
+                        newdir2 = "."
+                    if "*" in newdir2 or "?" in newdir2:
+                        validPath = False
 
 # Second argument has valid path
-                    (validPath, tmpDir) = chkPath(aPath2)
                     if validPath:
                         gc.collect()
                         targetPath = tmpDir
