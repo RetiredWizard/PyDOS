@@ -57,9 +57,9 @@ spaces must not be enclosed in quotes.
 **CD [[d:]path]** - Displays working (current) directory and/or changes to a different directory.  
 **CD ..** - Changes to parent directory of current directory.
 
-**MKDIR path** - Creates a new subdirectory.
+**MKDIR (MD) path** - Creates a new subdirectory.
 
-**RMDIR path** - Removes a subdirectory.
+**RMDIR (RD) path** - Removes a subdirectory.
 
 **COPY[/Y] [path]filename [path][filename]** - copies files.
 
