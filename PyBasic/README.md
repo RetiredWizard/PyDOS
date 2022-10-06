@@ -19,5 +19,5 @@ The PyDOS version of PyBasic still has the following difference from the richpl 
 * pre-allocation of memory on startup, this seems to reduce the memory allocation errors when attempting to run large basic programs
 
 * added SOUND freq,duration[,volume] command. The Windows code uses the winsound library and the Micropython/Circuit Python implementations
-         assumes the appropriate speaker circuit is connected to GPIO pin #19
+         assumes the appropriate speaker circuit is connected to the GPIO pin defined in pydos_bcfg.py
 
