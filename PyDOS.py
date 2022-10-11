@@ -56,9 +56,12 @@ def PyDOS():
     global envVars
     if "envVars" not in globals().keys():
         envVars = {}
-    _VER = "1.11"
+    _VER = "1.12"
     if implementation.name.upper() == "CPYTHON":
-        slh = '\\'
+        if os.name.upper() == "POSIX":
+            slh = '/'
+        else:
+            slh = '\\'
     else:
         slh = '/'
     prmpVals = ['>','(',')','&','|','\x1b','\b','<','=',' ',_VER,'\n','$']
@@ -142,6 +145,7 @@ def PyDOS():
         if tstPath != []:
             savDir = os.getcwd()
             for path in tstPath:
+                path = path.replace("C:","")
                 if path == "":
                     os.chdir(slh)
                 elif os.getcwd() == slh and path == "..":
@@ -575,10 +579,14 @@ def PyDOS():
                         quotedArg = False
                     else:
                         args[i-1] = args[i-1] + " " + args.pop(i)
-                elif args[i][0] == '"' and args[i][-1] != '"':
-                    args[i] = args[i][1:]
-                    i += 1
-                    quotedArg = True
+                elif args[i][0] == '"':
+                    if args[i][-1] != '"':
+                        args[i] = args[i][1:]
+                        i += 1
+                        quotedArg = True
+                    else:
+                        args[i] = args[i][1:-1]
+                        i += 1
                 else:
                     i += 1
 
@@ -611,7 +619,7 @@ def PyDOS():
         elif cmd == "DIR":
 # Command switches /p/w/a:[d]/o:[[-]n,e,s,d]/s needs to be implemented
             if len(args) == 1:
-                prDir(os.getcwd(),switches)
+                prDir(os.getcwd().replace("C:",""),switches)
             elif len(args) == 2:
                 prDir(args[1],switches)
             else:
@@ -1180,7 +1188,7 @@ def PyDOS():
                 passedIn = ""
                 batParams = []
             elif len(args) > 1:
-                passedIn = args[1]
+                passedIn = " ".join(args[1:])
                 batParams = args[1:]
 
             gc.collect()

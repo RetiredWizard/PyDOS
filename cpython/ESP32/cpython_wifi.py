@@ -11,7 +11,7 @@ from os import getenv
 
 # Get wifi details and more from a .env file
 if getenv('CIRCUITPY_WIFI_SSID') is None:
-    raise Exception("WiFi secrets are kept in .env, please add them there!")
+    raise Exception("WiFi secrets are kept in .env, please add them there by using setenv.py!")
 
 ssid=getenv('CIRCUITPY_WIFI_SSID')
 passwd=getenv('CIRCUITPY_WIFI_PASSWORD')

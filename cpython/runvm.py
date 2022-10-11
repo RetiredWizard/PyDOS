@@ -8,35 +8,24 @@ import supervisor,os
 def runvm(runargv):
     def chkPath(tstPath):
         validPath = True
-
         simpPath = ""
-        if tstPath == []:
-            validPath = True
-            simpPath = ""
-        else:
 
+        if tstPath != []:
             savDir = os.getcwd()
-
             for path in tstPath:
                 if path == "":
                     os.chdir("/")
-
                 elif os.getcwd() == "/" and path == "..":
                     validPath = False
                     break
-
                 elif path == ".":
                     continue
-
                 elif path == ".." and len(os.getcwd().split('/')) == 2:
                     os.chdir('/')
-
                 elif path == "..":
                     os.chdir("..")
-
                 elif path in os.listdir() and (os.stat(path)[0] & (2**15) == 0):
                     os.chdir(path)
-
                 else:
                     validPath = False
                     simpPath = ""
@@ -89,6 +78,7 @@ def runvm(runargv):
         t.write("__name__ = 'PyDOS'\n")
         t.write(r.read())
         t.write("\nos.chdir('/')\n")
+        t.write("os.remove('/PyD-code.py')\n")
 
         t.close()
         r.close()

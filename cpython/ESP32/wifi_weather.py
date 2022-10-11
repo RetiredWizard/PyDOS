@@ -11,36 +11,68 @@ from os import getenv
 
 import adafruit_requests as requests
 
-# Get wifi details and more from a .env file
-if getenv('CIRCUITPY_WIFI_SSID') is None:
-    raise Exception("WiFi secrets are kept in .env, please add them there!")
+def wifi_weather():
 
-print("Connecting to %s" % getenv('CIRCUITPY_WIFI_SSID'))
-wifi.radio.connect(getenv('CIRCUITPY_WIFI_SSID'), getenv('CIRCUITPY_WIFI_PASSWORD'))
-print("Connected to %s!" % getenv('CIRCUITPY_WIFI_SSID'))
-print("My IP address is", wifi.radio.ipv4_address)
+    try:
+        _scrWidth = int(envVars.get('_scrWidth',80))
+    except:
+        _scrWidth = 80
 
-socket = socketpool.SocketPool(wifi.radio)
-https = requests.Session(socket, ssl.create_default_context())
+    # Get wifi details and more from a .env file
+    if getenv('CIRCUITPY_WIFI_SSID') is None:
+        raise Exception("WiFi secrets are kept in .env, please add them there by using setenv.py!")
 
-TEXT_URL = "https://api.weather.gov/gridpoints/BOX/70,76/forecast"
-JSON_GET_URL = "https://api.weather.gov/gridpoints/BOX/70,76/forecast"
-headers = {"user-agent": "RetiredWizard@circuitpython/7.1.0b0"}
+    print("Connecting to %s" % getenv('CIRCUITPY_WIFI_SSID'))
+    wifi.radio.connect(getenv('CIRCUITPY_WIFI_SSID'), getenv('CIRCUITPY_WIFI_PASSWORD'))
+    print("Connected to %s!" % getenv('CIRCUITPY_WIFI_SSID'))
+    print("My IP address is", wifi.radio.ipv4_address)
 
-print("Fetching text from %s" % TEXT_URL)
-response = https.get(TEXT_URL,headers=headers)
-print("-" * 40)
-print("Text Response: ", response.text)
-print("-" * 40)
-response.close()
+    socket = socketpool.SocketPool(wifi.radio)
+    https = requests.Session(socket, ssl.create_default_context())
 
-print("Fetching JSON data from %s" % JSON_GET_URL)
-response = https.get(JSON_GET_URL,headers=headers)
-print("-" * 40)
+    _URL = "https://api.weather.gov/gridpoints/BOX/70,76/forecast"
+    headers = {"user-agent": "RetiredWizard@circuitpython/7.1.0b0"}
 
-print("JSON Response: ", response.json())
-print("-" * 40)
-print()
-print(response.json()['properties']['periods'][0]['detailedForecast'])
+    print("Fetching text from %s" % _URL)
+    response = https.get(_URL,headers=headers)
 
-https._free_sockets()
+    response_window = []
+    for _ in range(4):
+        response_window.append(next(iter(response.iter_content(chunk_size=256))))
+
+    response.close()
+
+    forecast = (b''.join(response_window))[0:800].decode()
+
+    print("\nText Response:")
+    print("-" * _scrWidth)
+    for pline in [forecast[i:i+_scrWidth] for i in range(0, len(forecast), _scrWidth)]:
+        print(pline)
+    print("-" * _scrWidth)
+
+    print("Fetching JSON data from %s" % _URL)
+    response = https.get(_URL,headers=headers)
+    print("-" * _scrWidth)
+
+    print("JSON Response: ", response.json())
+    print("-" * _scrWidth)
+    print()
+    forecast = response.json()['properties']['periods'][0]['detailedForecast']
+    nLines = int(len(forecast)/_scrWidth)
+    if len(forecast) != nLines*_scrWidth:
+        nLines += 1
+    for i in range(nLines):
+        print(forecast[i*_scrWidth:min(((i+1)*_scrWidth)-1,len(forecast))])
+
+    https._free_sockets()
+    response.close()
+    del response
+    del response_window
+    del forecast
+    del socket
+    del https
+
+if __name__ == "PyDOS":
+    wifi_weather()
+else:
+    print("Enter 'wifi_weather.wifi_weather()' in the REPL or PEXEC command to run.")

@@ -19,8 +19,7 @@ the Microcontroller flash.
 
 PyDOS requires all switches to immediatly following the command with no spaces between the command or switches.
 
-If a command argument contains spaces the argument must be enclosed in quotes, **however** arguments that do **not** contain
-spaces must not be enclosed in quotes.
+If a command argument contains spaces the argument must be enclosed in quotes.
 
 **REM [comment]** - Used in batch files to insert remarks (that will not be acted on).
 
@@ -101,6 +100,8 @@ to return control to PyDOS.
 **setdate.py** - initalizes the real time clock to an entered date
 
 **settime.py** - initalizes the real time clock to an entered time
+
+**ntpdate.py** (Circuit Python, ESP32xxx and Pico W only) - sets the time and date using the Internet NTP protocol
 
 **diff.py** - performs a file comparison
 

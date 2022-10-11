@@ -43,18 +43,18 @@ set _ans=M
 copy/y /mpython/* /
 if not exist /lib mkdir /lib
 copy /mpython/lib/* /lib/
-if exist "/mpython/boardconfigs/pydos_bcfg_%_uname%.py" goto foundbcfg
+if exist "/mpython/boardconfigs/pydos_bcfg_%_boardID%.py" goto foundbcfg
 echo *** Warning *** No board configuration file found
-echo *** Warning *** /mpython/boardconfigs/pydos_bcfg_%_uname%.py
+echo *** Warning *** /mpython/boardconfigs/pydos_bcfg_%_boardID%.py
 goto board
 :foundbcfg
-echo copy "/mpython/boardconfigs/pydos_bcfg_%_uname%.py" to /lib/pydos_bcfg.py
-copy/y "/mpython/boardconfigs/pydos_bcfg_%_uname%.py" /lib/pydos_bcfg.py
+echo copy "/mpython/boardconfigs/pydos_bcfg_%_boardID%.py" to /lib/pydos_bcfg.py
+copy/y "/mpython/boardconfigs/pydos_bcfg_%_boardID%.py" /lib/pydos_bcfg.py
 
 
 :board
 echo .
-echo      (N)anoConnect, (E) ESP32[-S2/S3] board,
+echo      (N)anoConnect, (E) ESP32[-S2/S3] or Pico-W board,
 set/p _ans2 = (O)ther RP2040/STM32/Atmel SAMD/nRF/ARM Cortex-M board:
 if %_ans2% == N goto nanoconnect
 if %_ans2% == n goto nanoconnect
@@ -94,6 +94,12 @@ copy /cpython/ESP32/lib/* /lib/
 
 :other
 if %_ans2% == o set _ans2 = O
+if %_boardID% == raspberry_pi_pico_w goto copy_code
+goto skip_codecopy
+:copy_code
+copy/y /cpython/code.py /
+copy/y /cpython/main.py /
+:skip_codecopy
 if %_ans% == M goto Cytron
 set/p _ans3 = Are you using a Keyboard FeatherWing (Y/N)?:
 if %_ans3% == N goto Cytron

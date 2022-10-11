@@ -13,7 +13,7 @@ import adafruit_requests as requests
 
 # Get wifi details and more from a .env file
 if getenv('CIRCUITPY_WIFI_SSID') is None:
-    raise Exception("WiFi secrets are kept in .env, please add them there!")
+    raise Exception("WiFi secrets are kept in .env, please add them there by using setenv.py!")
 
 print("Connecting to %s" % getenv('CIRCUITPY_WIFI_SSID'))
 wifi.radio.connect(getenv('CIRCUITPY_WIFI_SSID'), getenv('CIRCUITPY_WIFI_PASSWORD'))

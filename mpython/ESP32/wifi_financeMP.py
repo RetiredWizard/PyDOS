@@ -26,7 +26,7 @@ if envfound:
 
 # Check .env has updated credentials
 if not envfound or config.get('CIRCUITPY_WIFI_SSID','') == '':
-    assert False, ("/.env has not been updated with your unique keys and data")
+    assert False, ("/.env has not been updated with your unique keys and data try using setenv.py")
 
 # AP info
 SSID=config['CIRCUITPY_WIFI_SSID'] # Network SSID
