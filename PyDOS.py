@@ -56,7 +56,7 @@ def PyDOS():
     global envVars
     if "envVars" not in globals().keys():
         envVars = {}
-    _VER = "1.12"
+    _VER = "1.13"
     if implementation.name.upper() == "CPYTHON":
         if os.name.upper() == "POSIX":
             slh = '/'

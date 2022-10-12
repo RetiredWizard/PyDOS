@@ -2,6 +2,7 @@
 
 Pydos_pins = {
     'sndPin' : (18,"GP18 Onboard Buzzer"),
+    'led' : (25,"GP25"),
     'neoPixel' : (28,None),
     'I2C_NUM' : (0,None),
     'SCL' : (3,"GP3 GROVE#2"),

@@ -2,6 +2,7 @@
 
 Pydos_pins = {
     'sndPin' : (17,"D17"),
+    'led' : (25,"D25"),
     'neoPixel' : (8,None),
     'I2C_NUM' : (1,None),
     'SCL' : (7,"SCL D7 D23"),

@@ -31,6 +31,7 @@ if implementation.name.upper() == "CIRCUITPYTHON":
 if implementation.name.upper() == "MICROPYTHON":
     Pydos_pins = {
         'sndPin' : (7,"IO7"),
+        'led' : ('LED',"LED"),
         'neoPixel' : (16,"IO16"),
         'I2C_NUM' : (1,None),
         'SCL' : (3,"SCL IO3"),
@@ -99,4 +100,3 @@ elif implementation.name.upper() == "CIRCUITPYTHON":
             Pydos_pins["SCK"] = (_SCK,"SCK")
             Pydos_pins["MOSI"] = (board.SD_COPI,"COPI")
             Pydos_pins["MISO"] = (board.SD_CIPO,"CIPO")
-

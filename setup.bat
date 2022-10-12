@@ -1,16 +1,10 @@
 @echo off
 setboard.py
-:tryagain
-set/p _ans = (C)ircuit Python or (M)icropython: 
-if %_ans% == c goto cpython
-if %_ans% == C goto cpython
-if %_ans% == m goto mpython
+if %_implementation% == CIRCUITPYTHON set _ans = C
+if %_implementation% == MICROPYTHON set _ans = M
 if %_ans% == M goto mpython
-echo Invalid selection (C or M)
-goto tryagain
 
 :cpython
-set _ans = C
 copy/y /cpython/* /
 if not exist /lib mkdir /lib
 copy /cpython/lib/* /lib/
@@ -39,7 +33,6 @@ echo *** Power Cycle the board and run setup again....  ***
 echo .
 /flash/reboot
 :flashmountedroot
-set _ans=M
 copy/y /mpython/* /
 if not exist /lib mkdir /lib
 copy /mpython/lib/* /lib/
@@ -50,7 +43,6 @@ goto board
 :foundbcfg
 echo copy "/mpython/boardconfigs/pydos_bcfg_%_boardID%.py" to /lib/pydos_bcfg.py
 copy/y "/mpython/boardconfigs/pydos_bcfg_%_boardID%.py" /lib/pydos_bcfg.py
-
 
 :board
 echo .
@@ -66,6 +58,7 @@ echo Invalid selection (N,E or O)
 goto board
 
 :nanoconnect
+if exist /ntpdate.py del /ntpdate.py
 set _ans2 = N
 if %_ans% == M goto nanoconnectMP
 copy /cpython/NanoConnect/* /
@@ -94,10 +87,14 @@ copy /cpython/ESP32/lib/* /lib/
 
 :other
 if %_ans2% == o set _ans2 = O
-if %_boardID% == raspberry_pi_pico_w goto copy_code
+if "%_boardID%" == "raspberry_pi_pico_w" goto copy_code
+if %_ans2% == E goto skip_codecopy
+if exist /ntpdate.py del /ntpdate.py
 goto skip_codecopy
 :copy_code
+echo copy /cpython/code.py /
 copy/y /cpython/code.py /
+echo copy /cpython/main.py /
 copy/y /cpython/main.py /
 :skip_codecopy
 if %_ans% == M goto Cytron
@@ -157,6 +154,7 @@ goto wifienv
 
 :dotenv
 setenv.py
+ntpdate.py -4
 
 :done
 set _ans=

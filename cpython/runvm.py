@@ -85,6 +85,7 @@ def runvm(runargv):
 
         supervisor.set_next_code_file('/PyD-code.py',reload_on_success=True,reload_on_error=True)
 
+        print("\n\nIf "+tmpDir+newdir+" doesn't start, press Ctrl-D at the >>> REPL prompt\n\n")
         supervisor.reload()
     else:
         print("Invalid target path: "+args[0])

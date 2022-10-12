@@ -41,7 +41,7 @@ def blink(passed_envVars={}):
         if Pydos_hw.led:
             led = Pin(Pydos_hw.led, Pin.OUT)
         else:
-            led = Pin(25, Pin.OUT)
+            raise ValueError("LED pin not defined in pydos_bcfg.py!")
 
     elif sys.implementation.name.upper() == 'CIRCUITPYTHON':
 
