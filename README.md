@@ -101,7 +101,7 @@ to return control to PyDOS.
 
 **settime.py** - initalizes the real time clock to an entered time
 
-**ntpdate.py** (Circuit Python, ESP32xxx and Pico W only) - sets the time and date using the Internet NTP protocol
+**ntpdate.py** (ESP32xxx and Pico W only) - sets the time and date using the Internet NTP protocol
 
 **diff.py** - performs a file comparison
 
