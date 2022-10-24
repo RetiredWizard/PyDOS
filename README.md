@@ -10,9 +10,9 @@ To start the shell type **import PyDOS** at the micropython REPL prompt.
 At the PyDOS prompt a python program (.py) or batch (.bat) file can be run by simply entering the filename with or without
 the extension.
 
-**setup.bat** in the root folder will prompt the user to indicate Circuit Python or Micropython and then the board they are using.
-The setup batch file will then copy the programs and libraries appropriate for the user's platform to the root and /lib folders of
-the Microcontroller flash.
+**setup.bat** in the root folder, will prompt the user to indicate the board they are using.
+The setup batch file will then copy the programs and libraries appropriate for the user's
+ platform to the root and /lib folders of the Microcontroller flash.
 
 ## Implemented DOS Commands:  
 (syntax and descriptions taken from https://home.csulb.edu/~murdock/dosindex.html)
@@ -72,7 +72,7 @@ An **autoexec.bat** batch file will automatically execute when PyDOS starts.
 
 **pydospins.py** - Displays the GPIO pins for sound output and I2C for the particular board PyDOS is running on.
 
-**PyBasic.py** - a Basic interpreter from https://github.com/richpl/PyBasic. Tweaked and modified to run on Micropython.
+**PyBasic.py** - a Basic interpreter from https://github.com/richpl/PyBasic. Tweaked and modified to run on Micropython and Circuitpython.
 	basicparser.py, basictoken.py, flowsignal.py, lexer.py, program.py, basicdata.py
 	
 **runasthread.py** (Micropython only) - This program will attempt to launch a python program on the second RP2040 core. Threading is
@@ -143,9 +143,10 @@ and then power cycled or hard reset.
 
 If the board you're using has limited flash storage you can delete either the **cpython** (if you're not using CircuitPython) or **mpython**
 (if you're not using MicroPython) folder from the downloaded repository files. Within the remaining Python folder (**cpython** or **mpython**) are folders
-for specific micro controller boards,
-you can free up further space by deleting anything other than the board you are using. Finally, after running the **setup.bat** file in PyDOS you can
-delete both the **cpython** and **mpython** folders as they are only used by the **setup.bat** script.
+for specific micro controller boards, you can free up further space by deleting anything other than the board you are using (the "Pico W" board uses the ESP folder). Finally, after running
+the **setup.bat** file in PyDOS you can delete both the **cpython** and **mpython** folders as they are only used by the **setup.bat**
+script. For very limited Flash boards you may want to delete the **PyBasic** folder until after setup is run. Once setup has ben run, delete the **cpython/mpython** folders from
+the microcontroller and copy as much of the **PyBasic** directory as space permits, copying just the *.py files is all that's needed for PyBasic to run.
 
 **Building custom CircuitPython firmware**
 
@@ -153,7 +154,8 @@ For CircuitPython the first thing you should do is compile a custom CircuitPytho
 at: https://learn.adafruit.com/building-circuitpython/build-circuitpython.  Upon downloading the latest version of CircuitPython from the github repository,
 modify the **py/circuitpy_mpconfig.h** file and change the value on the line that reads "#**define MICROPY_ENABLE_PYSTACK**" from "(1)" to "(0)". On an 
 ESP32S2 microcontroller it's also necessary to modify the **py/mpconfig.h** file and change the value on the line that reades "**#define MICROPY_STACKLESS**"
-from "(0)" to "(1)".
+from "(0)" to "(1)". You can find custom UF2 images for some boards as release resources here: https://github.com/RetiredWizard/PyDOS/releases. If you're using a board not included you
+can open a Github issue on this repository to request it.
 
 An earlier version of the build process is demonstrated in the YouTube video at: https://www.youtube.com/watch?v=sWy5_B3LL8c, but be sure to check the Adafruit
 guide and use the updated instructions.
@@ -171,22 +173,19 @@ To copy PyDOS to the Microcontroller, simply drag the PyDOS directory structure
 (after removing the **mpython** folder if space is a concern) to the root directory of the device that appears on the host computer.
 Your microcontroller now has PyDOS installed.
 
-At this point the microcontroller file system is set to allow computer Read/Write access, however the boot.py file that you copied
-with PyDOS will switch the mode so that
-PyDOS has Read/Write access and the host computer will only have ReadOnly access. This change won't take effect until you power cycle the micro controller board so **be
-sure that the PyDOS files are all copied before turning the power off on your microcontroller board**. If the copy is interrupted for any reason you can delete the boot.py
-file in the root of the microcontroller flash, to be sure the file system doesn't
-switch modes and try the copy again. 
+If the copy worked without any errors, you should power cycle the microcontroller board so that the file system is configured to allow
+the microcontroller to have Read/Write access.
 
-If you do find your self locked out of the flash from the host computer and PyDOS is not running, the easiest way to recover is to
+**PyDOS has Read/Write access and the host computer will only have ReadOnly access. This change won't take effect until you have completed the power cycle mentioned above, so be
+sure that the PyDOS files are all copied before turning the power off on your microcontroller board. If the copy is interrupted for any reason you can delete the boot.py
+file in the root of the microcontroller flash and try the copy again. 
+
+If you find yourself locked out of the flash from the host computer and PyDOS is not running, the easiest way to recover is to
 connect to the REPL, remove the boot.py file and then power cycle the microcontroller board. 
 
         import os
         os.remove("boot.py")
-
-If the copy worked without any errors, you should power cycle the microcontroller board so that the file system is configured to allow
-the microcontroller to have Read/Write access.
-
+**
 To interact with the microcontroller you will need to connect using a terminal program. On a PC you can use putty and on linux minicom works well. To start minicom
 on linux type the command:
 
@@ -206,8 +205,9 @@ The first is if you wan to connect up an old school serial terminal to the REPL 
 Micropython with this modification can be found in section 2.2 of the Raspberry Pi Pico Python SDK at https://datasheets.raspberrypi.com/pico/raspberry-pi-pico-python-sdk.pdf.
 
 The second is that PyDOS uses a recursive routine to process wildcard operations and the default stack in Micropython limits the recursion depth that can be obtained.
-This means that PyDOS has to limit wildcard operations to files, one impact of this is that files with longer file names will not appear
-in directory listings when wildcards are used. To mitigate this issue the MICROPY_STACKLESS parameter in **py/circuitpy_mpconfig.h** can be changed from **0** to **1**. 
+This means that PyDOS has to limit wildcard operations, one impact of this is that files with longer file names will not appear
+in directory listings when wildcards are used. To eliminate this issue a custom Micropython image can be built with the the MICROPY_STACKLESS parameter in **py/circuitpy_mpconfig.h**
+changed from **0** to **1**. 
 
 **MicroPython Setup**
 
@@ -218,9 +218,10 @@ https://learn.adafruit.com/circuitpython-libraries-on-micropython-using-the-rasp
 Download PyDOS from the github repository and after deleting the **cpython** folder if space is an issue, use the Thonny upload command as described in the Adafruit 
 learning guide to copy the downloaded files to the microcontroller.
 
-To interact with the microcontroller connect over the serial USB port (COMn: /dev/ttyACMx, etc) using a terminal program like puTTY or minicom. 
+To interact with the microcontroller connect over the serial USB port (COMn: /dev/ttyACMx, etc) using a terminal program like puTTY or minicom. You can use the Thonny shell as well
+however, it does not support the basic ansi escape sequences used by some of the PyDOS functions.
 One thing to note is that if you
-connect to your microcontroller with a terminal program after using Thonny to copy files, you may need to press CTRL-B to exit the raw REPL mode that 
+connect to your microcontroller with a terminal program after using Thonny, you may need to press CTRL-B to exit the raw REPL mode that 
 Thonny uses to transfer and execute files.
 
 Another option is to use MPRemote. Detailed documentation on installing and using MPRemote can be found 

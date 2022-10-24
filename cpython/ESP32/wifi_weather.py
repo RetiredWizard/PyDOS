@@ -37,12 +37,12 @@ def wifi_weather():
     response = https.get(_URL,headers=headers)
 
     response_window = []
-    for _ in range(4):
+    for _ in range(8):
         response_window.append(next(iter(response.iter_content(chunk_size=256))))
 
     response.close()
 
-    forecast = (b''.join(response_window))[0:800].decode()
+    forecast = (b''.join(response_window))[0:1800].decode()
 
     print("\nText Response:")
     print("-" * _scrWidth)
@@ -54,8 +54,27 @@ def wifi_weather():
     response = https.get(_URL,headers=headers)
     print("-" * _scrWidth)
 
-    print("JSON Response: ", response.json())
+    print("JSON Response: ")
+    for prop in response.json()['properties']:
+        if prop != 'periods':
+            print(prop,":",response.json()['properties'][prop])
+    print()
     print("-" * _scrWidth)
+    print()
+    for forecaststruct in response.json()['properties']['periods']:
+        print(forecaststruct['name'])
+        print()
+        forecast = forecaststruct['detailedForecast']
+        nLines = int(len(forecast)/_scrWidth)
+        if len(forecast) != nLines*_scrWidth:
+            nLines += 1
+        for i in range(nLines):
+            print(forecast[i*_scrWidth:min(((i+1)*_scrWidth)-1,len(forecast))])
+        print("\n")
+    print()
+    print("-" * _scrWidth)
+    print()
+    print(response.json()['properties']['periods'][0]['name'])
     print()
     forecast = response.json()['properties']['periods'][0]['detailedForecast']
     nLines = int(len(forecast)/_scrWidth)

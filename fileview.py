@@ -8,51 +8,27 @@ except:
 
 def viewFile(args):
 
-    #def kbdInterrupt():
-
-        #spoll = uselect.poll()
-        #spoll.register(sys.stdin,uselect.POLLIN)
-
-        #while not spoll.poll(0):
-            #time.sleep(.25)
-
-        #cmnd = sys.stdin.read(1)
-
-        #spoll.unregister(sys.stdin)
-
-        #return(cmnd)
-
     def chkPath(tstPath):
         validPath = True
-
         simpPath = ""
-        if tstPath == []:
-            validPath = True
-            simpPath = ""
-        else:
 
+        if tstPath != []:
             savDir = os.getcwd()
 
             for path in tstPath:
                 if path == "":
                     os.chdir("/")
-
                 elif os.getcwd() == "/" and path == "..":
                     validPath = False
                     break
-
                 elif path == ".":
                     continue
-
                 elif path == ".." and len(os.getcwd().split('/')) == 2:
                     os.chdir('/')
-
                 elif path == "..":
                     os.chdir("..")
-
                 elif path in os.listdir() and (os.stat(path)[0] & (2**15) == 0):
                     os.chdir(path)
-
                 else:
                     validPath = False
                     simpPath = ""
@@ -98,6 +74,8 @@ def viewFile(args):
     if validPath and newdir in os.listdir(tmpDir) and os.stat(tmpDir+("/" if tmpDir[-1] != "/" else "")+newdir)[0] & (2**15) != 0:
         f = open(args)
         index = [0]
+        linelengths = []
+        scrnMem = []
         currLineNum = 0
         maxRead = 0
         eof = -1
@@ -105,6 +83,8 @@ def viewFile(args):
             line = f.readline()
             if line != "":
                 index.append(index[i]+len(line))
+                scrnMem.append(line[:-1])
+                linelengths.append(len(line[:-1]))
                 print()
                 print((line[:-1])[:scrWidth],end="")
                 currLineNum += 1
@@ -115,6 +95,7 @@ def viewFile(args):
 
         cmnd = ""
         seqCnt = 0
+        strtCol = 0
         while cmnd.upper() != "Q":
             #cmnd = kbdInterrupt()
             cmnd = Pydos_ui.read_keyboard(1)
@@ -131,7 +112,12 @@ def viewFile(args):
                     print (chr(27)+"[1;1H"+chr(27)+"M",end="")
                     #print (chr(27)+"[2;0H"+chr(27)+"[T",end="")
                     f.seek(index[currLineNum-scrLines])
-                    print((f.readline()[:-1])[:scrWidth],end="")
+                    line = f.readline()
+                    print((line[:-1])[strtCol:scrWidth+strtCol],end="")
+                    scrnMem.pop()
+                    scrnMem.insert(0,line[:-1])
+                    linelengths.pop()
+                    linelengths.insert(0,len(line[:-1]))
 
             elif ord(cmnd) == 66 and seqCnt == 2:
                 # Down Arrow
@@ -145,7 +131,11 @@ def viewFile(args):
                             maxRead += 1
                         print(chr(27)+"["+str(scrLines)+";1H"+chr(27)+"D",end="")
                         #print(chr(27)+"["+str(scrLines+1)+";0H"+chr(27)+"[S",end="")
-                        print((line[:-1])[:scrWidth],end="")
+                        print((line[:-1])[strtCol:scrWidth+strtCol],end="")
+                        scrnMem.pop(0)
+                        scrnMem.append(line[:-1])
+                        linelengths.pop(0)
+                        linelengths.append(len(line[:-1]))
                         currLineNum += 1
                     else:
                         eof = currLineNum
@@ -153,15 +143,37 @@ def viewFile(args):
             elif ord(cmnd) == 67 and seqCnt == 2:
                 # Right Arrow
                 seqCnt = 0
+                if max(linelengths) > scrWidth+strtCol:
+                    strtCol += 1
+                    cret = chr(27)+"[H"
+                    for line in scrnMem:
+                        if scrWidth+strtCol > len(line.rstrip()):
+                            print(cret+line[strtCol:len(line.rstrip())]+" ",end="")
+                        else:
+                            print(cret+line[strtCol:scrWidth+strtCol],end="")
+                        cret = "\n"
+
             elif ord(cmnd) == 68 and seqCnt == 2:
                 # Left Arrow
                 seqCnt = 0
+                if strtCol > 0:
+                    strtCol -= 1
+                    cret = chr(27)+"[H"
+                    for line in scrnMem:
+                        print(cret+line[strtCol:scrWidth+strtCol],end="")
+                        cret = "\n"
+
             else:
                 seqCnt = 0
 
 
         print(chr(27)+"["+str(scrLines)+";1H",end="")
         f.close()
+
+        del index
+        del linelengths
+        del scrnMem
+
     else:
         print("Unable to display: "+args+". File not found.")
 

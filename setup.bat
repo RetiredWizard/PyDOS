@@ -1,5 +1,6 @@
 @echo off
-setboard.py
+pexec from sys import implementation
+pexec envVars["_implementation"] = implementation.name.upper()
 if %_implementation% == CIRCUITPYTHON set _ans = C
 if %_implementation% == MICROPYTHON set _ans = M
 if %_ans% == M goto mpython
@@ -10,6 +11,8 @@ if not exist /lib mkdir /lib
 copy /cpython/lib/* /lib/
 if not exist /lib/adafruit_bus_device mkdir /lib/adafruit_bus_device
 copy /cpython/lib/adafruit_bus_device/* /lib/adafruit_bus_device/
+pexec import board
+pexec envVars["_boardID"] = board.board_id
 if exist /cpython/boardconfigs/pydos_bcfg_%_boardID%.py goto foundbcfgCP
 echo *** Warning *** No board configuration file found
 echo *** Warning *** /cpython/boardconfigs/pydos_bcfg_%_boardID%.py
@@ -36,13 +39,15 @@ echo .
 copy/y /mpython/* /
 if not exist /lib mkdir /lib
 copy /mpython/lib/* /lib/
-if exist "/mpython/boardconfigs/pydos_bcfg_%_boardID%.py" goto foundbcfg
+pexec from os import uname
+pexec envVars["_uname"] = uname().machine
+if exist "/mpython/boardconfigs/pydos_bcfg_%_uname%.py" goto foundbcfg
 echo *** Warning *** No board configuration file found
-echo *** Warning *** /mpython/boardconfigs/pydos_bcfg_%_boardID%.py
+echo *** Warning *** /mpython/boardconfigs/pydos_bcfg_%_uname%.py
 goto board
 :foundbcfg
-echo copy "/mpython/boardconfigs/pydos_bcfg_%_boardID%.py" to /lib/pydos_bcfg.py
-copy/y "/mpython/boardconfigs/pydos_bcfg_%_boardID%.py" /lib/pydos_bcfg.py
+echo copy "/mpython/boardconfigs/pydos_bcfg_%_uname%.py" to /lib/pydos_bcfg.py
+copy/y "/mpython/boardconfigs/pydos_bcfg_%_uname%.py" /lib/pydos_bcfg.py
 
 :board
 echo .
