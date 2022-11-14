@@ -5,7 +5,6 @@ from pydos_ui import Pydos_ui
 
 if sys.implementation.name.upper() == 'MICROPYTHON':
     from machine import Pin
-    from os import uname
 elif sys.implementation.name.upper() == 'CIRCUITPYTHON':
     import board
     from digitalio import DigitalInOut, Direction
@@ -21,7 +20,7 @@ def blink(passed_envVars={}):
     if sys.implementation.name.upper() == 'MICROPYTHON':
 
         # nano connect is special case becuase LED uses the SPI SCK pin
-        if uname().machine in ['Arduino Nano RP2040 Connect with RP2040','Teensy 4.1 with MIMXRT1062DVJ6A']:
+        if sys.implementation._machine in ['Arduino Nano RP2040 Connect with RP2040','Teensy 4.1 with MIMXRT1062DVJ6A']:
 
             if envVars.get('.sd_drive',None) != None:
                 from os import umount
@@ -33,7 +32,7 @@ def blink(passed_envVars={}):
                 except:
                     pass
 
-            if uname().machine == 'Teensy 4.1 with MIMXRT1062DVJ6A':
+            if sys.implementation._machine == 'Teensy 4.1 with MIMXRT1062DVJ6A':
                 Pydos_hw.SPI_deinit()
             else:
                 Pydos_hw.SD_deinit()

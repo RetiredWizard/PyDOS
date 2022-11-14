@@ -5,7 +5,6 @@ from pydos_hw import Pydos_hw
 if sys.implementation.name.upper() == 'MICROPYTHON':
     import machine
     from time import ticks_ms,sleep
-    from os import uname
 elif sys.implementation.name.upper() == 'CIRCUITPYTHON':
     from time import sleep
     from supervisor import ticks_ms
@@ -103,7 +102,7 @@ def piano():
                     pwm.duty_u16(volume)
                 else:
                     pwm.duty(int((volume/65535)*1023))
-                if "ESP32" in uname().machine or "S2" in uname().machine:
+                if "ESP32" in sys.implementation._machine or "S2" in sys.implementation._machine:
                     sleep(.1)
             elif sys.implementation.name.upper() == 'CIRCUITPYTHON':
                 if pwm.frequency != note:

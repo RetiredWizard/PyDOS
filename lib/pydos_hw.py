@@ -5,7 +5,6 @@
 from sys import implementation
 from pydos_bcfg import Pydos_pins
 if implementation.name.upper() == "MICROPYTHON":
-    from os import uname
     from machine import Pin
     from machine import SoftI2C as s_I2C
     from machine import I2C as m_I2C

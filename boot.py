@@ -5,53 +5,42 @@ if implementation.name.upper() == "CIRCUITPYTHON":
     import digitalio
     import storage
 
-# Changing the value of PyDOSReadOnly from False to True changes the behavior of this program.
-# When PyDOSReadOnly is False the PyDOS file system will be set to Read/Write status for next
+# The PyDOS file system will be set to Read/Write status for next
 # power cycle unless a control GPIO is grounded (GP2,5 or 6 depending on the Microcontroller)
 # in which case the host computer will have Read/Write access and PyDOS will have readonly access.
 
-    # Changing PyDOSReadOnly to True will allow the host computer write access even if the
-    # GPIO pin is not grounded.
-
-    # If a grounding Pin is not available on the microcontroller, the PyDOS file system is set to
-    # ReadOnly so the host file has access unless PyDOSReadOnly is set to True in which case
-    # the PyDOS file system is set to Read/Write.
-
-    PyDOSReadOnly = False
-
     if board.board_id == 'arduino_nano_rp2040_connect':
-# For Gemma M0, Trinket M0, Metro M0/M4 Express, ItsyBitsy M0/M4 Express
-        switch = digitalio.DigitalInOut(board.D2)
+        swpin = board.D2
     elif board.board_id in ['raspberry_pi_pico','cytron_maker_pi_rp2040']:
-        switch = digitalio.DigitalInOut(board.GP6)
+        swpin = board.GP6
     elif board.board_id == 'adafruit_qtpy_esp32c3':
-        switch = digitalio.DigitalInOut(board.A1)
+        swpin = board.A1
     elif board.board_id == 'adafruit_itsybitsy_rp2040':
-        switch = digitalio.DigitalInOut(board.D7)
+        swpin = board.D7
     else:
         if "D5" in dir(board):
-            switch = digitalio.DigitalInOut(board.D5)
+            swpin = board.D5
         elif "GP5" in dir(board):
-            switch = digitalio.DigitalInOut(board.GP5)
+            swpin = board.GP5
         elif "IO5" in dir(board):
-            switch = digitalio.DigitalInOut(board.IO5)
+            swpin = board.IO5
         elif "D6" in dir(board):
-            switch = digitalio.DigitalInOut(board.D6)
+            swpin = board.D6
         elif "GP6" in dir(board):
-            switch = digitalio.DigitalInOut(board.GP6)
+            swpin = board.GP6
         elif "IO6" in dir(board):
-            switch = digitalio.DigitalInOut(board.IO6)
+            swpin = board.IO6
         elif "D2" in dir(board):
-            switch = digitalio.DigitalInOut(board.D2)
+            swpin = board.D2
         elif "GP2" in dir(board):
-            switch = digitalio.DigitalInOut(board.GP2)
+            swpin = board.GP2
         elif "IO2" in dir(board):
-            switch = digitalio.DigitalInOut(board.IO2)
+            swpin = board.IO2
         else:
-            switch = None
+            swpin = None
 
-
-    if switch:
+    if swpin:
+        switch = digitalio.DigitalInOut(swpin)
         switch.direction = digitalio.Direction.INPUT
         switch.pull = digitalio.Pull.UP
 
@@ -61,22 +50,15 @@ if implementation.name.upper() == "CIRCUITPYTHON":
             storage.remount("/", True)
             print("Switch False (pin grounded), PyDOS FS is ReadOnly")
         else:
-            storage.remount("/", PyDOSReadOnly)
-            print("Switch True (not grounded), ",end="")
-            if PyDOSReadOnly:
-                print("PyDOS FS is ReadOnly")
-            else:
-                print("PyDOS FS is ReadWrite")
+            storage.remount("/", False)
+            print("Switch True (not grounded), PyDOS FS is ReadWrite")
 
         switch.deinit()
     else:
-        print("No GPIO override pin found - set to Microcontroller access mode, PyDOS FS is ReadWrite")
-        print("To set the PyDOS FS readonly and give the host write access enter the following command")
-        print("at the PyDOS prompt: fs ro")
-        storage.remount("/", PyDOSReadOnly )
+        print("If write access from the host is needed, enter the following PyDOS command:\nfs ro")
+        storage.remount("/", False )
 elif implementation.name.upper() == "MICROPYTHON":
-    from os import uname
-    if uname().machine == 'Teensy 4.1 with MIMXRT1062DVJ6A':
+    if implementation._machine == 'Teensy 4.1 with MIMXRT1062DVJ6A':
         import uos, sys
         uos.umount("/flash")
         uos.mount(vfs,"/")
@@ -84,3 +66,9 @@ elif implementation.name.upper() == "MICROPYTHON":
         sys.path.pop(-1)
         sys.path.append("/")
         sys.path.append("/lib")
+    elif implementation._machine == "Sparkfun SAMD51 Thing Plus with SAMD51J20A":
+        import sys
+        sys.path.append("/lib")
+        sys.path.append("/mpython/samd51/lib")
+        import mountflash
+        sys.path.pop(-1)

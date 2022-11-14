@@ -10,7 +10,6 @@ import time
 import sys
 from pydos_ui import Pydos_ui
 from pydos_hw import Pydos_hw
-from os import uname
 
 def rgbblink():
     global envVars
@@ -55,7 +54,7 @@ def rgbblink():
         if Pydos_hw.neoPixel_Pow:
             Pydos_hw.neoPixel_Pow.on()
 
-        if uname().machine == 'TinyPICO with ESP32-PICO-D4':
+        if sys.implementation._machine == 'TinyPICO with ESP32-PICO-D4':
             from os import umount
             drive = envVars.get('.sd_drive',drive)
             try:
@@ -72,7 +71,7 @@ def rgbblink():
                 mosi=machine.Pin(tinypico.DOTSTAR_DATA), miso=machine.Pin(tinypico.SPI_MISO))
             pixels = DotStar(spi, 1)
             tinypico.set_dotstar_power(True)
-        elif uname().machine == 'Arduino Nano RP2040 Connect with RP2040':
+        elif sys.implementation._machine == 'Arduino Nano RP2040 Connect with RP2040':
             import mp_esp32spi
 
             nano_connect = True
@@ -156,12 +155,12 @@ def rgbblink():
                     pixels.fill((0, 0, 0))
                     time.sleep(0.5)
             elif sys.implementation.name.upper() == 'MICROPYTHON':
-                if uname().machine == 'TinyPICO with ESP32-PICO-D4':
+                if sys.implementation._machine == 'TinyPICO with ESP32-PICO-D4':
                     pixels.fill(((icolor == 1) * 20, (icolor == 2) * 50, (icolor == 0)*150))
                     time.sleep(0.5)
                     pixels.fill((0, 0, 0))
                     time.sleep(0.5)
-                elif uname().machine == 'Arduino Nano RP2040 Connect with RP2040':
+                elif sys.implementation._machine == 'Arduino Nano RP2040 Connect with RP2040':
                     esp.set_analog_write(LEDR,(0 if icolor == 1 else 1))
                     esp.set_analog_write(LEDG,(0 if icolor == 2 else 1))
                     esp.set_analog_write(LEDB,(0 if icolor == 0 else 1))

@@ -119,16 +119,18 @@ def sdMount(drive):
 
         if sdMounted:
             print(drive+" mounted")
+            if implementation.name.upper() == "CIRCUITPYTHON":
+                _uname = os.uname().machine
+            else:
+                _uname = implementation._machine
+
             # nano connect/Tennsy 4.1 are special cases becuase LED uses the SPI SCK pin
-            if os.uname().machine in ["Arduino Nano RP2040 Connect with rp2040", \
-                "Arduino Nano RP2040 Connect with RP2040", \
+            if _uname[0:27] in ["Arduino Nano RP2040 Connect", \
                 "TinyPICO with ESP32-PICO-D4"] and not altSPI:
 
                 envVars[".sd_drive"] = drive
 
-            if os.uname().machine in ["Teensy 4.1 with IMXRT1062DVJ6A", \
-                'Teensy 4.1 with MIMXRT1062DVJ6A'] and altSPI:
-
+            if _uname[0:15] == "Teensy 4.1 with" and altSPI:
                 envVars[".sd_drive"] = drive
 
         return

@@ -39,11 +39,10 @@ echo .
 copy/y /mpython/* /
 if not exist /lib mkdir /lib
 copy /mpython/lib/* /lib/
-pexec from os import uname
-pexec envVars["_uname"] = uname().machine
+pexec envVars["_uname"] = implementation._machine
 if exist "/mpython/boardconfigs/pydos_bcfg_%_uname%.py" goto foundbcfg
-echo *** Warning *** No board configuration file found
-echo *** Warning *** /mpython/boardconfigs/pydos_bcfg_%_uname%.py
+echo *** Warning *** No board configuration file found:
+echo   /mpython/boardconfigs/pydos_bcfg_%_uname%.py
 goto board
 :foundbcfg
 echo copy "/mpython/boardconfigs/pydos_bcfg_%_uname%.py" to /lib/pydos_bcfg.py
@@ -92,6 +91,10 @@ copy /cpython/ESP32/lib/* /lib/
 
 :other
 if %_ans2% == o set _ans2 = O
+if not "%_uname%" == "Sparkfun SAMD51 Thing Plus with SAMD51J20A" goto skip_SAMD51
+if not exist /lib mkdir /lib
+copy /mpython/samd51/lib/* /lib/
+:skip_SAMD51
 if "%_boardID%" == "raspberry_pi_pico_w" goto copy_code
 if %_ans2% == E goto skip_codecopy
 if exist /ntpdate.py del /ntpdate.py

@@ -1,6 +1,9 @@
 import os
 from time import localtime
-from sys import stdin,implementation
+from sys import stdin,implementation,path
+if not '/lib' in path:
+    path.insert(0,'/lib')
+path.append('/PyBasic')
 try:
     from pydos_ui import Pydos_ui
 except ImportError:
@@ -56,7 +59,7 @@ def PyDOS():
     global envVars
     if "envVars" not in globals().keys():
         envVars = {}
-    _VER = "1.13"
+    _VER = "1.14"
     if implementation.name.upper() == "CPYTHON":
         if os.name.upper() == "POSIX":
             slh = '/'
@@ -636,7 +639,8 @@ def PyDOS():
             print("\n%10i Kb free conventional memory" % (int(gc.mem_free()/1000)))
             print("%10i Kb used conventional memory" % (int(gc.mem_alloc()/1000)))
             if implementation.name.upper() == "MICROPYTHON":
-                print("%10i Kb current threshold value" % (int(gc.threshold()/1000)))
+                if 'threshold' in dir(gc):
+                    print("%10i Kb current threshold value" % (int(gc.threshold()/1000)))
 
                 for i in range(len(switches)):
                     if switches[i][0] == 'D':
@@ -1145,8 +1149,10 @@ def PyDOS():
                 pcmd = " ".join(args[1:])
             try:
                 exec(pcmd)
+                envVars['errorlevel'] = '0'
             except Exception as err:
                 print("*ERROR* Exception:",str(err))
+                envVars['errorlevel'] = '1'
             del pcmd
 
         elif cmd == "EXIT":

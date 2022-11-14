@@ -38,7 +38,10 @@ def wifi_weather():
 
     response_window = []
     for _ in range(8):
-        response_window.append(next(iter(response.iter_content(chunk_size=256))))
+        try:
+            response_window.append(next(iter(response.iter_content(chunk_size=256))))
+        except:
+            break
 
     response.close()
 

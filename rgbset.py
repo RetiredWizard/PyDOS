@@ -1,7 +1,6 @@
 from sys import implementation
 from pydos_hw import Pydos_hw
 from pydos_ui import Pydos_ui
-import os
 try:
     from pydos_ui import input
 except:
@@ -41,7 +40,7 @@ def rgbset(ans=""):
         if Pydos_hw.neoPixel_Pow:
             Pydos_hw.neoPixel_Pow.on()
 
-        if os.uname().machine == 'Arduino Nano RP2040 Connect with RP2040':
+        if implementation._machine == 'Arduino Nano RP2040 Connect with RP2040':
             import mp_esp32spi as adafruit_esp32spi
 
             #  uses the secondary SPI connected through the ESP32
@@ -54,7 +53,7 @@ def rgbset(ans=""):
 
             nano_connect = True
 
-        elif os.uname().machine == 'TinyPICO with ESP32-PICO-D4':
+        elif implementation._machine == 'TinyPICO with ESP32-PICO-D4':
             from os import umount
 
             drive = envVars.get('.sd_drive',drive)
@@ -161,7 +160,7 @@ def rgbset(ans=""):
                 pixels.fill((r, g, b))
 
         elif implementation.name.upper() == 'MICROPYTHON':
-            if os.uname().machine == 'TinyPICO with ESP32-PICO-D4':
+            if implementation._machine == 'TinyPICO with ESP32-PICO-D4':
                 pixels.fill((r, g, b))
             else:
                 pixels[0] = (r, g, b)

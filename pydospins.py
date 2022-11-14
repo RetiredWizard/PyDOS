@@ -18,9 +18,6 @@ if implementation.name.upper() == "CIRCUITPYTHON":
             import kfw_s2_board as board
         except:
             pass
-elif implementation.name.upper() == "MICROPYTHON":
-    from os import uname
-
 
 def printPinAssignments():
 
@@ -42,12 +39,12 @@ def printPinAssignments():
             print("SPI                      ","board.SPI()")
 
     elif implementation.name.upper() == "MICROPYTHON":
-        print("Board ID:                ",uname().machine)
+        print("Board ID:                ",implementation._machine)
 
     for entry in Pydos_pins:
         if entry == 'sndPin':
             print("PyDOS Sound Pin:         ",Pydos_pins['sndPin'][1])
-        elif entry in ['led','SCL','SDA','SD_CS','SD_SCK','SD_MOSI','SD_MISO','CS','SCK','MOSI','MISO']:
+        elif entry in ['led','SCL','SDA','SD_CS','SD_SCK','SD_MOSI','SD_MISO','CS','SCK','MOSI','MISO','neoPixel']:
             print(entry+" Pin:"+(20-len(entry))*" ",Pydos_pins[entry][1])
         else:
             if Pydos_pins[entry][1] != None:

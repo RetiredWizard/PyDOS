@@ -29,9 +29,15 @@ if implementation.name.upper() == "CIRCUITPYTHON":
     import board
 
 if implementation.name.upper() == "MICROPYTHON":
+    from machine import Pin
+    try:
+        led = "LED"
+        test = machine.Pin(led,Pin.OUT)
+    except:
+        led = "D13"
+
     Pydos_pins = {
-        'sndPin' : (7,"IO7"),
-        'led' : ('LED',"LED"),
+        'led' : (led,led),
         'neoPixel' : (16,"IO16"),
         'I2C_NUM' : (1,None),
         'SCL' : (3,"SCL IO3"),

@@ -94,13 +94,10 @@ to return control to PyDOS.
 **fileview.py** - scrollable text file viewer
 
 **sdmount.py** - mounts an sd card to the file system
-
 **sdumount.py** - dismounts an sd card from the file system
 
 **setdate.py** - initalizes the real time clock to an entered date
-
 **settime.py** - initalizes the real time clock to an entered time
-
 **ntpdate.py** (ESP32xxx and Pico W only) - sets the time and date using the Internet NTP protocol
 
 **diff.py** - performs a file comparison
@@ -204,8 +201,8 @@ Micropython firmware file.
 The first is if you wan to connect up an old school serial terminal to the REPL rather than the standard serial over USB connection. Instructions for building 
 Micropython with this modification can be found in section 2.2 of the Raspberry Pi Pico Python SDK at https://datasheets.raspberrypi.com/pico/raspberry-pi-pico-python-sdk.pdf.
 
-The second is that PyDOS uses a recursive routine to process wildcard operations and the default stack in Micropython limits the recursion depth that can be obtained.
-This means that PyDOS has to limit wildcard operations, one impact of this is that files with longer file names will not appear
+The second is that PyDOS uses a recursive routine to process wildcard operations and the default stack in Micropython limits the recursion depth that can be obtained (**With more recent versions of Micropython this has become much less of an issue).
+This means that PyDOS has to limit wildcard operations, one impact of this is that files with longer file names may not appear
 in directory listings when wildcards are used. To eliminate this issue a custom Micropython image can be built with the the MICROPY_STACKLESS parameter in **py/circuitpy_mpconfig.h**
 changed from **0** to **1**. 
 
