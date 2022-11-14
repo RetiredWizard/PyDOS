@@ -96,8 +96,8 @@ to return control to PyDOS.
 **sdmount.py** - mounts an sd card to the file system
 **sdumount.py** - dismounts an sd card from the file system
 
-**setdate.py** - initalizes the real time clock to an entered date
-**settime.py** - initalizes the real time clock to an entered time
+**setdate.py** - initalizes the real time clock to an entered date  
+**settime.py** - initalizes the real time clock to an entered time  
 **ntpdate.py** (ESP32xxx and Pico W only) - sets the time and date using the Internet NTP protocol
 
 **diff.py** - performs a file comparison
