@@ -388,7 +388,7 @@ def xcopy():
                     print("Invalid Target:",args[1])
         else:
             if not earlyError:
-                if not validPath:
+                if not validPath or newdir not in os.listdir(sourcePath):
                     print("No such file:",args[0])
                 else:
                     print("The source file cannot be a directory")

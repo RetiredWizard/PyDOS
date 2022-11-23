@@ -329,8 +329,9 @@ def PyDOS():
 
             if not quit:
                 if swWide:
-                    print()
-                    nLines += 1
+                    if dirHeadPrntd:
+                        print()
+                        nLines += 1
 
                 if swRecur:
                     for _dir in sorted(os.listdir(dPath), key=lambda v: (v.upper(), v[0].isupper())):
@@ -389,11 +390,19 @@ def PyDOS():
 
             tmpDir = os.getcwd()
 
-            if lastDir in os.listdir() or lastDir in ".." or "*" in lastDir or "?" in lastDir:
-                if (lastDir in "..") or ("*" in lastDir) or ("?" in lastDir) or (os.stat(slh if lastDir == "" else lastDir)[0] & (2**15) == 0):
-                    isFile = False
+            if lastDir in os.listdir() or lastDir in ".." or "*" in lastDir or "?" in lastDir or \
+                swBits & int('000010',2):
+
+                if lastDir in os.listdir():
+                    if (lastDir in "..") or ("*" in lastDir) or ("?" in lastDir) or  \
+                        (os.stat(slh if lastDir == "" else lastDir)[0] & (2**15) == 0):
+
+                        isFile = False
+                    else:
+                        isFile = True
                 else:
                     isFile = True
+
                 dirLoop(tmpDir,lastDir,isFile,bool(swBits&int('000100',2)),bool(swBits&int('010000',2)),bool(swBits&int('000010',2)),True)
             else:
                 print("File",dirPath,"not found. (1)")
@@ -426,9 +435,9 @@ def PyDOS():
                             break
                     elif Recurs:
                         delFiles(Dir+_dir+slh,'*',Recurs,removDirs)
-                        if os.getcwd() == Dir+_dir:
-                            os.chdir("..")
                         if removDirs:
+                            if os.getcwd() == Dir+_dir:
+                                os.chdir("..")
                             try:
                                 os.rmdir(Dir+_dir)
                             except Exception as err:
@@ -436,6 +445,8 @@ def PyDOS():
                                 break
                 else:
                     print("Unable to delete: "+Dir+_dir+". Filename too long for wildcard operation.")
+            elif Recurs and not removDirs and os.stat(Dir+_dir)[0] & (2**15) == 0:
+                delFiles(Dir+_dir+slh,File,Recurs,removDirs)
 
     def setCondCmd(args,i,condResult):
         condCmd = ""
@@ -900,7 +911,12 @@ def PyDOS():
                                     if ans == "Y":
                                         delFiles(tmpDir+newdir+slh,'*',bool(swBits&int('000010',2)),False)
                             else:
-                                print("Unable to delete: "+tmpDir+newdir+". File not found.")
+                                if swBits & int('000010',2):
+                                    ans = input(tmpDir+newdir+slh+"*, Are you sure (y/n)? ").upper()
+                                    if ans == "Y":
+                                        delFiles(tmpDir,newdir,True,False)
+                                else:
+                                    print("Unable to delete: "+tmpDir+newdir+". File not found.")
                     else:
                         print("Illegal switch, Command Format: DEL[/s] [path][file]")
                 else:
@@ -988,6 +1004,10 @@ def PyDOS():
                                 os.rmdir(tmpDir)
                             except Exception as err:
                                 print("Unable to remove: "+tmpDir+", Exception:",str(err))
+                            try:
+                                os.chdir(savDir)
+                            except:
+                                pass
                         else:
                             print("The directory is not empty")
                     else:
@@ -1041,6 +1061,8 @@ def PyDOS():
                             aPath2 = tmpDir.split(slh)
                             newdir2 = aPath2.pop(-1)
                             targetPath = chkPath(aPath2)[1]
+                            if not validPath:
+                                print("Impossible Target Error:",args[2])
 
 # Second argument specifies an existing target
                         if newdir2 in os.listdir(targetPath) or (targetPath == slh and newdir2 == ""):
@@ -1100,8 +1122,6 @@ def PyDOS():
                                 else:
                                     filecpy(sourcePath+newdir,targetPath+newdir2+("" if newdir2 == "" else slh)+newdir)
                                     nFiles += 1
-                        elif not validPath:
-                            print("Invalid Target:",args[2])
 # Second argument is a new file
                         else:
                             if trailingSlash or wildCardOp:

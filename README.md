@@ -5,7 +5,7 @@
 
 **Check out the demo video at https://www.youtube.com/watch?v=Az_oiq8GE4Y**
 
-To start the shell type **import PyDOS** at the micropython REPL prompt.
+To start the shell type **import PyDOS** at the REPL prompt.
 
 At the PyDOS prompt a python program (.py) or batch (.bat) file can be run by simply entering the filename with or without
 the extension.
@@ -110,7 +110,7 @@ to return control to PyDOS.
     
 **edit.py** - shell to load full screen editor from https://github.com/robert-hh/Micropython-Editor
 
-**xcopy.py** - a more robust version of the copy command  
+**xcopy.py[/S][/Y] [path]filename [path][filename]** - a more robust version of the copy command  
     /S Copies specified files from directories and subdirectories, except for empty ones  
     /Y Suppresses prompting to confirm you want to overwrite an existing destination file
 
