@@ -23,17 +23,17 @@ If a command argument contains spaces the argument must be enclosed in quotes.
 
 **REM [comment]** - Used in batch files to insert remarks (that will not be acted on).
 
-**DIR[/P][/W][/S] [path][filename]** - Displays directory of files and directories stored on flash.  
-    /P Pauses after each screenful of information (Q or C to abort listing)  
-    /W Uses wide list format, displaying file/folder names only  
-    /S Displays files recursively, traversing any subdirectories  
+**DIR[/P][/W][/S] [path][filename]** - Displays directory of files and directories stored on flash.
+- /P Pauses after each screenful of information (Q or C to abort listing)  
+- /W Uses wide list format, displaying file/folder names only  
+- /S Displays files recursively, traversing any subdirectories  
 
 **DATE** - Displays the current date.
 
 **TIME** - Displays the current time.
 
 **MEM[/D]** - Displays available RAM and performs a garbage collection operation  
-    /D Include debug information when supported by microcontroller board
+- /D Include debug information when supported by microcontroller board
 
 **VER** - Displays PyDOS version
 
@@ -48,9 +48,9 @@ If a command argument contains spaces the argument must be enclosed in quotes.
 **IF [NOT] ERRORLEVEL (number) (command) [parameters]**  
 
 **SET[/P][/A] (variable)=[(string|prompt)]** - Inserts strings into the command environment. The set values can be used later by programs.  
-    /A specifies that the string to the right of the equal sign is a numerical expression that is evaluated  
-    /P displays the specified prompt string before setting the value of a variable to a line of input entered by the user  
-    *DOS specific environment variables:*
+- /A specifies that the string to the right of the equal sign is a numerical expression that is evaluated  
+- /P displays the specified prompt string before setting the value of a variable to a line of input entered by the user  
+*DOS specific environment variables:*
     - LIB - The Python search path for importing libraries (the current direcotry is always searched first but not included in the LIB variable)  
     - PATH - The directory search list for executing python scripts and DOS batch files (the current directory is always searched first but not included in the PATH variable)
     - PROMPT - The DOS prompt string
@@ -64,10 +64,10 @@ If a command argument contains spaces the argument must be enclosed in quotes.
 **RENAME (REN, MOVE, MV) [path]filename [path]filename** - Changes the filename under which a file is stored.
 
 **DELETE (DEL)[/S] [path]filename** = Deletes files from disk.  
-    /S Delete specified files from all subdirectories
+- /S Delete specified files from all subdirectories
 
 **TYPE (MORE)[/P] [path]filename** - Displays the contents of a file.  
-    /P Pauses after each screenful of information (Q or C to abort listing)
+- /P Pauses after each screenful of information (Q or C to abort listing)
 
 **CD [[d:]path]** - Displays working (current) directory and/or changes to a different directory.  
 **CD ..** - Changes to parent directory of current directory.
@@ -75,15 +75,15 @@ If a command argument contains spaces the argument must be enclosed in quotes.
 **MKDIR (MD) path** - Creates a new subdirectory.
 
 **RMDIR (RD)[/S] path** - Removes a subdirectory.  
-    /S Removes all directories and files in the specified directory and the directory itself
+- /S Removes all directories and files in the specified directory and the directory itself
 
 **COPY[/Y] [path]filename [path][filename]** - copies files.  
-    /Y Suppresses prompting to confirm you want to overwrite an existing destination file
+- /Y Suppresses prompting to confirm you want to overwrite an existing destination file
 
 **EXIT** - In a batch file returns to PyDOS, at PyDOS prompt terminates PyDOS and returns to REPL.
 
 **PEXEC[/Q] [python command]** - Executes a single python command.
-    /Q Supresses error message if error condition occurs (errorlevel variable is set)
+- /Q Supresses error message if error condition occurs (errorlevel variable is set)
 
 An **autoexec.bat** batch file will automatically execute when PyDOS starts.
 
@@ -111,8 +111,8 @@ to return control to PyDOS.
 **edit.py** - shell to load full screen editor from https://github.com/robert-hh/Micropython-Editor
 
 **xcopy.py[/S][/Y] [path]filename [path][filename]** - a more robust version of the copy command  
-    /S Copies specified files from directories and subdirectories, except for empty ones  
-    /Y Suppresses prompting to confirm you want to overwrite an existing destination file
+- /S Copies specified files from directories and subdirectories, except for empty ones  
+- /Y Suppresses prompting to confirm you want to overwrite an existing destination file
 
 **fileview.py** - scrollable text file viewer
 
