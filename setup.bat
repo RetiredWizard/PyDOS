@@ -13,6 +13,12 @@ if not exist /lib/adafruit_bus_device mkdir /lib/adafruit_bus_device
 copy /cpython/lib/adafruit_bus_device/* /lib/adafruit_bus_device/
 pexec import board
 pexec envVars["_boardID"] = board.board_id
+if "%_boardID%" == "bpi_picow_s3" set _boardID = raspberry_pi_pico
+pexec/q import sdcardio
+if not errorlevel 0 leave_af_sdcard
+if "%_boardID%" == "teensy41" goto leave_af_sdcard
+del /lib/adafruit_sdcard.mpy
+:leave_af_sdcard
 if exist /cpython/boardconfigs/pydos_bcfg_%_boardID%.py goto foundbcfgCP
 echo *** Warning *** No board configuration file found
 echo *** Warning *** /cpython/boardconfigs/pydos_bcfg_%_boardID%.py
@@ -40,6 +46,10 @@ copy/y /mpython/* /
 if not exist /lib mkdir /lib
 copy /mpython/lib/* /lib/
 pexec envVars["_uname"] = implementation._machine
+if not "%_uname%" == "Sparkfun SAMD51 Thing Plus with SAMD51J20A" goto skip_SAMD51
+if not exist /lib mkdir /lib
+copy /mpython/samd51/lib/* /lib/
+:skip_SAMD51
 if exist "/mpython/boardconfigs/pydos_bcfg_%_uname%.py" goto foundbcfg
 echo *** Warning *** No board configuration file found:
 echo   /mpython/boardconfigs/pydos_bcfg_%_uname%.py
@@ -91,10 +101,6 @@ copy /cpython/ESP32/lib/* /lib/
 
 :other
 if %_ans2% == o set _ans2 = O
-if not "%_uname%" == "Sparkfun SAMD51 Thing Plus with SAMD51J20A" goto skip_SAMD51
-if not exist /lib mkdir /lib
-copy /mpython/samd51/lib/* /lib/
-:skip_SAMD51
 if "%_boardID%" == "raspberry_pi_pico_w" goto copy_code
 if %_ans2% == E goto skip_codecopy
 if exist /ntpdate.py del /ntpdate.py

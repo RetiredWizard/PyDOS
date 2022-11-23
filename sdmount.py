@@ -11,7 +11,11 @@ if implementation.name.upper() == "MICROPYTHON":
         pass
     import sdcard
 elif implementation.name.upper() == "CIRCUITPYTHON":
-    import adafruit_sdcard
+    from digitalio import DigitalInOut
+    try:
+        import adafruit_sdcard
+    except:
+        import sdcardio as adafruit_sdcard
     import storage
 
 
@@ -77,6 +81,8 @@ def sdMount(drive):
         sdMounted = False
 
         if implementation.name.upper() == "MICROPYTHON":
+            _uname = implementation._machine
+
             if Pydos_hw.SD_SCK and not altSPI:
                 try:
                     os.mount(SDCard(), drive)
@@ -100,18 +106,23 @@ def sdMount(drive):
                     print_exception(e)
 
         elif implementation.name.upper() == "CIRCUITPYTHON":
+            _uname = os.uname().machine
+
             if not Pydos_hw.SD_CS and not Pydos_hw.CS:
                 print("CS Pin not allocated for SDCard SPI interface")
             else:
+                if Pydos_hw.SD_CS:
+                    _cs = Pydos_hw.SD_CS
+                elif Pydos_hw.CS:
+                    _cs = Pydos_hw.CS
+
                 try:
                     if altSPI:
-                        sd = adafruit_sdcard.SDCard(Pydos_hw.SPI(), Pydos_hw.CS)
+                        Pydos_hw.ALT_SD = adafruit_sdcard.SDCard(Pydos_hw.SPI(), _cs)
+                        vfs = storage.VfsFat(Pydos_hw.ALT_SD)
                     else:
-                        if Pydos_hw.SD_CS:
-                            sd = adafruit_sdcard.SDCard(Pydos_hw.SD_SPI(), Pydos_hw.SD_CS)
-                        elif Pydos_hw.CS:
-                            sd = adafruit_sdcard.SDCard(Pydos_hw.SD_SPI(), Pydos_hw.CS)
-                    vfs = storage.VfsFat(sd)
+                        Pydos_hw.SD = adafruit_sdcard.SDCard(Pydos_hw.SD_SPI(), _cs)
+                        vfs = storage.VfsFat(Pydos_hw.SD)
                     storage.mount(vfs, drive)
                     sdMounted = True
                 except Exception as e:
@@ -119,10 +130,6 @@ def sdMount(drive):
 
         if sdMounted:
             print(drive+" mounted")
-            if implementation.name.upper() == "CIRCUITPYTHON":
-                _uname = os.uname().machine
-            else:
-                _uname = implementation._machine
 
             # nano connect/Tennsy 4.1 are special cases becuase LED uses the SPI SCK pin
             if _uname[0:27] in ["Arduino Nano RP2040 Connect", \

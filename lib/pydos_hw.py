@@ -20,6 +20,13 @@ elif implementation.name.upper() == "CIRCUITPYTHON":
     import busio
     import board
 
+    try:
+        import adafruit_sdcard
+        del adafruit_sdcard
+        csAsPin = False
+    except:
+        csAsPin = True
+
     if board.board_id == "unexpectedmaker_feathers2":
         try:
             import kfw_s2_board as board
@@ -66,6 +73,10 @@ class PyDOS_HW:
     CS = None
     I2CbbqDevice = None
     KFW = False
+    SD = None
+    SDdrive = None
+    ALT_SD = None
+    ALT_SDdrive = None
 
     def __init__(self):
 
@@ -101,10 +112,11 @@ class PyDOS_HW:
         self.CS=Pydos_pins.get('CS',(None,None))[0]
 
         if implementation.name.upper() == 'CIRCUITPYTHON':
-            if self.CS:
-                self.CS = digitalio.DigitalInOut(self.CS)
-            if self.SD_CS:
-                self.SD_CS = digitalio.DigitalInOut(self.SD_CS)
+            if not csAsPin:
+                if self.CS:
+                    self.CS = digitalio.DigitalInOut(self.CS)
+                if self.SD_CS:
+                    self.SD_CS = digitalio.DigitalInOut(self.SD_CS)
 
             if self.sndPin:
                 self.sndGPIO = digitalio.DigitalInOut(self.sndPin)
@@ -241,9 +253,14 @@ class PyDOS_HW:
                             except ImportError:
                                 trybitbangio = False
                                 print('SD_SPI Create Fail')
+                        else:
+                            print('SD_SPI Create Fail')
 
                         if trybitbangio:
                             self._SD_SPI = bitbangio.SPI(self.SD_SCK, self.SD_MOSI, self.SD_MISO)
+
+                        if not self._SD_SPI:
+                            self._SD_SPI = self.SPI()
                     else:
                         self._SD_SPI = self.SPI()
             elif implementation.name.upper() == "MICROPYTHON":

@@ -49,12 +49,20 @@ def blink(passed_envVars={}):
 
             if envVars.get('.sd_drive',None) != None:
                 from storage import umount
-                from pydos_hw import PyDOS_HW
+                #from pydos_hw import PyDOS_HW
                 drive = envVars['.sd_drive']
                 try:
                     umount(drive) # Nano Connect uses LED pin for SPI SCK
                     print("Unmounting SD card because of shared SCK pin")
                     envVars.pop('.sd_drive',None)
+                    if drive == Pydos_hw.SDdrive:
+                        Pydos_hw.SD.deinit()
+                        Pydos_hw.SD = None
+                        Pydos_hw.SDdrive = None
+                    elif drive == Pydos_hw.ALT_SDdrive:
+                        Pydos_hw.ALT_SD.deinit()
+                        Pydos_hw.Alt_SD = None
+                        Pydos_hw.ALT_SDdrive = None
                 except:
                     pass
             # If anything has used the SPI interface need to free up SCK

@@ -43,8 +43,7 @@ class PyDOS_UI:
         _tft_cs = board.D9
         _tft_dc = board.D10
         _display_bus = displayio.FourWire(Pydos_hw.SPI(), command=_tft_dc, chip_select=_tft_cs)
-        _display = adafruit_ili9341.ILI9341(_display_bus, width=320,
-            height=(235 if int(uname().release.split('.')[0]) >=8 else 240))
+        _display = adafruit_ili9341.ILI9341(_display_bus, width=320, height=240)
 
         self.kbd = BBQ10Keyboard(Pydos_hw.I2C(),BBQI2CDevice=Pydos_hw.I2CbbqDevice)
 
@@ -136,7 +135,7 @@ class PyDOS_UI:
 
     def get_screensize(self):
         if int(uname().release.split('.')[0]) >=8:
-            return(18,52)
+            return(19,52)
         else:
             return(17,49)
 
