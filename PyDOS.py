@@ -62,7 +62,7 @@ def PyDOS():
     global envVars
     if "envVars" not in globals().keys():
         envVars = {}
-    _VER = "1.15"
+    _VER = "1.16"
     if imp == "B":
         if os.name.upper() == "POSIX":
             slh = '/'
@@ -401,6 +401,8 @@ def PyDOS():
                     else:
                         isFile = True
                 else:
+                    if lastDir in ".." or (tmpDir == "/" and lastDir == ""):
+                        lastDir = "*" 
                     isFile = True
 
                 dirLoop(tmpDir,lastDir,isFile,bool(swBits&int('000100',2)),bool(swBits&int('010000',2)),bool(swBits&int('000010',2)),True)
