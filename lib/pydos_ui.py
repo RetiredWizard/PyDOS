@@ -35,7 +35,7 @@ class PyDOS_UI:
         return stdin.read(num)
 
     def get_screensize(self):
-        print("Screen set to 24 rows, 80 col. Press any key to coninue...",end="")
+        print("Screen set to 24 rows, 80 col. Press any key to continue...",end="")
         stdout.write('\x1b[2K')
         stdout.write('\x1b[999;999H\x1b[6n')
         pos = ''

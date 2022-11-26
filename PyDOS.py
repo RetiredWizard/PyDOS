@@ -62,7 +62,7 @@ def PyDOS():
     global envVars
     if "envVars" not in globals().keys():
         envVars = {}
-    _VER = "1.17"
+    _VER = "1.18"
     if imp == "B":
         if os.name.upper() == "POSIX":
             slh = '/'
@@ -113,23 +113,21 @@ def PyDOS():
 
     def scrnPause(swPause,nLines,scrnLine,scrnEnd=None):
         quit = False
-        key = ""
-        if swPause and nLines >= int(envVars["_scrHeight"])-1:
-            key = anyKey()
-#            if key != "\n" and key != "":
-            if key != "\n":
+        i = 0
+        for sLine in scrnLine:
+            i += 1
+            if swPause and nLines >= int(envVars["_scrHeight"])-1:
+                key = anyKey()
                 nLines = 0
-            else:
-                nLines -= 6
-#            if key in "QqCc" and key != "":
-            if key in "QqCc":
-                quit = True
-        if not quit and scrnLine is not None:
-            if scrnEnd is None:
-                print(scrnLine)
-                nLines += 1
-            else:
-                print(scrnLine,end="")
+                if key in "QqCc":
+                    quit = True
+                    break
+            if sLine is not None:
+                if scrnEnd is None or i<len(scrnLine):
+                    print(sLine)
+                    nLines += 1
+                else:
+                    print(sLine,end="")
         return (quit,nLines)
 
     def weekDay():
@@ -155,17 +153,9 @@ def PyDOS():
         try:
             with open(cFile) as cf:
                 if passedIn.find("'") > -1:
-                    if passedIn.find('"') > -1:
-                        if passedIn[0] == '"' and passedIn[-1] == '"':
-                            passedIn = passedIn[1:-1]
-                            exec('passedIn = "'+passedIn+'"\n'+cf.read())
-                        else:
-                            print("Invalid argument: "+passedIn)
-                    else:
-                        exec('passedIn = "'+passedIn+'"\n'+cf.read())
+                    exec('passedIn = "'+passedIn+'"\n'+cf.read())
                 else:
                     exec("passedIn = '"+passedIn+"'\n"+cf.read())
-
         except Exception as err:
             print("*ERROR* Exception:",str(err),"in",cFile)
 
@@ -219,41 +209,6 @@ def PyDOS():
     def prDir(dirPath,swBits):
         wideCols = int(scrWdth/16)
 
-        def dirLine(fType,dFile,fSize,fTime,swWide):
-
-            if swWide:
-                if fType == "D":
-                    print("["+dFile[:13]+"]"+" "*(14-len(dFile[:13])),end="")
-                else:
-                    print(dFile[:15]+" "*(16-len(dFile[:15])),end="")
-            else:
-                if fType == "D":
-                    scrAdj1 = 52 - min(scrWdth,52)
-                    scrAdj2 = min(13,65-min(scrWdth,65))
-                    print(dFile[:max(8,scrWdth-26)]+" "*(24-len(dFile)-scrAdj1)+"<DIR>"+" "*(18-scrAdj2)+"%2.2i-%2.2i-%4.4i %2.2i:%2.2i" % (fTime[0], fTime[1], fTime[2], fTime[3], fTime[4]))
-                else:
-                    scrAdj1 = 65 - min(scrWdth,65)
-                    print(dFile[:max(8,scrWdth-20-len(fSize))]+" "*(35-len(dFile)+10-len(fSize)-scrAdj1),fSize,"%2.2i-%2.2i-%4.4i %2.2i:%2.2i" % (fTime[0], fTime[1], fTime[2], fTime[3], fTime[4]))
-
-            return()
-
-        def dirSummary(screenlines,swPause,swWide,nLines,nFiles,tFSize,nDirs,rtPth):
-            try:
-                availDisk = os.statvfs(rtPth)[1]*os.statvfs(rtPth)[4]
-            except:
-                availDisk = 0
-
-            scrAdj1 = 65 - min(scrWdth,65)
-            (quit,nLines) = scrnPause(swPause,nLines, \
-                " "*(4-len(str(nFiles)))+" "+str(nFiles)+" File(s)"+" "*(32-len(str(tFSize))-scrAdj1)+" "+str(tFSize)+" Bytes.")
-
-            (quit,nLines) = scrnPause(swPause,nLines, \
-                " "*(4-len(str(nDirs)))+" "+str(nDirs)+" Dir(s)"+" "*(33-len(str(availDisk))-scrAdj1)+" "+str(availDisk)+" Bytes free.")
-
-            scrnPause(swPause,nLines,"","")
-
-            return
-
         def dirLoop(tmpDir,lastDir,isFile,swPause,swWide,swRecur,prSum, \
             nLines=0,nFiles=0,tFSize=0,nDirs=0):
 
@@ -274,58 +229,67 @@ def PyDOS():
                 lastDir = ""
 
             if dirPat is None:
-                (quit,nLines) = scrnPause(swPause,nLines,"")
-                (quit,nLines) = scrnPause(swPause,nLines,"Directory of "+dPath)
+                (quit,nLines) = scrnPause(swPause,nLines,["","Directory of "+dPath])
                 dirHeadPrntd = True
                 nDirs += 2
                 if swWide:
                     if wideCols > 1:
                         (quit,nLines) = scrnPause(swPause,nLines, \
-                            "[.]             [..]            ","")
+                            ["[.]             [..]            "],"")
                         wideCount += 2
                     else:
-                        (quit,nLines) = scrnPause(swPause,nLines,"[.]")
-                        wideCount = 0
-                        (quit,nLines) = scrnPause(swPause,nLines,"[..]","")
-                        wideCount += 1
+                        (quit,nLines) = scrnPause(swPause,nLines,["[.]","[..]"],"")
+                        wideCount = 1
                 else:
                     scrAdj1 = 52 - min(scrWdth,52)
-                    (quit,nLines) = scrnPause(swPause,nLines,"."+" "*(23-scrAdj1)+"<DIR>")
-                    (quit,nLines) = scrnPause(swPause,nLines,".."+" "*(22-scrAdj1)+"<DIR>")
+                    (quit,nLines) = scrnPause(swPause,nLines, \
+                        ["."+" "*(23-scrAdj1)+"<DIR>",".."+" "*(22-scrAdj1)+"<DIR>"])
 
-            for _dir in sorted(os.listdir(dPath), key=lambda v: (("D" if os.stat(dPath+v)[0]&(2**15)==0 else "F")+v.upper())):
-                if (dirPat is None or _match(dirPat,_dir[:wldCLen])) and not quit:
+            for i in range(2):
+                for _dir in sorted([x for x in os.listdir(dPath) if (os.stat(dPath+x)[0]&(32768))>>15==i],key=str.lower):
+                    if (dirPat is None or _match(dirPat,_dir[:wldCLen])) and not quit:
 
-                    if not dirHeadPrntd:
-                        (quit,nLines) = scrnPause(swPause,nLines,"")
-                        (quit,nLines) = scrnPause(swPause,nLines,"Directory of "+dPath)
+                        if not dirHeadPrntd:
+                            (quit,nLines) = scrnPause(swPause,nLines,["","Directory of "+dPath])
+                            if quit:
+                                break
+                            dirHeadPrntd = True
+
+                        if i == 0: 
+                            fSize = 0
+                            nDirs += 1
+                        else:
+                            fSize = str(os.stat(dPath+_dir)[6])
+                            tFSize += int(fSize)
+                            nFiles += 1
+
+                        fTime = localtime(max(min(2145916800,os.stat(dPath+_dir)[9]),946684800))
+
+                        if swWide:
+                            if wideCount >= wideCols:
+                                wideCount = 0
+                                print()
+                                nLines += 1
+                            wideCount += 1
+                            if i == 0:
+                                (quit,nLines) = scrnPause(swPause,nLines, \
+                                    ["["+_dir[:13]+"]"+" "*(14-len(_dir[:13]))],"")
+                            else:
+                                (quit,nLines) = scrnPause(swPause,nLines, \
+                                    [_dir[:15]+" "*(16-len(_dir[:15]))],"")
+                        else:
+                            if i == 0:
+                                scrAdj1 = 52 - min(scrWdth,52)
+                                scrAdj2 = min(13,65-min(scrWdth,65))
+                                (quit,nLines) = scrnPause(swPause,nLines, \
+                                    [_dir[:max(8,scrWdth-26)]+" "*(24-len(_dir)-scrAdj1)+"<DIR>"+" "*(18-scrAdj2)+"%2.2i-%2.2i-%4.4i %2.2i:%2.2i" % (fTime[1], fTime[2], fTime[0], fTime[3], fTime[4])])
+                            else:
+                                scrAdj1 = 65 - min(scrWdth,65)
+                                (quit,nLines) = scrnPause(swPause,nLines, \
+                                    [_dir[:max(8,scrWdth-20-len(fSize))]+" "*(36-len(_dir)+10-len(fSize)-scrAdj1)+fSize+" %2.2i-%2.2i-%4.4i %2.2i:%2.2i" % (fTime[1], fTime[2], fTime[0], fTime[3], fTime[4])])
+
                         if quit:
                             break
-                        dirHeadPrntd = True
-
-                    DirorFile = ("D" if os.stat(dPath+_dir)[0]&(2**15)==0 else "F")
-                    if DirorFile == "F":
-                        fSize = str(os.stat(dPath+_dir)[6])
-                        tFSize += int(fSize)
-                        nFiles += 1
-                    else:
-                        fSize = 0
-                        nDirs += 1
-
-                    fTime = txtFileTime(dPath+_dir)
-                    if swWide:
-                        if wideCount == wideCols:
-                            wideCount = 0
-                            print()
-                            nLines += 1
-                        wideCount += 1
-                    (quit,nLines) = scrnPause(swPause,nLines,None)
-                    if not swWide:
-                        nLines += 1
-                    if quit:
-                        break
-
-                    dirLine(DirorFile,_dir,fSize,fTime,swWide)
 
             if not quit:
                 if swWide:
@@ -334,8 +298,8 @@ def PyDOS():
                         nLines += 1
 
                 if swRecur:
-                    for _dir in sorted(os.listdir(dPath), key=lambda v: (v.upper(), v[0].isupper())):
-                        if (os.stat(dPath+_dir)[0] & (2**15) == 0) == True:
+                    for _dir in sorted(os.listdir(dPath), key=str.upper):
+                        if (os.stat(dPath+_dir)[0] & (32768) == 0) == True:
                             (nLines,nFiles,tFSize,nDirs,quit) = \
                                 dirLoop(dPath+_dir,(dirPat if dirPat is not None else ""), \
                                     isFile,swPause,swWide,swRecur,False, \
@@ -344,19 +308,17 @@ def PyDOS():
                             break
 
                 if prSum and not quit:
-                    dirSummary(int(envVars["_scrHeight"])-1,swPause,swWide,nLines,nFiles,tFSize,nDirs,dPath)
+                    try:
+                        availDisk = os.statvfs(dPath)[1]*os.statvfs(dPath)[4]
+                    except:
+                        availDisk = 0
+
+                    scrAdj1 = 65 - min(scrWdth,65)
+                    (quit,nLines) = scrnPause(swPause,nLines, \
+                        [" "*(4-len(str(nFiles)))+" "+str(nFiles)+" File(s)"+" "*(32-len(str(tFSize))-scrAdj1)+" "+str(tFSize)+" Bytes.", \
+                        " "*(4-len(str(nDirs)))+" "+str(nDirs)+" Dir(s)"+" "*(33-len(str(availDisk))-scrAdj1)+" "+str(availDisk)+" Bytes free.",""],"")
 
             return (nLines,nFiles,tFSize,nDirs,quit)
-
-        def txtFileTime(fPath):
-            retTime = localtime(max(min(2145916800,os.stat(fPath)[9]),946684800))
-            fTime = []
-            fTime.append(retTime[1])
-            fTime.append(retTime[2])
-            fTime.append(retTime[0])
-            fTime.append(retTime[3])
-            fTime.append(retTime[4])
-            return(fTime)
 
         if swBits & (swAllB-int('010110',2)):
             print("Illegal switch, Command Format: DIR[/p][/w][/s] [path][file]")
@@ -940,14 +902,14 @@ def PyDOS():
                             for line in f:
                                 istrt = 0
                                 while istrt+scrWdth < len(line):
-                                    (quit,nLines) = scrnPause(swPause,nLines,None)
+                                    (quit,nLines) = scrnPause(swPause,nLines,[None])
                                     try:
                                         print(line[istrt:istrt+scrWdth].decode())
                                     except:
                                         print(chr(65534)*scrWdth)
                                     nLines += 1
                                     istrt += scrWdth
-                                (quit,nLines) = scrnPause(swPause,nLines,None)
+                                (quit,nLines) = scrnPause(swPause,nLines,[None])
                                 if quit:
                                     break
                                 try:

@@ -51,19 +51,19 @@ If a command argument contains spaces the argument must be enclosed in quotes.
 - /A specifies that the string to the right of the equal sign is a numerical expression that is evaluated  
 - /P displays the specified prompt string before setting the value of a variable to a line of input entered by the user  
 *DOS specific environment variables:*
-    - LIB - The Python search path for importing libraries (the current direcotry is always searched first but not included in the LIB variable)  
+    - LIB - The Python search path for importing libraries (the current directory is always searched first but not included in the LIB variable)  
     - PATH - The directory search list for executing python scripts and DOS batch files (the current directory is always searched first but not included in the PATH variable)
     - PROMPT - The DOS prompt string
     - _scrHeight - The number of lines on the terminal or screen
     - _scrWidth - The number of columns on the terminal or screen
     - errorlevel - The result code from the previous BAT file or pexec command executed
 
-**PROMPT [prompt text]** = Changes or displays the DOS command prompt. Supported strings "$R,$D,$T,$P,$G,$C,$F,$A,$B,$E,$H,$L,$Q,$S,$V,$_,$."  
-**PATH [path1;path2;...]** = Changes or displays the directory search list for executing python scripts and DOS batch files
+**PROMPT [prompt text]** - Changes or displays the DOS command prompt. Supported strings "$R,$D,$T,$P,$G,$C,$F,$A,$B,$E,$H,$L,$Q,$S,$V,$_,$."  
+**PATH [path1;path2;...]** - Changes or displays the directory search list for executing python scripts and DOS batch files
 
 **RENAME (REN, MOVE, MV) [path]filename [path]filename** - Changes the filename under which a file is stored.
 
-**DELETE (DEL)[/S] [path]filename** = Deletes files from disk.  
+**DELETE (DEL)[/S] [path]filename** - Deletes files from disk.  
 - /S Delete specified files from all subdirectories
 
 **TYPE (MORE)[/P] [path]filename** - Displays the contents of a file.  
@@ -226,7 +226,7 @@ Micropython with this modification can be found in section 2.2 of the Raspberry 
 
 The second is that PyDOS uses a recursive routine to process wildcard operations and the default stack in Micropython limits the recursion depth that can be obtained **(With more recent versions of Micropython this has become much less of an issue)**.
 This means that PyDOS has to limit wildcard operations, one impact of this is that files with longer file names may not appear
-in directory listings when wildcards are used. To eliminate this issue a custom Micropython image can be built with the the MICROPY_STACKLESS parameter in **py/circuitpy_mpconfig.h**
+in directory listings when wildcards are used. To eliminate this issue a custom Micropython image can be built with the the MICROPY_STACKLESS parameter in **py/mpconfig.h**
 changed from **0** to **1**. 
 
 **MicroPython Setup**
