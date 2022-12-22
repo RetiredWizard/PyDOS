@@ -190,7 +190,7 @@ example: `('led' : (25, "GP25"))`
 **SCL**  
 **SDA**  
 
-**LIST OF TUPLES**
+**LIST OF TUPLES**  
 *First tuple in list used for machine/board SD dedicated SPI (board.SD_SPI)*  
 *Last tuple in list used for machine/board general use SPI (board.SPI)*  
 example: `('MISO' : [(43, "DAT0 D43 Internal"), (12, "MISO D12")])`
