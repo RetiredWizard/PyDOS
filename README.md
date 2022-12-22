@@ -175,35 +175,35 @@ The pydos_bcfg.py file acts as a library which contains a single dictionary opje
 
 The recognized keys of the Pydos_pins dictionary are:  
 
-**TUPLES (pin number, Text description of identified pin)**
-led - Micropython may use text identifer (i.e. "led") rather than pin number
-sndPin  
-neoPixel  
-neoPixel_Pow  
-dotStar_Clock  
-dotStar_Data  
-dotStar_Extra  
-dotStar_Pow  
-I2C_NUM - MicroPython hardware I2C number  
-SCL  
-SDA  
+**TUPLES (pin number, Text description of identified pin)**  
+**led** - Micropython may use text identifer (i.e. "led") rather than pin number
+**sndPin**  
+**neoPixel**  
+**neoPixel_Pow**  
+**dotStar_Clock**  
+**dotStar_Data**  
+**dotStar_Extra**  
+**dotStar_Pow**  
+**I2C_NUM** - MicroPython hardware I2C number  
+**SCL**  
+**SDA**  
 
 **LIST OF TUPLES**
 * First tuple in list used for machine/board SD dedicated SPI (board.SD_SPI)  
 * Last tuple in list used for machine/board general use SPI (board.SPI)  
-SPI_NUM - MicroPython hardware SPI number  
-SCK  
-MOSI  
-MISO  
-CS  
+**SPI_NUM** - MicroPython hardware SPI number  
+**SCK**  
+**MOSI**  
+**MISO**  
+**CS**  
 
 **CALCULATED DATA**
 
-sndGPIO - digitalio.DigitalInOut(sndPin)  
-KFW - Flag indicating use of Keyboard FeatherWing (True/False)  
-I2CbbqDevice - I2C device being used for the KFW keyboard  
-SD - list of sdcard objects  
-SDdrive - list of mount points for mounted SD cards
+**sndGPIO** - digitalio.DigitalInOut(sndPin)  
+**KFW** - Flag indicating use of Keyboard FeatherWing (True/False)  
+**I2CbbqDevice** - I2C device being used for the KFW keyboard  
+**SD** - list of sdcard objects  
+**SDdrive** - list of mount points for mounted SD cards
 
 
 ## PyDOS Generalized Wifi API library (pydos_wifi.py)
