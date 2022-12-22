@@ -4,12 +4,12 @@ import os
 
 if implementation.name.upper() == "MICROPYTHON":
     from sys import print_exception
-    from machine import Pin,SoftSPI,SPI
+    from machine import Pin
     try:
         from machine import SDCard
     except:
         pass
-    import sdcard
+    import sdcard as sdcardLIB
 elif implementation.name.upper() == "CIRCUITPYTHON":
     from digitalio import DigitalInOut
     try:
@@ -19,7 +19,7 @@ elif implementation.name.upper() == "CIRCUITPYTHON":
     import storage
 
 
-def sdMount(drive):
+def sdMount(drive,spiNo):
 
     def chkPath(tstPath):
         validPath = True
@@ -77,68 +77,53 @@ def sdMount(drive):
 
         return(fullPath)
 
-    def do_mount(drive):
+    def do_mount(drive,spiNo):
         sdMounted = False
 
         if implementation.name.upper() == "MICROPYTHON":
-            _uname = implementation._machine
 
-            if Pydos_hw.SD_SCK and not altSPI:
-                try:
-                    os.mount(SDCard(), drive)
-                    sdMounted = True
-                except:
-                    pass
-
+            if spiNo+1 > len(Pydos_hw.CS):
+                print("CS Pin not allocated for Pydos_bcfg SPI interface #",spiNo)
+            elif Pydos_hw.SDdrive[spiNo] != None:
+                print("SD card on Pydos_bcfg SPI interface #",spiNo,"already mounted as",Pydos_hw.SDdrive[spiNo])
+            else:
+                if spiNo == 0:
+                    try:
+                        os.mount(SDCard(), drive)
+                        Pydos_hw.SDdrive[spiNo] = drive
+                        sdMounted = True
+                    except:
+                        pass
                 if not sdMounted:
                     try:
-                        sd = sdcard.SDCard(Pydos_hw.SD_SPI(), Pin(Pydos_hw.SD_CS,Pin.OUT))
+                        sd = sdcardLIB.SDCard(Pydos_hw.SPI(spiNo), Pin(Pydos_hw.CS[spiNo],Pin.OUT))
                         os.mount( sd, drive)
+                        Pydos_hw.SDdrive[spiNo] = drive
                         sdMounted = True
                     except Exception as e:
                         print_exception(e)
-            else:
-                try:
-                    sd = sdcard.SDCard(Pydos_hw.SPI(), Pin(Pydos_hw.CS,Pin.OUT))
-                    os.mount( sd, drive)
-                    sdMounted = True
-                except Exception as e:
-                    print_exception(e)
 
         elif implementation.name.upper() == "CIRCUITPYTHON":
-            _uname = os.uname().machine
 
-            if not Pydos_hw.SD_CS and not Pydos_hw.CS:
-                print("CS Pin not allocated for SDCard SPI interface")
+            if spiNo+1 > len(Pydos_hw.CS):
+                print("CS Pin not allocated for Pydos_bcfg SPI interface #",spiNo)
+            elif Pydos_hw.SDdrive[spiNo] != None:
+                print("SD card on Pydos_bcfg SPI interface #",spiNo,"already mounted as",Pydos_hw.SDdrive[spiNo])
             else:
-                if Pydos_hw.SD_CS:
-                    _cs = Pydos_hw.SD_CS
-                elif Pydos_hw.CS:
-                    _cs = Pydos_hw.CS
+                _cs = Pydos_hw.CS[spiNo]
 
                 try:
-                    if altSPI:
-                        Pydos_hw.ALT_SD = adafruit_sdcard.SDCard(Pydos_hw.SPI(), _cs)
-                        vfs = storage.VfsFat(Pydos_hw.ALT_SD)
-                    else:
-                        Pydos_hw.SD = adafruit_sdcard.SDCard(Pydos_hw.SD_SPI(), _cs)
-                        vfs = storage.VfsFat(Pydos_hw.SD)
+                    if not Pydos_hw.SD[spiNo]:
+                        Pydos_hw.SD[spiNo] = adafruit_sdcard.SDCard(Pydos_hw.SPI(spiNo), _cs)
+                    vfs = storage.VfsFat(Pydos_hw.SD[spiNo])
                     storage.mount(vfs, drive)
+                    Pydos_hw.SDdrive[spiNo] = drive
                     sdMounted = True
                 except Exception as e:
                     print('SD-Card: Fail,', e)
 
         if sdMounted:
             print(drive+" mounted")
-
-            # nano connect/Tennsy 4.1 are special cases becuase LED uses the SPI SCK pin
-            if _uname[0:27] in ["Arduino Nano RP2040 Connect", \
-                "TinyPICO with ESP32-PICO-D4"] and not altSPI:
-
-                envVars[".sd_drive"] = drive
-
-            if _uname[0:15] == "Teensy 4.1 with" and altSPI:
-                envVars[".sd_drive"] = drive
 
         return
 
@@ -154,9 +139,11 @@ def sdMount(drive):
     if validPath:
         if newdir not in os.listdir(tmpDir[:(-1 if tmpDir != "/" else None)]):
             if (tmpDir+newdir)[1:].find('/') != -1:
-                print("Target must be in root")
+                print("Target must be in root folder")
+            elif tmpDir+newdir == '/':
+                print("Target can not be root folder")
             else:
-                do_mount(tmpDir+newdir)
+                do_mount(tmpDir+newdir,spiNo)
         else:
             print("Target name already exists")
     else:
@@ -165,7 +152,7 @@ def sdMount(drive):
     return
 
 drive = "/sd"
-altSPI = False
+spiNo = 0
 
 if __name__ != "PyDOS":
     passedIn = ""
@@ -174,7 +161,7 @@ if __name__ != "PyDOS":
 if passedIn != "":
     drive = passedIn.split(',')
     if len(drive) > 1:
-        altSPI = True
+        spiNo = int(drive[1])
     drive = drive[0]
 
-sdMount(drive)
+sdMount(drive,spiNo)

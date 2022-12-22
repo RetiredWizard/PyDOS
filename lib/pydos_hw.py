@@ -49,35 +49,29 @@ class PyDOS_HW:
 
     _I2C = None
     _I2C_power = None
-    _SPI = None
-    _SD_SPI = None
+    _SPI = []
     sndPin = None
     sndGPIO = None
     neoPixel = None
     neoPixel_Pow = None
     dotStar_Clock = None
     dotStar_Data = None
+    dotStar_Extra = None
+    dotStar_Pow = None
     led = None
     I2C_NUM = None
     SCL = None
     SDA = None
-    SD_SPI_NUM = None
-    SD_SCK = None
-    SD_MOSI = None
-    SD_MISO = None
-    SD_CS = None
-    SPI_NUM = None
-    SCK = None
-    MOSI = None
-    MISO = None
-    CS = None
+    SPI_NUM = []
+    SCK = []
+    MOSI = []
+    MISO = []
+    CS = []
     I2CbbqDevice = None
     KFW = False
-    SD = None
-    SDdrive = None
-    ALT_SD = None
-    ALT_SDdrive = None
-
+    SD = []
+    SDdrive = []
+    
     def __init__(self):
 
         self.sndPin = Pydos_pins.get('sndPin',(None,None))[0]
@@ -85,6 +79,8 @@ class PyDOS_HW:
         self.neoPixel_Pow = Pydos_pins.get('neoPixel_Pow',(None,None))[0]
         self.dotStar_Clock = Pydos_pins.get('dotStar_Clock',(None,None))[0]
         self.dotStar_Data = Pydos_pins.get('dotStar_Data',(None,None))[0]
+        self.dotStar_Pow = Pydos_pins.get('dotStar_Pow',(None,None))[0]
+        self.dotStar_Extra = Pydos_pins.get('dotStar_Extra',(None,None))[0]
         self.led = Pydos_pins.get('led',(None,None))[0]
 
         if implementation.name.upper() == 'MICROPYTHON':
@@ -100,23 +96,34 @@ class PyDOS_HW:
         self.I2C_NUM=Pydos_pins.get('I2C_NUM',(None,None))[0]
         self.SCL=Pydos_pins.get('SCL',(None,None))[0]
         self.SDA=Pydos_pins.get('SDA',(None,None))[0]
-        self.SD_SPI_NUM=Pydos_pins.get('SD_SPI_NUM',(None,None))[0]
-        self.SD_SCK=Pydos_pins.get('SD_SCK',(None,None))[0]
-        self.SD_MOSI=Pydos_pins.get('SD_MOSI',(None,None))[0]
-        self.SD_MISO=Pydos_pins.get('SD_MISO',(None,None))[0]
-        self.SD_CS=Pydos_pins.get('SD_CS',(None,None))[0]
-        self.SPI_NUM=Pydos_pins.get('SPI_NUM',(None,None))[0]
-        self.SCK=Pydos_pins.get('SCK',(None,None))[0]
-        self.MOSI=Pydos_pins.get('MOSI',(None,None))[0]
-        self.MISO=Pydos_pins.get('MISO',(None,None))[0]
-        self.CS=Pydos_pins.get('CS',(None,None))[0]
+        for i in range(len(Pydos_pins.get('SCK',[]))):
+            self.SCK.append((Pydos_pins['SCK'][i])[0])
+            self.MOSI.append((Pydos_pins['MOSI'][i])[0])
+            self.MISO.append((Pydos_pins['MISO'][i])[0])
+            self.CS.append((Pydos_pins['CS'][i])[0])
+            if len(Pydos_pins.get('SPI_NUM',[])) > i:
+                self.SPI_NUM.append((Pydos_pins['SPI_NUM'][i])[0])
+            else:
+                self.SPI_NUM.append(None)
+            self.SDdrive.append(None)
+            self.SD.append(None)
+            self._SPI.append(None)
+
+            if implementation.name.upper() == 'CIRCUITPYTHON':
+                if not csAsPin:
+                    if self.CS[i]:
+                        self.CS[i] = digitalio.DigitalInOut(self.CS[i])
 
         if implementation.name.upper() == 'CIRCUITPYTHON':
-            if not csAsPin:
-                if self.CS:
-                    self.CS = digitalio.DigitalInOut(self.CS)
-                if self.SD_CS:
-                    self.SD_CS = digitalio.DigitalInOut(self.SD_CS)
+            if not self.led:
+                if 'LED1' in dir(board):
+                    self.led = board.LED1
+                elif 'LED' in dir(board):
+                    self.led = board.LED
+
+            if self.dotStar_Pow:
+                self.dotStar_Pow = digitalio.DigitalInOut(self.dotStar_Pow)
+                self.dotStar_Pow.direction = digitalio.Direction.OUTPUT
 
             if self.sndPin:
                 self.sndGPIO = digitalio.DigitalInOut(self.sndPin)
@@ -142,14 +149,6 @@ class PyDOS_HW:
             elif self.neoPixel is None and 'NEOPIXEL' in dir(board):
                 self.neoPixel = board.NEOPIXEL
 
-    def quietSnd(self):
-
-        if implementation.name.upper() == "CIRCUITPYTHON":
-            if self.sndPin:
-                self.sndGPIO = digitalio.DigitalInOut(self.sndPin)
-                #self.sndGPIO.direction = digitalio.Direction.OUTPUT
-        return
-
     def I2C(self):
 
         if not self._I2C:
@@ -171,7 +170,8 @@ class PyDOS_HW:
                     self.I2CbbqDevice = I2CDevice(self._I2C, 0x1F)
             elif implementation.name.upper() == "MICROPYTHON":
                 if self.I2C_NUM:
-                    self._I2C = m_I2C(self.I2C_NUM,scl=Pin(self.SCL),sda=Pin(self.SDA))
+                    #self._I2C = m_I2C(self.I2C_NUM,scl=Pin(self.SCL),sda=Pin(self.SDA))
+                    self._I2C = m_I2C(self.I2C_NUM)
                 else:
                     self._I2C = s_I2C(scl=Pin(self.SCL),sda=Pin(self.SDA))
 
@@ -188,30 +188,24 @@ class PyDOS_HW:
             self._I2C = None
             self.I2CbbqDevice = None
 
-    def SD_deinit(self):
-        if self._SD_SPI:
-            if self._SPI == self._SD_SPI:
-                self._SPI = None
-            self.SD_SPI().deinit()
-            self._SD_SPI = None
+    def SPI_deinit(self,spiNo=0):
+        if self._SPI[spiNo]:
 
-    def SPI_deinit(self):
-        if self._SPI:
-            if self._SPI == self._SD_SPI:
-                self._SD_SPI = None
-            self.SPI().deinit()
-            self._SPI = None
+            self._SPI[spiNo].deinit()
+            self._SPI[spiNo] = None
 
-    def SPI(self):
-        if not self._SPI:
+    def SPI(self,spiNo=0):
+        if not self._SPI[spiNo]:
             if implementation.name.upper() == "CIRCUITPYTHON":
-                if 'SPI' in dir(board):
-                    self._SPI = board.SPI()
+                if spiNo == len(self._SPI)-1 and 'SPI' in dir(board):
+                    self._SPI[spiNo] = board.SPI()
+                elif spiNo == 0 and 'SD_SPI' in dir(board):
+                    self._SPI[spiNo] = board.SD_SPI()
                 else:
-                    if self.SCK:
+                    if spiNo+1 <= len(Pydos_hw.SCK):
                         trybitbangio = False
                         try:
-                            self._SPI = busio.SPI(self.SCK, self.MOSI, self.MISO)
+                            self._SPI[spiNo] = busio.SPI(self.SCK[spiNo], self.MOSI[spiNo], self.MISO[spiNo])
                         except ValueError:
                             trybitbangio = True
 
@@ -223,58 +217,28 @@ class PyDOS_HW:
                                 print('SPI Create Fail')
 
                         if trybitbangio:
-                            self._SPI = bitbangio.SPI(self.SCK, self.MOSI, self.MISO)
+                            self._SPI[spiNo] = bitbangio.SPI(self.SCK[spiNo], self.MOSI[spiNo], self.MISO[spiNo])
+                    else:
+                        print("SPI pins not defined for requested SPI interface #",spiNo)
 
             elif implementation.name.upper() == "MICROPYTHON":
-                if Pydos_hw.SPI_NUM != None:
-                    self._SPI = m_SPI(Pydos_hw.SPI_NUM)
+                if self.SPI_NUM[spiNo] != None:
+                    self._SPI[spiNo] = m_SPI(self.SPI_NUM[spiNo])
                 else:
-                    if self.SCK:
-                        self._SPI = s_SPI(sck=Pin(Pydos_hw.SCK),mosi=Pin(Pydos_hw.MOSI), \
-                            miso=Pin(Pydos_hw.MISO))
-        return self._SPI
-
-    def SD_SPI(self):
-        if not self._SD_SPI:
-            if implementation.name.upper() == "CIRCUITPYTHON":
-                if 'SD_SPI' in dir(board):
-                    self._SD_SPI = board.SD_SPI()
-                else:
-                    if self.SD_SCK:
-                        trybitbangio = False
-                        try:
-                            self._SD_SPI = busio.SPI(self.SD_SCK, self.SD_MOSI, self.SD_MISO)
-                        except ValueError:
-                            trybitbangio = True
-
-                        if trybitbangio:
-                            try:
-                                import bitbangio
-                            except ImportError:
-                                trybitbangio = False
-                                print('SD_SPI Create Fail')
-                        else:
-                            print('SD_SPI Create Fail')
-
-                        if trybitbangio:
-                            self._SD_SPI = bitbangio.SPI(self.SD_SCK, self.SD_MOSI, self.SD_MISO)
-
-                        if not self._SD_SPI:
-                            self._SD_SPI = self.SPI()
-                    else:
-                        self._SD_SPI = self.SPI()
-            elif implementation.name.upper() == "MICROPYTHON":
-                if Pydos_hw.SD_SPI_NUM != None:
-                    self._SD_SPI = m_SPI(Pydos_hw.SD_SPI_NUM)
-                else:
-                    if self.SD_SCK:
-                        self._SD_SPI = s_SPI(sck=Pin(Pydos_hw.SD_SCK),mosi=Pin(Pydos_hw.SD_MOSI), \
-                            miso=Pin(Pydos_hw.SD_MISO))
-                    else:
-                        self._SD_SPI = self.SPI()
-
-        return self._SD_SPI
+                    if self.SCK[spiNo]:
+                        self._SPI[spiNo] = s_SPI(sck=Pin(self.SCK[spiNo]), \
+                            mosi=Pin(self.MOSI[spiNo]),miso=Pin(self.MISO[spiNo]))
+        return self._SPI[spiNo]
 
 Pydos_hw = PyDOS_HW()
 sndPin = Pydos_hw.sndPin
 sndGPIO = Pydos_hw.sndGPIO
+
+def quietSnd():
+
+    if implementation.name.upper() == "CIRCUITPYTHON":
+        if sndPin:
+            Pydos_hw.sndGPIO = digitalio.DigitalInOut(sndPin)
+            #self.sndGPIO.direction = digitalio.Direction.OUTPUT
+    return
+

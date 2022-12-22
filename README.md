@@ -99,29 +99,34 @@ experimental on Micropython so it's not difficult to crash the microcontroller u
 a thread started on the second core so be sure any threads you launch will shutdown on their own or monitor a global variable or
 thread.lock to respond to a shutdown request (see the badblink.py for an example).
 
-**runvm.py** (Circuitpython only) - This program will use the **supervisor.set_next_code_file** method to configure the microcontroller
-board to launch the specfied python script after the next soft reboot. The program then uses the **supervisor.reload()** method to 
-perform a reboot and launch the target script. The target script is "wrapped" in some code that passes any specified arguments and the
-PyDOS environment variables to the newly booted environment as well as code that causes a second soft reboot after the script has completed
-to return control to PyDOS.
+**runvm.py** - This program is used to launch Python programs that require more memory
+than is available while running PyDOS. **runvm** will write a **code.py**/**main.py**
+file which launches the specfied python program after the next soft reboot. The program then
+uses **supervisor.reload()** for CircuitPython or **sys.exit** for MicroPython to
+perform a reboot (sys.exit requires a Ctrl-D to complete the operation). The specified python
+program is "wrapped" in some code that passes any command line arguments and the PyDOS
+environment variables to the newly booted environment as well as code that restores the
+original **code.py**/**main.py** files and causes a second soft reboot returning control to
+PyDOS.
 
 **edlin.py** - line editor inspired by DOS edlin. Intial program structure of line editor by Joesph Long
     https://github.com/j-osephlong/Python-Text-Editor
     
 **edit.py** - shell to load full screen editor from https://github.com/robert-hh/Micropython-Editor
 
-**xcopy.py[/S][/Y] [path]filename [path][filename]** - a more robust version of the copy command  
+**xcopy.py[/S][/Y][/V] [path]filename [path][filename]** - a more robust version of the copy command  
 - /S Copies specified files from directories and subdirectories, except for empty ones  
 - /Y Suppresses prompting to confirm you want to overwrite an existing destination file
+- /V Performs a verification read of the copied file to ensure it matches the source
 
 **fileview.py** - scrollable text file viewer
 
-**sdmount.py** - mounts an sd card to the file system
-**sdumount.py** - dismounts an sd card from the file system
+**sdmount.py [[mount path][,pydos spi bus#]]** - mounts an sd card to the file system  
+**sdumount.py [mount path]** - dismounts an sd card from the file system
 
 **setdate.py** - initalizes the real time clock to an entered date  
 **settime.py** - initalizes the real time clock to an entered time  
-**ntpdate.py** (ESP32xxx and Pico W only) - sets the time and date using the Internet NTP protocol
+**ntpdate.py** (ESP32xxx, Pico W and MicroPython Nano Connect) - sets the time and date using the Internet NTP protocol
 
 **diff.py** - performs a file comparison
 
@@ -131,6 +136,7 @@ to return control to PyDOS.
 
 **i2cscan.py** - scans the I2C bus and displays any found device addresses
 
+CircuitPython LCD libraries from https://github.com/dhylands/python_lcd  
 **lcdprint.py** - displays text on an I2C LCD display  
 **lcdscroll.py** - scrolls text on an I2C LCD display  
 **temperature.py** - displays temperature value from onboard temperature sensor to screen and I2C LCD display
@@ -159,13 +165,61 @@ replaced or modified from the host computer so that it contains the following in
 and then power cycled or hard reset.
 
 
+## Hardware (Pin) customization file (pydos_bcfg.py)
+
+
+The setup.bat file will identify the board being used from **board.board_id** or
+**sys.implementation._machine** and attempt to copy a customization file from the cpython or mpython /boardconfigs directory. If a matching config file is not found the default /lib/pydos_bcfg.py file will be used.
+
+The pydos_bcfg.py file acts as a library which contains a single dictionary opject, Pydos_pins.
+
+The recognized keys of the Pydos_pins dictionary are:  
+
+**TUPLES (pin number, Text description of identified pin)**
+led - Micropython may use text identifer (i.e. "led") rather than pin number
+sndPin  
+neoPixel  
+neoPixel_Pow  
+dotStar_Clock  
+dotStar_Data  
+dotStar_Extra  
+dotStar_Pow  
+I2C_NUM - MicroPython hardware I2C number  
+SCL  
+SDA  
+
+**LIST OF TUPLES**
+* First tuple in list used for machine/board SD dedicated SPI (board.SD_SPI)  
+* Last tuple in list used for machine/board general use SPI (board.SPI)  
+SPI_NUM - MicroPython hardware SPI number  
+SCK  
+MOSI  
+MISO  
+CS  
+
+**CALCULATED DATA**
+
+sndGPIO - digitalio.DigitalInOut(sndPin)  
+KFW - Flag indicating use of Keyboard FeatherWing (True/False)  
+I2CbbqDevice - I2C device being used for the KFW keyboard  
+SD - list of sdcard objects  
+SDdrive - list of mount points for mounted SD cards
+
+
+## PyDOS Generalized Wifi API library (pydos_wifi.py)
+
+Whenever possible PyDOS and the bundled external programs work equally well on MicroPython or CircuitPython and on any of the supported micro controller chip families. To assist in reaching this goal PyDOS_wifi, a simplified Wifi library, is being developed which provides a unified Wifi API that works the same under both MicroPython and CircuitPython on ESP32xx, Pico W and Arduino Nano based Microcontrollers.
+
+For PyDOS_wifi API documentation see https://github.com/RetiredWizard/PyDOS_wifi
+
+
 ## Installation
 
 If the board you're using has limited flash storage you can delete either the **cpython** (if you're not using CircuitPython) or **mpython**
 (if you're not using MicroPython) folder from the downloaded repository files. Within the remaining Python folder (**cpython** or **mpython**) are folders
-for specific micro controller boards, you can free up further space by deleting anything other than the board you are using (the "Pico W" board uses the ESP folder). Finally, after running
+for specific micro controller boards, you can free up further space by deleting anything other than the board you are using (the "Pico W" and "Arduino Nano Connect" boards use the ESP folder). Finally, after running
 the **setup.bat** file in PyDOS you can delete both the **cpython** and **mpython** folders as they are only used by the **setup.bat**
-script. For very limited Flash boards you may want to delete the **PyBasic** folder until after setup is run. Once setup has ben run, delete the **cpython/mpython** folders from
+script. For very limited Flash boards you may want to delete the **PyBasic** folder until after setup is run. Once setup has ben run, delete the **cpython** and/or **mpython** folders from
 the microcontroller and copy as much of the **PyBasic** directory as space permits, copying just the *.py files is all that's needed for PyBasic to run.
 
 **Building custom CircuitPython firmware**
@@ -256,3 +310,13 @@ To interact with the microcontroller you can connect to the REPL by simply typin
 (>>>) is displayed.
 
 At the REPL prompt type "**import PyDOS*** to start PyDOS and then type **setup** to run the customization script.
+
+
+**To Do**
+*Possible updates depending on RAM impact*
+
+- support for connected color displays  
+- support for touch screens  
+- Rename should allow wildcards in filenames, i.e. "rename *.bas *.txt" or "rename code.py *.sav"  
+- Quiet, /Q switches to DEL, RMDIR, COPY, XCOPY commands
+- PgUp/PgDwn support in fileview.py

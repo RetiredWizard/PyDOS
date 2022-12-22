@@ -3,7 +3,7 @@ paramlist = ['CIRCUITPY_WIFI_SSID','CIRCUITPY_WIFI_PASSWORD','CIRCUITPY_WEB_API_
 
 defaults = True
 try:
-    envfile = open('/.env')
+    envfile = open('/settings.toml')
 except:
     defaults = False
 
@@ -19,11 +19,15 @@ ans = ""
 while ans.upper() != "Y" and ans.upper() != "A":
 
     for param in paramlist:
-        temp = input(param+": ["+envline.get(param,"")+"] ")
+        temp = input(param+": ["+envline.get(param,"")+"] ").strip()
         if temp != "":
+            if temp[0] != '"':
+                temp = '"'+temp
+            if temp[-1] != '"':
+                temp = temp+'"'
             envline[param] = temp
 
-    print("\n/.env file about to be created:\n")
+    print("\n/settings.toml file about to be created:\n")
     for param in paramlist:
         print(param+"="+envline.get(param,""))
 
@@ -35,7 +39,10 @@ while ans.upper() != "Y" and ans.upper() != "A":
             print("Invalid response, please answer Y, N or A")
 
 if ans.upper() != "A":
-    envfile = open('/.env','w')
-    for param in paramlist:
-        envfile.write(param+"="+envline.get(param,"")+"\n")
-    envfile.close()
+    with open('/settings.toml','w') as envfile:
+        for param in paramlist:
+            envfile.write(param+"="+envline.get(param,"")+"\n")
+# Copy settings.toml to old .env file until 8.0.0 is released out of beta
+    with open('/.env','w') as envfile:
+        for param in paramlist:
+            envfile.write(param+"="+envline.get(param,"").replace('"','')+"\n")

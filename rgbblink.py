@@ -54,23 +54,6 @@ def rgbblink():
         if Pydos_hw.neoPixel_Pow:
             Pydos_hw.neoPixel_Pow.on()
 
-        if sys.implementation._machine == 'TinyPICO with ESP32-PICO-D4':
-            from os import umount
-            drive = envVars.get('.sd_drive',drive)
-            try:
-                umount(drive) # Nano Connect uses LED pin for SPI SCK
-                print("Unmounting SD card to free up SPI bus")
-                envVars.pop('.sd_drive',None)
-            except:
-                pass
-
-            from dotstar import DotStar
-            import tinypico
-
-            spi = machine.SoftSPI(sck=machine.Pin(tinypico.DOTSTAR_CLK),
-                mosi=machine.Pin(tinypico.DOTSTAR_DATA), miso=machine.Pin(tinypico.SPI_MISO))
-            pixels = DotStar(spi, 1)
-            tinypico.set_dotstar_power(True)
         elif sys.implementation._machine == 'Arduino Nano RP2040 Connect with RP2040':
             import mp_esp32spi
 
@@ -110,11 +93,16 @@ def rgbblink():
                     import adafruit_dotstar
                     pixels = adafruit_dotstar.DotStar(Pydos_hw.dotStar_Clock, \
                         Pydos_hw.dotStar_Data, 1, auto_write=True)
+                    if Pydos_hw.dotStar_Pow:
+                        Pydos_hw.dotStar_Pow = 0
                 elif sys.implementation.name.upper() == 'MICROPYTHON':
                     from dotstar import DotStar
                     spi = machine.SoftSPI(sck=machine.Pin(Pydos_hw.dotStar_Clock), \
-                        mosi=machine.Pin(Pydos_hw.dotStar_Data), miso=machine.Pin(Pydos_hw.MISO))
+                        mosi=machine.Pin(Pydos_hw.dotStar_Data), \
+                        miso=machine.Pin(Pydos_hw.dotStar_Extra))
                     pixels = DotStar(spi, 1)
+                    if Pydos_hw.dotStar_Pow:
+                        machine.Pin(Pydos_hw.dotStar_Pow).value(0)
         else:
             print("Neopixel not found")
 
@@ -155,12 +143,7 @@ def rgbblink():
                     pixels.fill((0, 0, 0))
                     time.sleep(0.5)
             elif sys.implementation.name.upper() == 'MICROPYTHON':
-                if sys.implementation._machine == 'TinyPICO with ESP32-PICO-D4':
-                    pixels.fill(((icolor == 1) * 20, (icolor == 2) * 50, (icolor == 0)*150))
-                    time.sleep(0.5)
-                    pixels.fill((0, 0, 0))
-                    time.sleep(0.5)
-                elif sys.implementation._machine == 'Arduino Nano RP2040 Connect with RP2040':
+                if sys.implementation._machine == 'Arduino Nano RP2040 Connect with RP2040':
                     esp.set_analog_write(LEDR,(0 if icolor == 1 else 1))
                     esp.set_analog_write(LEDG,(0 if icolor == 2 else 1))
                     esp.set_analog_write(LEDB,(0 if icolor == 0 else 1))

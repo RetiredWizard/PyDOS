@@ -19,7 +19,8 @@ if implementation.name.upper() == "MICROPYTHON":
     from micropython import mem_info
     imp = "M"
 elif implementation.name.upper() == "CIRCUITPYTHON":
-    from supervisor import runtime
+    if not Pydos_ui:
+        from supervisor import runtime
     imp = "C"
 
 gc.collect()
@@ -62,12 +63,9 @@ def PyDOS():
     global envVars
     if "envVars" not in globals().keys():
         envVars = {}
-    _VER = "1.18"
-    if imp == "B":
-        if os.name.upper() == "POSIX":
-            slh = '/'
-        else:
-            slh = '\\'
+    _VER = "1.195"
+    if imp == "B" and os.name.upper() != "POSIX":
+        slh = '\\'
     else:
         slh = '/'
     prmpVals = ['>','(',')','&','|','\x1b','\b','<','=',' ',_VER,'\n','$']
@@ -96,6 +94,8 @@ def PyDOS():
     if wldCLen < 40:
         print("*Warning* wild card length set to: ",wldCLen)
     gc.collect()
+
+    aFile = lambda dPth: bool(os.stat(dPth)[0]&(32768))
 
     def anyKey():
         print("Press any key to continue . . . .",end="")
@@ -130,25 +130,6 @@ def PyDOS():
                     print(sLine,end="")
         return (quit,nLines)
 
-    def weekDay():
-        offset = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334]
-        week   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
-        month = localtime()[1]
-        day = localtime()[2]
-        year = localtime()[0]
-        afterFeb = 1
-        if month > 2: afterFeb = 0
-        aux = year - 1700 - afterFeb
-        # dayOfWeek for 1700/1/1 = 5, Friday
-        dayOfWeek  = 5
-        # days betweem current date and 1700/1/1
-        dayOfWeek += (aux + afterFeb) * 365
-        # leap year
-        dayOfWeek += aux / 4 - aux / 100 + (aux + 100) / 400
-        dayOfWeek += offset[month - 1] + (day - 1)
-        dayOfWeek %= 7
-        return week[int(dayOfWeek)]
-
     def exCmd(cFile,passedIn):
         try:
             with open(cFile) as cf:
@@ -158,6 +139,8 @@ def PyDOS():
                     exec("passedIn = '"+passedIn+"'\n"+cf.read())
         except Exception as err:
             print("*ERROR* Exception:",str(err),"in",cFile)
+        except KeyboardInterrupt:
+            print("^C")
 
         return
 
@@ -180,7 +163,7 @@ def PyDOS():
                     os.chdir(slh)
                 elif path == "..":
                     os.chdir("..")
-                elif path in os.listdir() and (os.stat(path)[0] & (2**15) == 0):
+                elif path in os.listdir() and not aFile(path):
                     os.chdir(path)
                 else:
                     validPath = False
@@ -192,6 +175,16 @@ def PyDOS():
 
         return((validPath,simpPath))
 
+    def pFmt(dPath,trailSlh=True):
+        if dPath == "":
+            return slh
+        elif dPath == slh:
+            return dPath
+        elif trailSlh:
+            return dPath+(slh if dPath[-1]!=slh else "")
+        else:
+            return dPath[:(-1 if dPath[-1] == slh else None)]
+
     def absolutePath(argPath,currDir):
 
         if argPath[0] == slh:
@@ -201,8 +194,7 @@ def PyDOS():
         else:
             fullPath = currDir+slh+argPath
 
-        if len(fullPath) > 1 and fullPath[-1] == slh:
-            fullPath = fullPath[:-1]
+        fullPath = pFmt(fullPath,False)
 
         return(fullPath)
 
@@ -222,8 +214,7 @@ def PyDOS():
             else:
                 dirPat = None
 
-            dPath = tmpDir+(slh if tmpDir[-1] != slh else "")+lastDir
-            dPath = dPath + (slh if dPath[-1] != slh else "")
+            dPath = pFmt(pFmt(tmpDir)+lastDir,False)
             if dPath == slh+".":
                 dPath = slh
                 lastDir = ""
@@ -246,8 +237,9 @@ def PyDOS():
                         ["."+" "*(23-scrAdj1)+"<DIR>",".."+" "*(22-scrAdj1)+"<DIR>"])
 
             for i in range(2):
-                for _dir in sorted([x for x in os.listdir(dPath) if (os.stat(dPath+x)[0]&(32768))>>15==i],key=str.lower):
+                for _dir in sorted([x for x in os.listdir(dPath) if aFile(pFmt(dPath)+x)==bool(i)],key=str.lower):
                     if (dirPat is None or _match(dirPat,_dir[:wldCLen])) and not quit:
+                        dStat = os.stat(pFmt(dPath)+_dir)
 
                         if not dirHeadPrntd:
                             (quit,nLines) = scrnPause(swPause,nLines,["","Directory of "+dPath])
@@ -259,11 +251,9 @@ def PyDOS():
                             fSize = 0
                             nDirs += 1
                         else:
-                            fSize = str(os.stat(dPath+_dir)[6])
+                            fSize = str(dStat[6])
                             tFSize += int(fSize)
                             nFiles += 1
-
-                        fTime = localtime(max(min(2145916800,os.stat(dPath+_dir)[9]),946684800))
 
                         if swWide:
                             if wideCount >= wideCols:
@@ -278,6 +268,8 @@ def PyDOS():
                                 (quit,nLines) = scrnPause(swPause,nLines, \
                                     [_dir[:15]+" "*(16-len(_dir[:15]))],"")
                         else:
+
+                            fTime = localtime(max(min(2145916800,dStat[9]),946684800))
                             if i == 0:
                                 scrAdj1 = 52 - min(scrWdth,52)
                                 scrAdj2 = min(13,65-min(scrWdth,65))
@@ -299,9 +291,10 @@ def PyDOS():
 
                 if swRecur:
                     for _dir in sorted(os.listdir(dPath), key=str.upper):
-                        if (os.stat(dPath+_dir)[0] & (32768) == 0) == True:
+                        dStat = pFmt(dPath)+_dir
+                        if not aFile(dStat):
                             (nLines,nFiles,tFSize,nDirs,quit) = \
-                                dirLoop(dPath+_dir,(dirPat if dirPat is not None else ""), \
+                                dirLoop(dStat,(dirPat if dirPat is not None else ""), \
                                     isFile,swPause,swWide,swRecur,False, \
                                     nLines,nFiles,tFSize,nDirs)
                         if quit:
@@ -356,12 +349,12 @@ def PyDOS():
                 swBits & int('000010',2):
 
                 if lastDir in os.listdir():
-                    if os.stat(slh if lastDir == "" else lastDir)[0] & (2**15) == 0:
-                        isFile = False
-                    else:
+                    if aFile(pFmt(lastDir,False)):
                         isFile = True
+                    else:
+                        isFile = False
                 else:
-                    if lastDir in ".." or (tmpDir == "/" and lastDir == ""):
+                    if lastDir in ".." or (tmpDir == slh and lastDir == ""):
                         isFile = False
                     else:
                         isFile = True
@@ -382,14 +375,13 @@ def PyDOS():
             with open(file1, 'rb') as fOrig:
                 for line in fOrig:
                     fCopy.write(line)
-        gc.collect()
         return
 
     def delFiles(Dir,File,Recurs,removDirs):
-        for _dir in os.listdir(Dir[:(-1 if Dir != slh else None)]):
+        for _dir in os.listdir(pFmt(Dir,False)):
             if _match(File,_dir[:wldCLen]):
                 if _dir == _dir[:wldCLen]:
-                    if os.stat(Dir+_dir)[0] & (2**15) != 0:
+                    if aFile(Dir+_dir):
                         try:
                             os.remove(Dir+_dir)
                             print(Dir+_dir,"deleted.")
@@ -408,7 +400,7 @@ def PyDOS():
                                 break
                 else:
                     print("Unable to delete: "+Dir+_dir+". Filename too long for wildcard operation.")
-            elif Recurs and not removDirs and os.stat(Dir+_dir)[0] & (2**15) == 0:
+            elif Recurs and not removDirs and not aFile(Dir+_dir):
                 delFiles(Dir+_dir+slh,File,Recurs,removDirs)
 
     def setCondCmd(args,i,condResult):
@@ -560,10 +552,11 @@ def PyDOS():
             cmd = args[0]
 
         # Error=1, (S)Recur=2, (P)Pause=4, (Y)Conf=8, (W)Wide=16, (D)debug=32, (Q)uiet=64
+        # (V)erify=128
         swBits = 0
-        swAllB = int('1111111',2)
+        swAllB = int('11111111',2)
         for i in range(len(switches)):
-            swBits = swBits | (2**('SPYWDQ'.find(switches[i])+1))
+            swBits = swBits | (2**('SPYWDQV'.find(switches[i])+1))
 
         if quotedArg:
             print("Mismatched quotes.")
@@ -579,8 +572,7 @@ def PyDOS():
                     newdir = aPath.pop(-1)
                 (validPath,tmpDir) = chkPath(aPath)
                 if cmd in ["DELETE","DEL","TYPE","MORE","MKDIR","MD"]:
-                    if tmpDir == "" or tmpDir[-1] != slh:
-                        tmpDir += slh
+                    tmpDir = pFmt(tmpDir)
 
         if cmd == "" or cmd == "REM":
             continue
@@ -593,7 +585,9 @@ def PyDOS():
                 print("Too many arguments. Command Format: DIR/p/w [path][file]")
 
         elif cmd == "DATE":
-            print("The current date is: "+weekDay()+" %2.2i/%2.2i/%4.4i" % (localtime()[1], localtime()[2], localtime()[0]))
+            i = localtime()[6]*3
+            print("The current date is: "+"MonTueWedThuFriSatSun"[i:i+3]+ \
+                " %2.2i/%2.2i/%4.4i" % (localtime()[1], localtime()[2], localtime()[0]))
 
         elif cmd == "TIME":
             print("The current time is: %2.2i:%2.2i:%2.2i" % (localtime()[3], localtime()[4], localtime()[5]))
@@ -683,10 +677,9 @@ def PyDOS():
                         aPath = args[i].split(slh)
                         newdir = aPath.pop(-1)
                         (validPath, tmpDir) = chkPath(aPath)
-                        if tmpDir == "" or tmpDir[-1] != slh:
-                            tmpDir += slh
+                        tmpDir = pFmt(tmpDir)
 
-                        if validPath and newdir in os.listdir(tmpDir[:(-1 if tmpDir != slh else None)]):
+                        if validPath and newdir in os.listdir(pFmt(tmpDir,False)):
                             condResult = True
                         if notlogic:
                             condResult = not condResult
@@ -786,23 +779,23 @@ def PyDOS():
                     if len(switches) == 0 or switches[0] == "P":
                         if tmp != "":
                             envVars[envCmdVar] = tmp
-                        else:
+                        elif envCmdVar == "_scrHeight" or envCmdVar == "_scrWidth":
                             if Pydos_ui:
                                 (tHeight,tWidth) = Pydos_ui.get_screensize()
                             else:
                                 tHeight = 24
                                 tWidth = 80
-                            if envCmdVar == "_scrHeight":
-                                envVars["_scrHeight"] = tHeight
-                            elif envCmdVar == "_scrWidth":
-                                envVars["_scrWidth"] = tWidth
-                            elif envVars.get(envCmdVar) != None:
-                                envVars.pop(envCmdVar)
+                            if envCmdVar == "_scrWidth":
+                                envVars[envCmdVar] = tWidth
+                            else:
+                                envVars[envCmdVar] = tHeight
+                        elif envVars.get(envCmdVar) != None:
+                            envVars.pop(envCmdVar)
                     
                     scrWdth = int(envVars["_scrWidth"])
                     if envCmdVar == 'LIB':
                         path.clear()
-                        path.extend(['']+envVars["LIB"].split(';'))
+                        path.extend(['']+envVars.get("LIB","").split(';'))
                 else:
                     print("Illegal switch, Command Format: SET[/a|/p] [variable = [string|expression]]")
 
@@ -835,11 +828,10 @@ def PyDOS():
 # second argument doesn't specify an existing target
                         if newdir2 not in os.listdir(tmpDir2):
                             currDRen = False
-                            if os.stat(tmpDir+slh+newdir)[0] & (2**15) == 0:
+                            if not aFile(tmpDir+slh+newdir):
                                 if tmpDir+slh+newdir == os.getcwd():
                                     currDRen = True
-                            os.rename(tmpDir+("" if tmpDir[-1] == slh else slh)+newdir, \
-                                    tmpDir2+("" if tmpDir2[-1] == slh else slh)+newdir2)
+                            os.rename(pFmt(tmpDir)+newdir,pFmt(tmpDir2)+newdir2)
                             if currDRen:
                                 os.chdir(tmpDir2)
 
@@ -865,8 +857,8 @@ def PyDOS():
                             if ans == "Y":
                                 delFiles(tmpDir,newdir,bool(swBits&int('000010',2)),False)
                         else:
-                            if newdir in os.listdir(tmpDir[:(-1 if tmpDir != slh else None)]):
-                                if os.stat(tmpDir+newdir)[0] & (2**15) != 0:
+                            if newdir in os.listdir(pFmt(tmpDir,False)):
+                                if aFile(tmpDir+newdir):
                                     os.remove(tmpDir+newdir)
                                     print(tmpDir+newdir,"deleted.")
                                 else:
@@ -890,7 +882,7 @@ def PyDOS():
         elif cmd in ["TYPE","MORE"]:
 
             if len(args) == 2:
-                if validPath and newdir in os.listdir(tmpDir[:(-1 if tmpDir != slh else None)]) and os.stat(tmpDir+newdir)[0] & (2**15) != 0:
+                if validPath and newdir in os.listdir(pFmt(tmpDir,False)) and aFile(tmpDir+newdir):
                     if cmd == "MORE":
                         swBits = swBits | int('000100',2)
 
@@ -942,7 +934,7 @@ def PyDOS():
                 print("Too many arguments")
             else:
                 if validPath:
-                    if newdir not in os.listdir(tmpDir[:(-1 if tmpDir != slh else None)]):
+                    if newdir not in os.listdir(pFmt(tmpDir,False)):
                         os.mkdir(tmpDir+newdir)
                     else:
                         print("Target name already exists")
@@ -982,7 +974,7 @@ def PyDOS():
 
         elif cmd == "COPY":
 
-            if (len(args) == 3 or len(args) == 2) and not swBits & (swAllB-int('001000',2)):
+            if (len(args) == 3 or len(args) == 2) and not swBits & (swAllB-int('00001000',2)):
                 if len(args) == 2:
                     args.append('.')
 
@@ -996,7 +988,8 @@ def PyDOS():
                     trailingSlash = True
 
 # Check that first argument has a valid path, exists and is not a directory file
-                if not earlyError and validPath and ("*" in newdir or "?" in newdir or (newdir in os.listdir(tmpDir) and os.stat(tmpDir+(slh if tmpDir[-1] != slh else "")+newdir)[0] & (2**15))) != 0:
+                if not earlyError and validPath and ("*" in newdir or "?" in newdir or \
+                    (newdir in os.listdir(tmpDir) and aFile(pFmt(tmpDir)+newdir))):
 
                     sourcePath = tmpDir
                     if "*" in newdir or "?" in newdir:
@@ -1020,7 +1013,7 @@ def PyDOS():
                         targetPath = tmpDir
 
                         if newdir2 in "..":
-                            (validPath,tmpDir) = chkPath((targetPath+(slh if targetPath[-1] != slh else "")+newdir2).split(slh))
+                            (validPath,tmpDir) = chkPath((pFmt(targetPath)+newdir2).split(slh))
                             aPath2 = tmpDir.split(slh)
                             newdir2 = aPath2.pop(-1)
                             targetPath = chkPath(aPath2)[1]
@@ -1031,7 +1024,7 @@ def PyDOS():
                         if newdir2 in os.listdir(targetPath) or (targetPath == slh and newdir2 == ""):
 
 # Second argument target is a file
-                            if os.stat(targetPath+(slh if targetPath[-1] != slh else "")+newdir2)[0] & (2**15) != 0:
+                            if aFile(pFmt(targetPath)+newdir2):
                                 if trailingSlash:
                                     print("Cannot find the specified path: ",enteredArg)
                                 elif wildCardOp:
@@ -1041,49 +1034,47 @@ def PyDOS():
                                     print("The file cannot be copied onto itself")
 
                                 elif swBits & int('001000',2) or input("Overwrite "+args[2]+"? (y/n): ").upper() == "Y":
-                                    os.remove(targetPath+(slh if targetPath[-1] != slh else "")+newdir2)
-                                    filecpy(sourcePath+(slh if sourcePath[-1] != slh else "")+newdir,targetPath+(slh if targetPath[-1] != slh else "")+newdir2)
+                                    os.remove(pFmt(targetPath)+newdir2)
+                                    filecpy(pFmt(sourcePath)+newdir,pFmt(targetPath)+newdir2)
                                     nFiles += 1
 
 # Second argument target is a directory
                             else:
-                                if sourcePath == "" or sourcePath[-1] != slh:
-                                    sourcePath += slh
-                                if targetPath == "" or targetPath[-1] != slh:
-                                    targetPath += slh
+                                sourcePath = pFmt(sourcePath)
+                                targetPath = pFmt(targetPath)
 
                                 if wildCardOp:
                                     ans = ""
-                                    for _dir in os.listdir(sourcePath[:(-1 if sourcePath != slh else None)]):
-                                        if os.stat(sourcePath+_dir)[0] & (2**15) != 0 and _match(newdir,_dir[:wldCLen]):
-                                            print("copy",sourcePath+_dir,"to",targetPath+newdir2+("" if newdir2 == "" else slh)+_dir)
+                                    for _dir in os.listdir(pFmt(sourcePath,False)):
+                                        if aFile(sourcePath+_dir) and _match(newdir,_dir[:wldCLen]):
+                                            print("copy",sourcePath+_dir,"to",pFmt(targetPath+newdir2)+_dir)
                                             if _dir in os.listdir(targetPath+newdir2):
-                                                if sourcePath == targetPath+newdir2+("" if newdir2 == "" else slh):
+                                                if sourcePath == pFmt(targetPath+newdir2):
                                                     print("The file cannot be copied onto itself")
                                                     break
                                                 else:
                                                     if ans != "A" and not swBits & int('001000',2):
-                                                        ans = input("Overwrite "+targetPath+newdir2+("" if newdir2 == "" else slh)+_dir+"? (y/n/(q)uit/(a)ll): ").upper()
+                                                        ans = input("Overwrite "+pFmt(targetPath+newdir2)+_dir+"? (y/n/(q)uit/(a)ll): ").upper()
                                                     if ans  == "Y" or ans == "A" or swBits & int('001000',2):
-                                                        filecpy(sourcePath+_dir,targetPath+newdir2+("" if newdir2 == "" else slh)+_dir)
+                                                        filecpy(sourcePath+_dir,pFmt(targetPath+newdir2)+_dir)
                                                         nFiles += 1
                                                     elif ans == "Q":
                                                         break
                                             else:
-                                                filecpy(sourcePath+_dir,targetPath+newdir2+("" if newdir2 == "" else slh)+_dir)
+                                                filecpy(sourcePath+_dir,pFmt(targetPath+newdir2)+_dir)
                                                 nFiles += 1
                                             gc.collect()
 
                                 elif newdir in os.listdir(targetPath+newdir2):
-                                    if sourcePath == targetPath+newdir2+("" if newdir2 == "" else slh):
+                                    if sourcePath == pFmt(targetPath+newdir2):
                                         print("The file cannot be copied onto itself")
-                                    elif swBits & int('001000',2) or input("Overwrite "+targetPath+newdir2+("" if newdir2 == "" else slh)+newdir+"? (y/n): ").upper() == "Y":
-                                        os.remove(targetPath+newdir2+("" if newdir2 == "" else slh)+newdir)
-                                        filecpy(sourcePath+newdir,targetPath+newdir2+("" if newdir2 == "" else slh)+newdir)
+                                    elif swBits & int('001000',2) or input("Overwrite "+pFmt(targetPath+newdir2)+newdir+"? (y/n): ").upper() == "Y":
+                                        os.remove(pFmt(targetPath+newdir2)+newdir)
+                                        filecpy(sourcePath+newdir,pFmt(targetPath+newdir2)+newdir)
                                         nFiles += 1
 
                                 else:
-                                    filecpy(sourcePath+newdir,targetPath+newdir2+("" if newdir2 == "" else slh)+newdir)
+                                    filecpy(sourcePath+newdir,pFmt(targetPath+newdir2)+newdir)
                                     nFiles += 1
 # Second argument is a new file
                         else:
@@ -1093,7 +1084,7 @@ def PyDOS():
                                 else:
                                     print("Cannot find the specified path: ",enteredArg)
                             else:
-                                filecpy(sourcePath+(slh if sourcePath[-1] != slh else "")+newdir,targetPath+(slh if targetPath[-1] != slh else "")+newdir2)
+                                filecpy(pFmt(sourcePath)+newdir,pFmt(targetPath)+newdir2)
                                 nFiles += 1
 
                         print(" "*7,nFiles,"files(s) copied.")
@@ -1158,8 +1149,7 @@ def PyDOS():
                 aPath = aPath[0:aPath.index('xcopy')+1]
             newdir = aPath.pop(-1)
             (validPath, tmpDir) = chkPath(aPath)
-            if tmpDir == "" or tmpDir[-1] != slh:
-                tmpDir += slh
+            tmpDir = pFmt(tmpDir)
 
             args = [('"'+i+'"' if i.find(" ") != -1 else i) for i in args]
             if len(args) == 1:
@@ -1174,30 +1164,32 @@ def PyDOS():
 
             cmdFound = False
             for tmpDir in [tmpDir]+(envVars.get('PATH',"").split(";") if envVars.get('PATH',"") != "" else []):
-                if tmpDir[-1] != slh:
-                    tmpDir += slh
-                curDLst = os.listdir(tmpDir[:(-1 if tmpDir != slh else None)])
+                tmpDir = pFmt(tmpDir)
+                try:
+                    curDLst = os.listdir(pFmt(tmpDir,False))
+                except:
+                    curDLst = []
                 curDLst_LC = ",".join(curDLst).lower().split(",")
                 if  ((newdir.split("."))[-1]).upper() == "PY":
-                    if validPath and newdir in curDLst and os.stat(tmpDir+newdir)[0] & (2**15) != 0:
+                    if validPath and newdir in curDLst and aFile(tmpDir+newdir):
 
                         exCmd(tmpDir+newdir,passedIn)
                         cmdFound = True
                         break
                 elif ((newdir.split("."))[-1]).upper() == "BAT":
-                    if validPath and newdir in curDLst and os.stat(tmpDir+newdir)[0] & (2**15) != 0:
+                    if validPath and newdir in curDLst and aFile(tmpDir+newdir):
                         batFound = newdir
                         break
                 elif validPath:
                     if newdir.lower()+".py" in curDLst_LC:
                         curDLst_indx = curDLst_LC.index(newdir.lower()+".py")
-                        if os.stat(tmpDir+curDLst[curDLst_indx])[0] & (2**15) != 0:
+                        if aFile(tmpDir+curDLst[curDLst_indx]):
                             exCmd(tmpDir+curDLst[curDLst_indx],passedIn)
                             cmdFound = True
                             break
                     elif newdir.lower()+".bat" in curDLst_LC:
                         curDLst_indx = curDLst_LC.index(newdir.lower()+".bat")
-                        if os.stat(tmpDir+curDLst[curDLst_indx])[0] & (2**15) != 0:
+                        if aFile(tmpDir+curDLst[curDLst_indx]):
                             batFound = curDLst[curDLst_indx]
                             break
 

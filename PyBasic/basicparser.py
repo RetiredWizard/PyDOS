@@ -26,8 +26,9 @@ try:
 except:
     pass
 try:
-    from pydos_hw import Pydos_hw
-    sndPin = Pydos_hw.sndPin
+    from pydos_hw import sndPin as hwsndPin
+    from pydos_hw import sndGPIO, quietSnd
+    sndPin = hwsndPin
 except:
     sndPin = None
 
@@ -42,7 +43,7 @@ elif implementation.name.upper() == 'CIRCUITPYTHON':
         try: # temporary? until broadcom port supports pwmio
             from pwmio import PWMOut
         except:
-            pass
+            sndPin = None
 else:
     import winsound
     from time import monotonic
@@ -903,14 +904,15 @@ class BASICParser:
                     sleep(duration/18.2)
                     self.__pwm.duty(0)
         elif implementation.name.upper() == 'CIRCUITPYTHON':
-            try:
-                Pydos_hw.sndGPIO.deinit() # Workaround for ESP32-S2 GPIO issue
-                audioPin = PWMOut(sndPin, duty_cycle=volume, frequency=freq, variable_frequency=True)
-                sleep(duration/18.2)
-                audioPin.deinit()
-                Pydos_hw.quietSnd() # Workaround for ESP32-S2 GPIO issue
-            except:
-                pass
+            if sndPin:
+                try:
+                    sndGPIO.deinit() # Workaround for ESP32-S2 GPIO issue
+                    audioPin = PWMOut(sndPin, duty_cycle=volume, frequency=freq, variable_frequency=True)
+                    sleep(duration/18.2)
+                    audioPin.deinit()
+                    quietSnd() # Workaround for ESP32-S2 GPIO issue
+                except:
+                    pass
         else:
             winsound.Beep(freq,int(self.__operand_stack.pop()*1000/18.2))
 

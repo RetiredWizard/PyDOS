@@ -58,12 +58,9 @@ def edlin(passedIn=""):
 
         text = []
         if chkPath(aPath) and newdir in os.listdir(name[0:len(name)-len(newdir)]) and os.stat(name)[0] & (2**15) != 0:
-            f = open(name, "r")
-
-            for line in f:
-                text.append(line.replace("\n",""))
-
-            f.close()
+            with open(name,"r") as f:
+                for line in f:
+                    text.append(line.replace("\n",""))
         else:
             print("Unable to open: "+name+". File not found.")
             name = ""

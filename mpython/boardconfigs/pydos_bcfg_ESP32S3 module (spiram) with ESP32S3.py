@@ -6,9 +6,9 @@ Pydos_pins = {
     'I2C_NUM' : (1,None),
     'SCL' : (7,"GPIO7"),
     'SDA' : (6,"GPIO6"),
-    'SPI_NUM' : (2,None),
-    'SCK' : (36,"GPIO36"),
-    'MOSI' : (35,"GPIO35"),
-    'MISO' : (37,"GPIO37"),
-    'CS' : (9,"GPIO9")
+    'SPI_NUM' : [(2,None)],
+    'SCK' : [(36,"GPIO36")],
+    'MOSI' : [(35,"GPIO35")],
+    'MISO' : [(37,"GPIO37")],
+    'CS' : [(9,"GPIO9")]
 }

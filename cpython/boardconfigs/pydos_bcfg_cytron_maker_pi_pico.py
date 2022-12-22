@@ -7,8 +7,8 @@ Pydos_pins = {
     'neoPixel' : (board.NEOPIXEL,None),
     'SCL' : (board.GP3,"GP3 GROVE#2"),
     'SDA' : (board.GP2,"GP2 GROVE#2"),
-    'SD_SCK' : (board.SCK,"GP10 Onboard SD"),
-    'SD_MOSI' : (board.MOSI,"GP11 Onboard SD"),
-    'SD_MISO' : (board.MISO,"GP12 Onboard SD"),
-    'SD_CS' : (board.GP15,"GP15 Onboard SD")
+    'SCK' : [(board.SCK,"GP10 Onboard SD")],
+    'MOSI' : [(board.MOSI,"GP11 Onboard SD")],
+    'MISO' : [(board.MISO,"GP12 Onboard SD")],
+    'CS' : [(board.GP15,"GP15 Onboard SD")]
 }

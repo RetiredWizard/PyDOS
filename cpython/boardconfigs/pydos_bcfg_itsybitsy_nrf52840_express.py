@@ -8,8 +8,8 @@ Pydos_pins = {
     'dotStar_Data' : (board.DOTSTAR_DATA,None),
     'SCL' : (board.SCL,"D22 SCL"),
     'SDA' : (board.SDA,"D21 SDA"),
-    'SCK' : (board.SCK,"D25 SCK"),
-    'MOSI' : (board.MOSI,"D24 MO"),
-    'MISO' : (board.MISO,"D23 MI"),
-    'CS' : (board.D9,"D9")
+    'SCK' : [(board.SCK,"D25 SCK")],
+    'MOSI' : [(board.MOSI,"D24 MO")],
+    'MISO' : [(board.MISO,"D23 MI")],
+    'CS' : [(board.D9,"D9")]
 }

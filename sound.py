@@ -1,6 +1,7 @@
 import time
 import sys
 from pydos_hw import Pydos_hw
+from pydos_hw import quietSnd
 if sys.implementation.name.upper() == "MICROPYTHON":
     import machine
 elif sys.implementation.name.upper() == 'CIRCUITPYTHON':
@@ -53,4 +54,4 @@ elif sys.implementation.name.upper() == "CIRCUITPYTHON":
         time.sleep(dur/1000)
         #audioPin.duty_cycle = 0
         audioPin.deinit()
-        Pydos_hw.quietSnd() # Workaround for ESP32-S2 GPIO issue
+        quietSnd() # Workaround for ESP32-S2 GPIO issue

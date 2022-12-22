@@ -1,6 +1,7 @@
 import sys
 from pydos_ui import Pydos_ui
 from pydos_hw import Pydos_hw
+from pydos_hw import quietSnd
 
 if sys.implementation.name.upper() == 'MICROPYTHON':
     import machine
@@ -130,7 +131,7 @@ def piano():
 
     if sys.implementation.name.upper() == 'CIRCUITPYTHON':
         pwm.deinit()
-        Pydos_hw.quietSnd() # Workaround for ESP32-S2 GPIO issue
+        quietSnd() # Workaround for ESP32-S2 GPIO issue
 
 if Pydos_hw.sndPin:
     piano()

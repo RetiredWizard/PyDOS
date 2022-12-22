@@ -26,14 +26,14 @@ from basictoken import BASICToken as Token
 from basicparser import BASICParser
 from flowsignal import FlowSignal
 from lexer import Lexer
-import gc
+from gc import collect
 from os import listdir,remove
 from sys import implementation
 try:
     from pydos_ui import input
 except:
     pass
-gc.collect()
+collect()
 
 class Program:
 
@@ -301,12 +301,12 @@ class Program:
             # will be incremented by one, unless modified by
             # a jump
             index = 0
-            self.set_next_line_number(line_numbers[index])
+            self.__next_stmt = line_numbers[index]
 
             # Run through the program until the
             # has line number has been reached
             while True:
-                flowsignal = self.__execute(self.get_next_line_number(),infile,tmpfile)
+                flowsignal = self.__execute(self.__next_stmt,infile,tmpfile)
                 self.__parser.last_flowsignal = flowsignal
 
 
@@ -318,9 +318,9 @@ class Program:
 
                         except ValueError:
                             raise RuntimeError("Invalid line number supplied in GOTO or conditional branch: "
-                                               + str(flowsignal.ftarget)+ " in line " + str(self.get_next_line_number()))
+                                               + str(flowsignal.ftarget)+ " in line " + str(self.__next_stmt))
 
-                        self.set_next_line_number(flowsignal.ftarget)
+                        self.__next_stmt = flowsignal.ftarget
 
                     elif flowsignal.ftype == FlowSignal.GOSUB:
                         # Subroutine call encountered
@@ -341,7 +341,7 @@ class Program:
                             raise RuntimeError("Invalid line number supplied in subroutine call: "
                                                + str(flowsignal.ftarget))
 
-                        self.set_next_line_number(flowsignal.ftarget)
+                        self.__next_stmt = flowsignal.ftarget
 
                     elif flowsignal.ftype == FlowSignal.RETURN:
                         # Subroutine return encountered
@@ -351,13 +351,13 @@ class Program:
 
                         except ValueError:
                             raise RuntimeError("Invalid subroutine return in line " +
-                                               str(self.get_next_line_number()))
+                                               str(self.__next_stmt))
 
                         except IndexError:
                             raise RuntimeError("RETURN encountered without corresponding " +
-                                               "subroutine call in line " + str(self.get_next_line_number()))
+                                               "subroutine call in line " + str(self.__next_stmt))
 
-                        self.set_next_line_number(line_numbers[index])
+                        self.__next_stmt = line_numbers[index]
 
                     elif flowsignal.ftype == FlowSignal.STOP:
                         break
@@ -367,13 +367,13 @@ class Program:
                         # Put loop line number on the stack so
                         # that it can be returned to when the loop
                         # repeats
-                        self.__return_loop[flowsignal.floop_var] = self.get_next_line_number()
+                        self.__return_loop[flowsignal.floop_var] = self.__next_stmt
 
                         # Continue to the next statement in the loop
                         index = index + 1
 
                         if index < len(line_numbers):
-                            self.set_next_line_number(line_numbers[index])
+                            self.__next_stmt = line_numbers[index]
 
                         else:
                             # Reached end of program
@@ -399,7 +399,7 @@ class Program:
                                     index = index + 1
                                     if index < len(line_numbers):
                                         next_line_number = line_numbers[index]  # Statement after the NEXT
-                                        self.set_next_line_number(next_line_number)
+                                        self.__next_stmt = next_line_number
                                         break
 
                             index = index + 1
@@ -417,19 +417,19 @@ class Program:
 
                         except ValueError:
                             raise RuntimeError("Invalid loop exit in line " +
-                                               str(self.get_next_line_number()))
+                                               str(self.__next_stmt))
 
                         except KeyError:
                             raise RuntimeError("NEXT encountered without corresponding " +
-                                               "FOR loop in line " + str(self.get_next_line_number()))
+                                               "FOR loop in line " + str(self.__next_stmt))
 
-                        self.set_next_line_number(line_numbers[index])
+                        self.__next_stmt = line_numbers[index]
 
                 else:
                     index = index + 1
 
                     if index < len(line_numbers):
-                        self.set_next_line_number(line_numbers[index])
+                        self.__next_stmt = line_numbers[index]
 
                     else:
                         # Reached end of program
@@ -458,22 +458,3 @@ class Program:
 
         except KeyError:
             raise KeyError("Line number does not exist")
-
-    def get_next_line_number(self):
-        """Returns the line number of the next statement
-        to be executed
-
-        :return: The line number
-
-        """
-
-        return self.__next_stmt
-
-    def set_next_line_number(self, line_number):
-        """Sets the line number of the next
-        statement to be executed
-
-        :param line_number: The new line number
-
-        """
-        self.__next_stmt = line_number

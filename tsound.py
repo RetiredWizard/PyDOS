@@ -1,14 +1,13 @@
 import time
 import sys
 from pydos_hw import Pydos_hw
+from pydos_hw import quietSnd
 
 if not Pydos_hw.sndPin:
     print("Sound Pin not found")
 else:
     if sys.implementation.name.upper() == "MICROPYTHON":
         import machine
-        machine.PWM(Pydos_hw.sndPin)
-        machine.PWM(Pydos_hw.sndPin)
         piezo=machine.PWM(Pydos_hw.sndPin)
     elif sys.implementation.name.upper() == 'CIRCUITPYTHON':
         from pwmio import PWMOut
@@ -47,4 +46,4 @@ else:
 
     if sys.implementation.name.upper() == "CIRCUITPYTHON":
         piezo.deinit()
-        Pydos_hw.quietSnd() # Workaround for ESP32-S2 GPIO issue
+        quietSnd() # Workaround for ESP32-S2 GPIO issue

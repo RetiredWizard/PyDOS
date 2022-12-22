@@ -23,20 +23,20 @@ def ntpdate(passedIn=""):
         config = {}
         envfound = True
         try:
-            envfile = open('/.env')
+            envfile = open('/settings.toml')
         except:
             envfound = False
 
         if envfound:
             for line in envfile:
                 try:
-                    config[line.split('=')[0].strip()] = line.split('=')[1].strip()
+                    config[line.split('=')[0].strip()] = line.split('=')[1].strip().replace('"','')
                 except:
                     pass
             envfile.close()
 
         if config.get('CIRCUITPY_WIFI_SSID',None) is None:
-            raise Exception("WiFi secrets are kept in .env, please add them there by using setenv.py!")
+            raise Exception("WiFi secrets are kept in settings.toml, please add them there by using setenv.py!")
 
         wlan = network.WLAN(network.STA_IF)
         if not wlan.active():
@@ -52,15 +52,24 @@ def ntpdate(passedIn=""):
 
         # We should have a valid IP now via DHCP
         print("Wi-Fi Connected ", wlan.ifconfig()[0])
+        print("Attempting to set Date/Time")
 
-        ntptime.settime()
+        success = False
+        for i in range(10):
+            try:
+                ntptime.settime()
+                success = True
+                break
+            except:
+                time.sleep(2)
+            print(".",end="")
+        if not success:
+            print(".")
+            ntptime.settime()
         ltime = time.mktime(time.gmtime()) + my_tz_offset*3600
         inTime = time.localtime(ltime)
 
-        rtcBase=0x4005c000
-        atomicBSet=0x2000
-        machine.mem32[rtcBase+8] = (int(inTime[3]) << 16) | (int(inTime[4]) << 8) | int(inTime[5]) | int(inTime[6]) << 24
-        machine.mem32[rtcBase+atomicBSet+0xc] = 0x10
+        machine.RTC().datetime(tuple([inTime[i] for i in [0,1,2,6,3,4,5,7]]))
 
     elif sys.implementation.name.upper() == "CIRCUITPYTHON":
         # Get wifi details and more from a .env file
@@ -85,7 +94,7 @@ def ntpdate(passedIn=""):
             except:
                 pass
         if not success:
-            print(".",end="")
+            print(".")
             rtc.RTC().datetime = ntp.datetime
 
     print("\nTime and Date successfully set")

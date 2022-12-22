@@ -11,13 +11,13 @@
 620 REM ****  (714) 484-2955
 630 REM ****
 640 PRINT:PRINT:PRINT:PRINT:PRINT:PRINT:PRINT:PRINT:PRINT:PRINT:PRINT
-650 E1$= "                ,-----------------,       _"
-660 E2$= "                `----------   ----',-----/ \----,"
-670 E3$= "                           | |     '-  --------'"
-680 E4$= "                        ,--' '------/ /--,"
-690 E5$= "                       '-----------------'"
+650 E1$= "         ,-----------------,       _"
+660 E2$= "         `----------   ----',-----/ \----,"
+670 E3$= "                    | |     '-  --------'"
+680 E4$= "                 ,--' '------/ /--,"
+690 E5$= "                '-----------------'"
 691 PRINT
-700 E6$= "                   THE USS ENTERPRISE --- NCC-1701"
+700 E6$= "            THE USS ENTERPRISE --- NCC-1701"
 710 rem E8$=CHR$(15)
 720 PRINT E1$
 730 PRINT E2$
@@ -90,11 +90,13 @@
 1180 B9=1:G(Q1,Q2)=G(Q1,Q2)+10:Q1=INT(RND*7.98+1.01):Q2=INT(RND*7.98+1.01)
 1190 K7=K9:IF B9=1 THEN 1200
 1191 X$="s":X0$=" are "
-1200 PRINT"      Your orders are as follows: "
-1210 PRINT"      Destroy the ";K9;" Klingon warships which have invaded"
-1220 PRINT"    the galaxy before they can attack Federation headquarters"
-1230 PRINT"    on stardate ";T0+T9;". This gives you ";T9;" days.  there";X0$
-1240 PRINT"  ";B9;" starbase";X$;" in the galaxy for resupplying your ship"
+1200 PRINT"Your orders are as follows: "
+1210 PRINT"Destroy the ";K9;" Klingon warships which have"
+1220 PRINT"invaded the galaxy before they can attack"
+1230 PRINT"Federation headquarters on stardate ";T0+T9;"."
+1231 PRINT"This gives you ";T9;" days.  there";X0$;B9
+1240 PRINT"starbase";X$;" in the galaxy for resupplying"
+1241 PRINT"your ship."
 1250 rem PRINT PRINT  "hit any key except return when ready to accept command"
 1260 rem I=RND IF INP(1)=13 THEN 1260
 1261 PRINT:input "hit return when ready to accept command",i$
@@ -151,6 +153,7 @@
 1560 PRINT" and shield control":PRINT"is presently incapable of cross";
 1570 PRINT"-circuiting to engine room!!":GOTO 3480
 1580 INPUT"command ",A$
+1581 A$ = UPPER$(A$)
 1590 FOR I=1 TO 9
 1591 IF mid$(A$,1,3)<> MID$(A1$,3*I-2,3) THEN 1610
 1600 rem ON I GOTO 1720,1510,2440,2530,2750,3090,3180,3980,3510
@@ -425,6 +428,7 @@
 3230 PRINT"Technicians standing by to effect repairs to your ship;"
 3240 PRINT"estimated time to repair: ";0.01*INT(100*D3);" stardates"
 3250 INPUT"Will you authorize the repair order (Y/N)? ",A$
+3151 A$ = UPPER$(A$)
 3260 IF A$<>"y" AND A$<> "Y" THEN 1520
 3270 FOR I=1 TO 8
 3271 IF D(I)>=0 THEN 3280
@@ -472,7 +476,7 @@
 3530 PRINT:PRINT:IF B9=0 THEN 3670
 3540 PRINT"The Federation is in need of a new starship commander"
 3550 PRINT"for a similar mission -- if there is a volunteer,"
-3560 INPUT"let him or her step forward and enter 'AYE' ",X$:IF X$="AYE" THEN 520
+3560 INPUT"let him or her step forward and enter 'AYE' ",X$:IF X$="AYE" OR X$="aye" THEN 520
 3570 rem KEY 1,"LIST "
 3580 rem KEY 2,"RUN"+CHR$(13)
 3590 rem KEY 3,"LOAD"+CHR$(34)
@@ -523,15 +527,15 @@
 3876 if i=6 then 3940
 3877 if i=7 then 3950
 3878 if i=8 then 3960
-3880 PRINT"        Stardate           ";
+3880 PRINT" St date ";
 3890 TT= T*10 : TT=INT(TT)*0.1:PRINT TT :GOTO 3970
-3900 PRINT"        Condition          ";C$:GOTO 3970
-3910 PRINT"        Quadrant           ";Q1;",";Q2:GOTO 3970
-3920 PRINT"        Sector             ";S1;",";S2:GOTO 3970
-3930 PRINT"        Photon torpedoes   ";INT(P):GOTO 3970
-3940 PRINT"        Total energy       ";INT(E+S):GOTO 3970
-3950 PRINT"        Shields            ";INT(S):GOTO 3970
-3960 PRINT"        Klingons remaining ";INT(K9)
+3900 PRINT" Cond:   ";C$:GOTO 3970
+3910 PRINT" Quad:   ";Q1;",";Q2:GOTO 3970
+3920 PRINT" Sector: ";S1;",";S2:GOTO 3970
+3930 PRINT" Ph Tor: ";INT(P):GOTO 3970
+3940 PRINT" Energy: ";INT(E+S):GOTO 3970
+3950 PRINT" Shlds:  ";INT(S):GOTO 3970
+3960 PRINT" Klings: ";INT(K9)
 3970 NEXT I
 3971 PRINT "-"*33
 3972 RETURN
@@ -548,6 +552,7 @@
 4070 rem KEY 7,CHR$(13):KEY 8,CHR$(13):KEY 9,CHR$(13):KEY 10,CHR$(13)
 4071 gosub 4130
 4080 INPUT"Computer active and awaiting command ",CM$:H8=1
+4081 CM$ = UPPER$(CM$)
 4090 FOR K1= 1 TO 6
 4100 IF mid$(CM$,1,3)<>MID$(CM1$,3*K1-2,3) THEN 4120
 4110 rem   ON K1 GOTO 4230,4400,4490,4750,4550,4210
@@ -575,17 +580,19 @@
 4230 rem 'INPUT"Do you want a hardcopy? Is the TTY on (Y/N) ";A$
 4240 rem 'IF A$="y" THEN POKE 1229,2 POKE 1237,3 NULL 1
 4250 rem GOSUB 840
-4260 PRINT:PRINT"            ";
+4260 PRINT:PRINT" ";
 4270 PRINT "Computer record of galaxy for quadrant ";Q1;",";Q2
 4280 PRINT
-4290 PRINT"       1     2     3     4     5     6    7      8"
-4300 O1$="     ----- ----- ----- ----- ----- ----- ----- -----"
+4290 PRINT"  1     2     3     4     5     6    7      8"
+4300 O1$="----- ----- ----- ----- ----- ----- ----- -----"
 4310 PRINT O1$
 4311 FOR I=1 TO 8
-4312 PRINT I,"  ";:IF H8=0 THEN 4350
+4312 PRINT I;:IF H8=0 THEN 4350
 4320 FOR J=1 TO 8
-4321 PRINT"   ";:IF Z(I,J)<>0 THEN 4330
-4322 PRINT"***";:GOTO 4340
+4321 IF J=1 THEN 4323
+4322 PRINT"   ";
+4323 IF Z(I,J)<>0 THEN 4330
+4324 PRINT"***";:GOTO 4340
 4330 ZLEN = len(str$(z(i,j)+1000)
 4331 PRINT mid$(STR$(Z(I,J)+1000),zlen-2,3);
 4340 NEXT J
@@ -598,7 +605,7 @@
 4362 J0=INT(40-0.5*LEN(G2$)):PRINT TAB(J0);G2$;
 4370 PRINT:PRINT O1$
 4371 NEXT I
-4372 PRINT
+4372 REM PRINT
 4373 rem 'POKE 1229,0 POKE 1237,1
 4380 GOTO 1520
 4390 REM status report

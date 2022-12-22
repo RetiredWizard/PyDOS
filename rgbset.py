@@ -53,24 +53,6 @@ def rgbset(ans=""):
 
             nano_connect = True
 
-        elif implementation._machine == 'TinyPICO with ESP32-PICO-D4':
-            from os import umount
-
-            drive = envVars.get('.sd_drive',drive)
-            try:
-                umount(drive) # Nano Connect uses LED pin for SPI SCK
-                print("Unmounting SD card to free up SPI bus")
-                envVars.pop('.sd_drive',None)
-            except:
-                pass
-
-            from dotstar import DotStar
-            import tinypico
-            spi = machine.SoftSPI(sck=machine.Pin(tinypico.DOTSTAR_CLK),
-                mosi=machine.Pin(tinypico.DOTSTAR_DATA), miso=machine.Pin(tinypico.SPI_MISO))
-            pixels = DotStar(spi, 1)
-            tinypico.set_dotstar_power(True)
-
     if nano_connect:
         #  Nano LED Pins
         LEDG = 25
@@ -103,14 +85,19 @@ def rgbset(ans=""):
                     import adafruit_dotstar
                     pixels = adafruit_dotstar.DotStar(Pydos_hw.dotStar_Clock, \
                         Pydos_hw.dotStar_Data, 1, auto_write=True)
+                    if Pydos_hw.dotStar_Pow:
+                        Pydos_hw.dotStar_Pow = 0
                     envVars[".neopixel"] = pixels
                     if 'envVars' not in locals().keys():
                         locals()['envVars'] = envVars
                 elif implementation.name.upper() == 'MICROPYTHON':
                     from dotstar import DotStar
                     spi = machine.SoftSPI(sck=machine.Pin(Pydos_hw.dotStar_Clock), \
-                        mosi=machine.Pin(Pydos_hw.dotStar_Data), miso=machine.Pin(Pydos_hw.MISO))
+                        mosi=machine.Pin(Pydos_hw.dotStar_Data), \
+                        miso=machine.Pin(Pydos_hw.dotStar_Extra))
                     pixels = DotStar(spi, 1)
+                    if Pydos_hw.dotStar_Pow:
+                        machine.Pin(Pydos_hw.dotStar_Pow).value(0)
         else:
             print("Neopixel/Dotstar not found")
 

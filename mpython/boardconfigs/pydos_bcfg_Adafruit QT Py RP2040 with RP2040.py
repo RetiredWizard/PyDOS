@@ -7,8 +7,8 @@ Pydos_pins = {
     'I2C_NUM' : (1,None),
     'SCL' : (23,"SCL"),
     'SDA' : (22,"SDA"),
-    'SCK' : (6,"SCK"),
-    'MOSI' : (3,"MO"),
-    'MISO' : (4,"MI"),
-    'CS' : (26,"A3")
+    'SCK' : [(6,"SCK")],
+    'MOSI' : [(3,"MO")],
+    'MISO' : [(4,"MI")],
+    'CS' : [(26,"A3")]
 }

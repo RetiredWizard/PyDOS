@@ -34,21 +34,34 @@ def printPinAssignments():
             print("I2C                      ","board.I2C")
 
         if 'SD_SPI' in dir(board):
-            print("SD_SPI                   ","board.SD_SPI()")
+            print("SPI                   ","board.SD_SPI()")
         if 'SPI' in dir(board):
             print("SPI                      ","board.SPI()")
 
     elif implementation.name.upper() == "MICROPYTHON":
         print("Board ID:                ",implementation._machine)
 
-    for entry in Pydos_pins:
+    for entry in sorted(Pydos_pins):
         if entry == 'sndPin':
             print("PyDOS Sound Pin:         ",Pydos_pins['sndPin'][1])
-        elif entry in ['led','SCL','SDA','SD_CS','SD_SCK','SD_MOSI','SD_MISO','CS','SCK','MOSI','MISO','neoPixel']:
+        elif entry in ['led','SCL','SDA','neoPixel','neoPixel_Pow','dotStar_Clock', \
+            'dotStar_Data','dotStar_Extra','dotStar_Pow']:
+
             print(entry+" Pin:"+(20-len(entry))*" ",Pydos_pins[entry][1])
+        elif entry in ['I2C_NUM']:
+            print("Machine "+entry+":"+(16-len(entry))*" ",Pydos_pins[entry][0])
+        elif entry in ['CS','SCK','MOSI','MISO']:
+            for i in range(len(Pydos_pins[entry])):
+                print(entry+" ("+str(i)+") Pin:"+(16-len(entry))*" ",Pydos_pins[entry][i][1])
+        elif entry in ["SPI_NUM"]:
+            for i in range(len(Pydos_pins[entry])):
+                print("Machine "+entry+" ("+str(i)+"):"+(12-len(entry))*" ",Pydos_pins[entry][i][0])
         else:
-            if Pydos_pins[entry][1] != None:
-                print("*Custom Pin ["+entry+"]:"+(max(0,10-len(entry)))*" ",Pydos_pins[entry][1])
+            try:
+                if Pydos_pins[entry][1] != None:
+                    print("*Custom Pin ["+entry+"]:"+(max(0,10-len(entry)))*" ",Pydos_pins[entry][1])
+            except:
+                print("*Custom Pin ["+entry+"]:"+((max(0,10-len(entry)))*" ")+" ***ERROR***")
 
     if implementation.name.upper() == "CIRCUITPYTHON":
         if board.board_id == 'arduino_nano_rp2040_connect':

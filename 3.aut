@@ -1,4 +1,4 @@
 @echo off
 del autoexec.bat
-if exist autoexec.sav rename autoexec.sav autoexec.bat
+if exist _PyDexec._PyD rename _PyDexec._PyD autoexec.bat
 type menu.txt

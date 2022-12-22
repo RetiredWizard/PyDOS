@@ -7,8 +7,8 @@ Pydos_pins = {
     'neoPixel' : (board.NEOPIXEL,None),
     'SCL' : (board.SCL,"SCL"),
     'SDA' : (board.SDA,"SDA"),
-    'SCK' : (board.SCK,"SCK"),
-    'MOSI' : (board.MOSI,"MO"),
-    'MISO' : (board.MISO,"MI"),
-    'CS' : (board.A3,"A3")
+    'SCK' : [(board.SCK,"SCK")],
+    'MOSI' : [(board.MOSI,"MO")],
+    'MISO' : [(board.MISO,"MI")],
+    'CS' : [(board.A3,"A3")]
 }
