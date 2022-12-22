@@ -176,7 +176,8 @@ The pydos_bcfg.py file acts as a library which contains a single dictionary opje
 The recognized keys of the Pydos_pins dictionary are:  
 
 **TUPLES (pin number, Text description of identified pin)**  
-**led** - Micropython may use text identifer (i.e. "led") rather than pin number
+
+**led** - Micropython may use text identifer (i.e. "led") rather than pin number  
 **sndPin**  
 **neoPixel**  
 **neoPixel_Pow**  
