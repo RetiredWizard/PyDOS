@@ -176,7 +176,7 @@ The pydos_bcfg.py file acts as a library which contains a single dictionary opje
 The recognized keys of the Pydos_pins dictionary are:  
 
 **TUPLES (pin number, Text description of identified pin)**  
-example: `('led' : (25, "GP25"))`  
+example: `'led' : (25, "GP25")`  
 
 **led** - Micropython may use text identifer (i.e. "led") rather than pin number  
 **sndPin**  
@@ -193,7 +193,7 @@ example: `('led' : (25, "GP25"))`
 **LIST OF TUPLES**  
 *First tuple in list used for machine/board SD dedicated SPI (board.SD_SPI)*  
 *Last tuple in list used for machine/board general use SPI (board.SPI)*  
-example: `('MISO' : [(43, "DAT0 D43 Internal"), (12, "MISO D12")])`
+example: `'MISO' : [(43, "DAT0 D43 Internal"), (12, "MISO D12")]`
 
 **SPI_NUM** - MicroPython hardware SPI number  
 **SCK**  
