@@ -316,7 +316,7 @@ To interact with the microcontroller you can connect to the REPL by simply typin
 At the REPL prompt type "**import PyDOS*** to start PyDOS and then type **setup** to run the customization script.
 
 
-**To Do**
+## To Do  
 *Possible updates depending on RAM impact*
 
 - support for connected color displays  
