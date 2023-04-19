@@ -221,50 +221,38 @@ For PyDOS_wifi API documentation see https://github.com/RetiredWizard/PyDOS_wifi
 
 ## Installation
 
-If the board you're using has limited flash storage you can delete either the **cpython** (if you're not using CircuitPython) or **mpython**
-(if you're not using MicroPython) folder from the downloaded repository files. Within the remaining Python folder (**cpython** or **mpython**) are folders
-for specific micro controller boards, you can free up further space by deleting anything other than the board you are using (the "Pico W" and "Arduino Nano Connect" boards use the ESP folder). Finally, after running
-the **setup.bat** file in PyDOS you can delete both the **cpython** and **mpython** folders as they are only used by the **setup.bat**
-script. For very limited Flash boards you may want to delete the **PyBasic** folder until after setup is run. Once setup has ben run, delete the **cpython** and/or **mpython** folders from
-the microcontroller and copy as much of the **PyBasic** directory as space permits, copying just the *.py files is all that's needed for PyBasic to run.
-
-**CircuitPython Setup**
-
-Thanks to the great work of @bill88t, starting with CircuitPython version 8.0.4, you no longer need to build custom CirucitPython firmware (ESP32 based boards are still being worked on but should have this feature in 8.0.6/8.1.0). PyDOS will run without issue on a standard downloaded CircuitPython image from https://circuitpython.org/downloads. 
+Thanks to the great work of **@bill88t**, starting with CircuitPython version 8.0.4, you no longer need to build custom CirucitPython firmware (ESP32 based boards are still being worked on but should have this feature in 8.0.6/8.1.0). PyDOS will run without issue on a standard downloaded CircuitPython image from https://circuitpython.org/downloads. 
 
 *By the way, if you like PyDOS you'll probably also enjoy ljinux from https://github.com/bill88t/ljinux.* 
 
+**Before copying PyDOS files**
+
+If the board you're using has limited flash storage, as is the case with the Pico W, you can delete either the **cpython** (if you're not using CircuitPython) or **mpython**
+(if you're not using MicroPython) folder from the downloaded repository files. Within the remaining Python folder (**cpython** or **mpython**) are folders
+for specific micro controller boards, you can free up further space by deleting anything other than the board you are using (the "Pico W" and "Arduino Nano Connect" boards use the ESP folder). For very limited Flash boards you may want to delete the **PyBasic** folder until after the **setup.bat** step is run. Once setup has ben run, delete the **cpython** and/or **mpython** folders from the microcontroller and copy as much of the **PyBasic** directory as space permits to the Microcontroller. Copying just the *.py files is all that's needed for PyBasic to run.
+
+**CircuitPython install**
+
 To install the CircuitPython image, put your microcontroller board in "bootloader" mode and copy the .UF2 file to the USB mass storage device that shows up on your host computer. 
 
-After the .UF2 file is copied to the microcontroller board it should re-boot and a new USB mass storage device should appear. 
+After the .UF2 file is copied to the microcontroller board it should re-boot and a new USB mass storage device should appear.
+
+**PyDOS install**
 
 To copy PyDOS to the Microcontroller, simply drag the PyDOS directory structure
 (after removing the **mpython** folder if space is a concern) to the root directory of the device that appears on the host computer.
-Your microcontroller now has PyDOS installed.
 
-If there is less than 800K of flash available, as is the case with the Pico W, you should not
- copy the PyBasic folder until after completing the rest of the installation steps below. Once
- PyDOS has been installed give the host computer write access to the CIRCUIPY drive by running
- "fs ro" from PyDOS and then power cycling the board. Delete the entire cpython folder and
- then copy PyBasic to the board. All of PyBasic may still not fix in which case you can either
- delete some of the PyDOS external programs you don't need or copy only Part of the PyBasic
- folder. The *.py files in the PyBasic folder are all that is needed to run PyBasic. If you
- want to run Adventure you need enouch space for adventure-fast.pgm, ADESCRIP, AITEMS,
- AMESSAGE, AMOVING, BITEMS and AMESSAGE.IDX.
-
-If the copy worked without any errors, you should power cycle the microcontroller board so that the file system is configured to allow
-the microcontroller to have Read/Write access.
-
-**PyDOS has Read/Write access and the host computer will only have ReadOnly access. This change won't take effect until you have completed the power cycle mentioned above, so be
-sure that the PyDOS files are all copied before turning the power off on your microcontroller board. If the copy is interrupted for any reason you can delete the boot.py
+If the copy is interrupted for any reason you can delete the boot.py
 file in the root of the microcontroller flash and try the copy again. 
+
+If the copy worked without any errors, you should power cycle the microcontroller board so that the file system is configured to allow the microcontroller to have Read/Write access. When you do this, the host computer will no longer be able to write to the microcontroller mounted drive (usually CIRCUITPY).
 
 If you find yourself locked out of the flash from the host computer and PyDOS is not running, the easiest way to recover is to
 connect to the REPL, remove the boot.py file and then power cycle the microcontroller board. 
 
         import os
         os.remove("boot.py")
-**
+
 To interact with the microcontroller you will need to connect using a terminal program. On a PC you can use putty and on linux minicom works well. To start minicom
 on linux type the command:
 
@@ -273,6 +261,16 @@ on linux type the command:
 You should be presented with the REPL prompt (>>>), if not, press return or Ctrl-C.
 
 At the REPL prompt type "**import PyDOS**" to start PyDOS and then type **setup** to run the customization script.
+
+Once the **setup.bat** script has been run if you have more files to copy to the microcontroller (PyBasic for example), you will need to give the host computer read/write access to the mounted microcontroller drive. This is done by typing **"fs ro"** at the PyDOS prompt and then power cycling the board.
+
+After deleting and/or copying files from the Host computer when you want to run PyDOS normally again, edit the **boot.py** file in the root folder of the mounted microcontroller drive (usally CIRCUITPY) and change the line that reads:  
+
+            storage.remount("/",True)
+to:
+            storage.remount("/",False)
+
+and then powercycle the board once again.
 
 --------------------------------------------------------------------------------------------------------------------
 **Building custom Micropython firmware**
@@ -315,6 +313,8 @@ To interact with the microcontroller you can connect to the REPL by simply typin
 (>>>) is displayed.
 
 At the REPL prompt type "**import PyDOS*** to start PyDOS and then type **setup** to run the customization script.
+
+If your board has very limited flash space, you may want to delay copying the **PyBASIC** folder until after running **setup**. Once **setup** completes, delete the **mpython** folder and then copy as much of the **PyBasic** directory as space permits to the Microcontroller. Copying just the *.py files is all that's needed for PyBasic to run.
 
 **Note** If the board you're using has an onboard SD card slot, Micropython may not mount the flash at the root mount point. In this case copy the PyDOS files to the "/Flash" folder during the initial PyDOS setup. If you plan to boot your device with an SD card inserted you should install PyDOS and run setup before inserting the SD card, then copy boot.py to the SD card.
 
