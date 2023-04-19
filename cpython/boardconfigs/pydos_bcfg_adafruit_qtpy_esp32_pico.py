@@ -3,13 +3,13 @@
 import board
 
 Pydos_pins = {
-    'sndPin' : (board.A0,"A0"),
+    'sndPin' : (board.A3,"A3"),
     'neoPixel' : (board.NEOPIXEL,"NEOPIXEL"),
     'neoPixel_Pow' : (board.NEOPIXEL_POWER,"NEOPIXEL_POWER"),
-    'SCL' : (board.SCL,"SCL"),
-    'SDA' : (board.SDA,"SDA"),
-    'SCK' : [(board.SCK,"SCK")],
-    'MOSI' : [(board.MOSI,"MOSI")],
-    'MISO' : [(board.MISO,"MISO")],
-    'CS' : [(board.A3,"A3")]
+    'SCL' : (board.SCL,"SCL A5"),
+    'SDA' : (board.SDA,"SDA A4"),
+    'SCK' : [(board.SCK,"SCK A8")],
+    'MOSI' : [(board.MOSI,"MOSI A10")],
+    'MISO' : [(board.MISO,"MISO A9")],
+    'CS' : [(board.A2,"A2")]
 }

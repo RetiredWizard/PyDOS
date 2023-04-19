@@ -28,7 +28,7 @@ while ans.upper() != "Y" and ans.upper() != "A":
             envline[param] = temp
 
     print("\n/settings.toml file about to be created:\n")
-    for param in paramlist:
+    for param in envline:
         print(param+"="+envline.get(param,""))
 
     print()
@@ -40,7 +40,7 @@ while ans.upper() != "Y" and ans.upper() != "A":
 
 if ans.upper() != "A":
     with open('/settings.toml','w') as envfile:
-        for param in paramlist:
+        for param in envline:
             envfile.write(param+"="+envline.get(param,"")+"\n")
 # Copy settings.toml to old .env file until 8.0.0 is released out of beta
     with open('/.env','w') as envfile:

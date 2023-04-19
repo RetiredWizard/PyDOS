@@ -2,7 +2,7 @@ import os
 from time import localtime
 from sys import stdin,implementation,path
 if not '/lib' in path:
-    path.insert(0,'/lib')
+    path.insert(1,'/lib')
 path.append('/PyBasic')
 try:
     from pydos_ui import Pydos_ui
@@ -41,7 +41,7 @@ def _match(first, second):
 
     if (len(first) > 1 and first[0] == '?') or (len(first) != 0
         and len(second) !=0 and first[0] == second[0]):
-        return _match(first[1:],second[1:]);
+        return _match(first[1:],second[1:])
 
     if len(first) !=0 and first[0] == '*':
         return _match(first[1:],second) or _match(first,second[1:])
@@ -50,7 +50,7 @@ def _match(first, second):
 
 def calcWildCardLen(wldCLen,recursiveFail):
     wldCLen += 1
-    if not recursiveFail and wldCLen < 90:
+    if not recursiveFail and wldCLen < 115:
         try:
             (wldCLen,recursiveFail) = calcWildCardLen(wldCLen,recursiveFail)
         except:
@@ -63,12 +63,12 @@ def PyDOS():
     global envVars
     if "envVars" not in globals().keys():
         envVars = {}
-    _VER = "1.195"
+    _VER = "1.20 beta 3"
     if imp == "B" and os.name.upper() != "POSIX":
         slh = '\\'
     else:
         slh = '/'
-    prmpVals = ['>','(',')','&','|','\x1b','\b','<','=',' ',_VER,'\n','$']
+    prmpVals = ['>','(',')','&','|','\x1b','\b','<','=',' ',_VER,'\n','$','']
 
     print("Starting Py-DOS...")
     envVars["PATH"] = slh+";/PyBasic"
@@ -85,20 +85,19 @@ def PyDOS():
     recursiveFail = False
 
     (wldCLen,recursiveFail) = calcWildCardLen(wldCLen,recursiveFail)
+    wldCAdj = int(1+.2*wldCLen)
+    if implementation.name.upper() == "CIRCUITPYTHON":
+        wldCAdj += 5
+    wldCLen = max(1,wldCLen-wldCAdj)
 
-    if imp == "C":
-        wldCLen = max(1,wldCLen-6)
-    else:
-        wldCLen = max(1,wldCLen-2)
-
-    if wldCLen < 40:
-        print("*Warning* wild card length set to: ",wldCLen)
+    if wldCLen < 60:
+        print("Wild card length set to: ",wldCLen)
     gc.collect()
 
     aFile = lambda dPth: bool(os.stat(dPth)[0]&(32768))
 
     def anyKey():
-        print("Press any key to continue . . . .",end="")
+        print("Press any key to continue . . . ."[:scrWdth],end="")
         if Pydos_ui:
             while not Pydos_ui.serial_bytes_available():
                 pass
@@ -198,121 +197,128 @@ def PyDOS():
 
         return(fullPath)
 
-    def prDir(dirPath,swBits):
-        wideCols = int(scrWdth/16)
+    srtFnc = lambda v,dP: str(os.stat(dP+v)[0]&(32768))[0]+v.lower()+"*"+v
 
-        def dirLoop(tmpDir,lastDir,isFile,swPause,swWide,swRecur,prSum, \
-            nLines=0,nFiles=0,tFSize=0,nDirs=0):
+    def dirLoop(tmpDir,lastDir,isFile,swPause,swWide,swRecur,prSum, \
+        nLines=0,nFiles=0,tFSize=0,nDirs=0):
 
-            wideCount = 0
-            dirHeadPrntd = False
-            quit = False
+        wideCols = scrWdth//16
+        wideCount = 0
+        dirHeadPrntd = False
+        quit = False
 
-            if "*" in lastDir or "?" in lastDir or isFile:
-                dirPat = lastDir
-                lastDir = ""
-            else:
-                dirPat = None
+        if "*" in lastDir or "?" in lastDir or isFile:
+            dirPat = lastDir
+            lastDir = ""
+        else:
+            dirPat = None
 
-            dPath = pFmt(pFmt(tmpDir)+lastDir,False)
-            if dPath == slh+".":
-                dPath = slh
-                lastDir = ""
+        dPath = pFmt(pFmt(tmpDir)+lastDir,False)
+        if dPath == slh+".":
+            dPath = slh
+            lastDir = ""
 
-            if dirPat is None:
-                (quit,nLines) = scrnPause(swPause,nLines,["","Directory of "+dPath])
-                dirHeadPrntd = True
-                nDirs += 2
-                if swWide:
-                    if wideCols > 1:
-                        (quit,nLines) = scrnPause(swPause,nLines, \
-                            ["[.]             [..]            "],"")
-                        wideCount += 2
-                    else:
-                        (quit,nLines) = scrnPause(swPause,nLines,["[.]","[..]"],"")
-                        wideCount = 1
-                else:
-                    scrAdj1 = 52 - min(scrWdth,52)
+        if dirPat is None:
+            (quit,nLines) = scrnPause(swPause,nLines,["","Directory of "+dPath])
+            dirHeadPrntd = True
+            nDirs += 2
+            if swWide:
+                if wideCols > 1:
                     (quit,nLines) = scrnPause(swPause,nLines, \
-                        ["."+" "*(23-scrAdj1)+"<DIR>",".."+" "*(22-scrAdj1)+"<DIR>"])
+                        ["[.]             [..]            "],"")
+                    wideCount += 2
+                else:
+                    (quit,nLines) = scrnPause(swPause,nLines,["[.]","[..]"],"")
+                    wideCount = 1
+            else:
+                scrAdj1 = 52 - min(scrWdth,52)
+                (quit,nLines) = scrnPause(swPause,nLines, \
+                    ["."+" "*(23-scrAdj1)+"<DIR>",".."+" "*(22-scrAdj1)+"<DIR>"])
 
-            for i in range(2):
-                for _dir in sorted([x for x in os.listdir(dPath) if aFile(pFmt(dPath)+x)==bool(i)],key=str.lower):
-                    if (dirPat is None or _match(dirPat,_dir[:wldCLen])) and not quit:
-                        dStat = os.stat(pFmt(dPath)+_dir)
+        for _dir in sorted([srtFnc(x,pFmt(dPath)) for x in os.listdir(dPath)]):
+            _dir = _dir.split('*')[1]
 
-                        if not dirHeadPrntd:
-                            (quit,nLines) = scrnPause(swPause,nLines,["","Directory of "+dPath])
-                            if quit:
-                                break
-                            dirHeadPrntd = True
+            if (dirPat is None or _match(dirPat,_dir[:wldCLen])) and not quit:
+                dStat = os.stat(pFmt(dPath)+_dir)
+                ForD = aFile(pFmt(dPath)+_dir)
 
-                        if i == 0: 
-                            fSize = 0
-                            nDirs += 1
-                        else:
-                            fSize = str(dStat[6])
-                            tFSize += int(fSize)
-                            nFiles += 1
+                if not dirHeadPrntd:
+                    (quit,nLines) = scrnPause(swPause,nLines,["","Directory of "+dPath])
+                    if quit:
+                        break
+                    dirHeadPrntd = True
 
-                        if swWide:
-                            if wideCount >= wideCols:
-                                wideCount = 0
-                                print()
-                                nLines += 1
-                            wideCount += 1
-                            if i == 0:
-                                (quit,nLines) = scrnPause(swPause,nLines, \
-                                    ["["+_dir[:13]+"]"+" "*(14-len(_dir[:13]))],"")
-                            else:
-                                (quit,nLines) = scrnPause(swPause,nLines, \
-                                    [_dir[:15]+" "*(16-len(_dir[:15]))],"")
-                        else:
+                if not ForD: 
+                    fSize = 0
+                    nDirs += 1
+                else:
+                    fSize = str(dStat[6])
+                    tFSize += int(fSize)
+                    nFiles += 1
 
-                            fTime = localtime(max(min(2145916800,dStat[9]),946684800))
-                            if i == 0:
-                                scrAdj1 = 52 - min(scrWdth,52)
-                                scrAdj2 = min(13,65-min(scrWdth,65))
-                                (quit,nLines) = scrnPause(swPause,nLines, \
-                                    [_dir[:max(8,scrWdth-26)]+" "*(24-len(_dir)-scrAdj1)+"<DIR>"+" "*(18-scrAdj2)+"%2.2i-%2.2i-%4.4i %2.2i:%2.2i" % (fTime[1], fTime[2], fTime[0], fTime[3], fTime[4])])
-                            else:
-                                scrAdj1 = 65 - min(scrWdth,65)
-                                (quit,nLines) = scrnPause(swPause,nLines, \
-                                    [_dir[:max(8,scrWdth-20-len(fSize))]+" "*(36-len(_dir)+10-len(fSize)-scrAdj1)+fSize+" %2.2i-%2.2i-%4.4i %2.2i:%2.2i" % (fTime[1], fTime[2], fTime[0], fTime[3], fTime[4])])
-
-                        if quit:
-                            break
-
-            if not quit:
                 if swWide:
-                    if dirHeadPrntd:
+                    if wideCount >= wideCols:
+                        wideCount = 0
                         print()
                         nLines += 1
+                    wideCount += 1
+                    if not ForD:
+                        (quit,nLines) = scrnPause(swPause,nLines, \
+                            ["["+_dir[:13]+"]"+" "*(14-len(_dir[:13]))],"")
+                    else:
+                        (quit,nLines) = scrnPause(swPause,nLines, \
+                            [_dir[:15]+" "*(16-len(_dir[:15]))],"")
+                else:
 
-                if swRecur:
-                    for _dir in sorted(os.listdir(dPath), key=str.upper):
-                        dStat = pFmt(dPath)+_dir
-                        if not aFile(dStat):
+                    fTime = localtime(max(min(2145916800,dStat[9]),946684800))
+                    if not ForD:
+                        scrAdj1 = 52 - min(scrWdth,52)
+                        scrAdj2 = min(13,65-min(scrWdth,65))
+                        (quit,nLines) = scrnPause(swPause,nLines, \
+                            [_dir[:max(8,scrWdth-26)]+" "*(24-len(_dir)-scrAdj1)+"<DIR>"+" "*(18-scrAdj2)+"%2.2i-%2.2i-%4.4i %2.2i:%2.2i" % (fTime[1], fTime[2], fTime[0], fTime[3], fTime[4])])
+                    else:
+                        scrAdj1 = 65 - min(scrWdth,65)
+                        (quit,nLines) = scrnPause(swPause,nLines, \
+                            [_dir[:max(8,scrWdth-20-len(fSize))]+" "*(36-len(_dir)+10-len(fSize)-scrAdj1)+fSize+" %2.2i-%2.2i-%4.4i %2.2i:%2.2i" % (fTime[1], fTime[2], fTime[0], fTime[3], fTime[4])])
+
+                if quit:
+                    break
+
+        if not quit:
+            if swWide:
+                if dirHeadPrntd:
+                    print()
+                    nLines += 1
+
+            if swRecur:
+                for _dir in sorted(os.listdir(dPath), key=str.upper):
+                    dStat = pFmt(dPath)+_dir
+                    if not aFile(dStat):
+                        try:
                             (nLines,nFiles,tFSize,nDirs,quit) = \
                                 dirLoop(dStat,(dirPat if dirPat is not None else ""), \
                                     isFile,swPause,swWide,swRecur,False, \
                                     nLines,nFiles,tFSize,nDirs)
-                        if quit:
-                            break
+                        except:
+                            print("Recursion limit exceeded, Pystack too small")
+                            quit = True
+                    if quit:
+                        break
 
-                if prSum and not quit:
-                    try:
-                        availDisk = os.statvfs(dPath)[1]*os.statvfs(dPath)[4]
-                    except:
-                        availDisk = 0
+            if prSum and not quit:
+                try:
+                    availDisk = os.statvfs(dPath)[1]*os.statvfs(dPath)[4]
+                except:
+                    availDisk = 0
 
-                    scrAdj1 = 65 - min(scrWdth,65)
-                    (quit,nLines) = scrnPause(swPause,nLines, \
-                        [" "*(4-len(str(nFiles)))+" "+str(nFiles)+" File(s)"+" "*(32-len(str(tFSize))-scrAdj1)+" "+str(tFSize)+" Bytes.", \
-                        " "*(4-len(str(nDirs)))+" "+str(nDirs)+" Dir(s)"+" "*(33-len(str(availDisk))-scrAdj1)+" "+str(availDisk)+" Bytes free.",""],"")
+                scrAdj1 = 65 - min(scrWdth,65)
+                (quit,nLines) = scrnPause(swPause,nLines, \
+                    [(" "*(4-len(str(nFiles)))+" "+str(nFiles)+" File(s)"+" "*(32-len(str(tFSize))-scrAdj1)+" "+str(tFSize)+" Bytes.")[:scrWdth], \
+                    (" "*(4-len(str(nDirs)))+" "+str(nDirs)+" Dir(s)"+" "*(33-len(str(availDisk))-scrAdj1)+" "+str(availDisk)+" Bytes free.")[:scrWdth],""],"")
 
-            return (nLines,nFiles,tFSize,nDirs,quit)
+        return (nLines,nFiles,tFSize,nDirs,quit)
 
+    def prDir(dirPath,swBits):
         if swBits & (swAllB-int('010110',2)):
             print("Illegal switch, Command Format: DIR[/p][/w][/s] [path][file]")
             return
@@ -380,7 +386,7 @@ def PyDOS():
     def delFiles(Dir,File,Recurs,removDirs):
         for _dir in os.listdir(pFmt(Dir,False)):
             if _match(File,_dir[:wldCLen]):
-                if _dir == _dir[:wldCLen]:
+                if File == "*" or File == "*.*" or _dir == _dir[:wldCLen]:
                     if aFile(Dir+_dir):
                         try:
                             os.remove(Dir+_dir)
@@ -478,18 +484,27 @@ def PyDOS():
 
             else:
                 prompt = "\n"
-                for prmpToken in envVars.get('PROMPT','$C$R$F$P$G').upper().replace("$$","$.").split("$")[1:]:
-                    if prmpToken == 'R':
-                        if 'mem_free' in dir(gc):
-                            prompt += str(gc.mem_free())
-                    elif prmpToken == 'D':
-                        prompt += "%2.2i/%2.2i/%4.4i" % (localtime()[1], localtime()[2], localtime()[0])
-                    elif prmpToken == 'T':
-                        prompt += "%2.2i:%2.2i:%2.2i" % (localtime()[3], localtime()[4], localtime()[5])
-                    elif prmpToken == 'P':
-                        prompt += os.getcwd()
+                prmpLitrl = True
+                for prmpToken in envVars.get('PROMPT','$C$R$F$P$G').replace("$$","$."):
+                    if prmpToken == '$':
+                        prmpLitrl = False
+                        continue
+                    if prmpLitrl:
+                        prompt += prmpToken
                     else:
-                        prompt += prmpVals['GCFABEHLQSV_.'.find(prmpToken)]
+                        prmpToken = prmpToken.upper()
+                        prmpLitrl = True
+                        if prmpToken == 'R':
+                            if 'mem_free' in dir(gc):
+                                prompt += str(gc.mem_free())
+                        elif prmpToken == 'D':
+                            prompt += "%2.2i/%2.2i/%4.4i" % (localtime()[1], localtime()[2], localtime()[0])
+                        elif prmpToken == 'T':
+                            prompt += "%2.2i:%2.2i:%2.2i" % (localtime()[3], localtime()[4], localtime()[5])
+                        elif prmpToken == 'P':
+                            prompt += os.getcwd()
+                        else:
+                            prompt += prmpVals['GCFABEHLQSV_.'.find(prmpToken)]
                 cmdLine = input(prompt)
 
         cmdLine = cmdLine.strip()
@@ -563,12 +578,12 @@ def PyDOS():
             cmd = ""
 
         if cmd in ["DELETE","DEL","TYPE","MORE","MKDIR","MD","RMDIR","RD","COPY", \
-                   "CHDIR","CD","RENAME","REN","MOVE"]:
+                   "CHDIR","CD","RENAME","REN","MOVE","DELTREE"]:
             if len(args) > 1:
                 savDir = os.getcwd()
                 args[1] = absolutePath(args[1],savDir)
                 aPath = args[1].split(slh)
-                if cmd not in ["RMDIR","RD","CHDIR","CD"]:
+                if cmd not in ["RMDIR","RD","CHDIR","CD","DELTREE"]:
                     newdir = aPath.pop(-1)
                 (validPath,tmpDir) = chkPath(aPath)
                 if cmd in ["DELETE","DEL","TYPE","MORE","MKDIR","MD"]:
@@ -617,7 +632,7 @@ def PyDOS():
                 elif args[1].upper() == 'OFF':
                     batEcho = False
                 else:
-                    print(cmdLine[5:])
+                    print(cmdLine[5:].replace("\e",chr(27)).replace('\x1b',chr(27)).replace("\E",chr(27)).replace('\X1B',chr(27)))
 
         elif cmd == "PAUSE":
             anyKey()
@@ -941,8 +956,11 @@ def PyDOS():
                 else:
                     print("Invalid path")
 
-        elif cmd in ["RMDIR","RD"]:
+        elif cmd in ["RMDIR","RD","DELTREE"]:
             if len(args) == 2 and validPath:
+                if cmd == "DELTREE":
+                    swBits = int('000010',2)
+
                 if not (swBits & (swAllB-int('000010',2))):
                     if tmpDir != slh:
                         if swBits & int('000010',2):

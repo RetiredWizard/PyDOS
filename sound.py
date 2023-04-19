@@ -26,14 +26,26 @@ dur = int(args[1])
 vol = int(args[2])
 
 if sys.implementation.name.upper() == "MICROPYTHON":
-    pwm=machine.PWM(Pydos_hw.sndPin)
-    pwm.freq(freq)
-    if 'duty_u16' in dir(pwm):
+    oldPWM = False
+    try:
+        # Check if alternate PWM mode (nrf boards) is being used
+        pwm=machine.PWM(0,period=(1000-freq)*20,pin=Pydos_hw.sndPin,freq=250,duty=int((vol/65535)*100))
+        oldPWM = True
+    except:
+        pwm=machine.PWM(Pydos_hw.sndPin)
+        pwm.freq(freq)
+
+    if oldPWM:
+        pwm.init()
+    elif 'duty_u16' in dir(pwm):
         pwm.duty_u16(vol)
     else:
         pwm.duty(int((vol/65535)*1023))
+
     time.sleep(dur/1000)
-    if 'duty_u16' in dir(pwm):
+    if oldPWM:
+        pwm.deinit()
+    elif 'duty_u16' in dir(pwm):
         pwm.duty_u16(0)
     else:
         pwm.duty(0)
@@ -42,13 +54,7 @@ elif sys.implementation.name.upper() == "CIRCUITPYTHON":
         print("Sound Pin not found")
     else:
         Pydos_hw.sndGPIO.deinit() # Workaround for ESP32-S2 GPIO issue
-        # Hack for Teensy 4.1 PWM bug
-        audioPin = PWMOut(Pydos_hw.sndPin,duty_cycle=0,frequency=freq,variable_frequency=True)
-        audioPin.deinit()
-        audioPin = PWMOut(Pydos_hw.sndPin,duty_cycle=0,frequency=freq,variable_frequency=True)
-        audioPin.deinit()
-
-        audioPin = PWMOut(Pydos_hw.sndPin, duty_cycle=vol, frequency=freq, variable_frequency=True)
+        audioPin = PWMOut(Pydos_hw.sndPin, duty_cycle=vol, frequency=freq)
         #audioPin.frequency = freq
         #audioPin.duty_cycle = vol
         time.sleep(dur/1000)

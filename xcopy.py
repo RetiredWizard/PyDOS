@@ -75,6 +75,17 @@ def xcopy():
 
         return((validPath,simpPath))
 
+    def pFmt(dPath,trailSlh=True):
+    # Formats a path/filename string either with a trailing slash (trailSlh=True) or without
+        if dPath == "":
+            return slh
+        elif dPath == slh:
+            return dPath
+        elif trailSlh:
+            return dPath+(slh if dPath[-1]!=slh else "")
+        else:
+            return dPath[:(-1 if dPath[-1] == slh else None)]
+
     def absolutePath(argPath,currDir):
 
         if argPath[0] == slh:
@@ -123,7 +134,7 @@ def xcopy():
     def multicpy(sourcePath,newdir,targetPath,newdir2,swBits,ans=""):
 
         nFiles = 0
-        curDLst = os.listdir(sourcePath[:(-1 if sourcePath != slh else None)])
+        curDLst = os.listdir(pFmt(sourcePath,False))
 
         try:
             os.mkdir(targetPath+newdir2)
@@ -132,7 +143,7 @@ def xcopy():
 
         for _dir in curDLst:
             if os.stat(sourcePath+_dir)[0] & (2**15) != 0 and _match(newdir,_dir[:wildcardLen]):
-                if _dir in os.listdir(targetPath+newdir2):
+                if _dir in os.listdir(pFmt(targetPath+newdir2,False)):
                     if sourcePath == targetPath+newdir2+("" if newdir2 == "" else slh):
                         print("The file cannot be copied onto itself")
                         #break
@@ -140,18 +151,18 @@ def xcopy():
                         if ans != "A" and not swBits & int('001000',2):
                             ans = "*"
                             while "YNQA".find(ans) == -1:
-                                ans = input("Overwrite "+targetPath+newdir2+("" if newdir2 == "" else slh)+_dir+"? (y/n/(q)uit/(a)ll): ").upper()
+                                ans = input("Overwrite "+pFmt(targetPath+newdir2)+_dir+"? (y/n/(q)uit/(a)ll): ").upper()
                         if ans  == "Y" or ans == "A" or swBits & int('001000',2):
-                            if filecpy(sourcePath+_dir,targetPath+newdir2+("" if newdir2 == "" else slh)+_dir,bool(swBits&int('10000000'))):
+                            if filecpy(sourcePath+_dir,pFmt(targetPath+newdir2)+_dir,bool(swBits&int('10000000'))):
                                 nFiles += 1
                         elif ans == "Q":
                             break
                 else:
-                    if filecpy(sourcePath+_dir,targetPath+newdir2+("" if newdir2 == "" else slh)+_dir,bool(swBits&int('10000000'))):
+                    if filecpy(sourcePath+_dir,pFmt(targetPath+newdir2)+_dir,bool(swBits&int('10000000'))):
                         nFiles += 1
                 gc.collect()
             elif os.stat(sourcePath+_dir)[0] & (2**15) == 0 and swBits & int('000010',2):
-                (nF,ans) = multicpy(sourcePath+_dir+slh,newdir,targetPath+newdir2+(slh if newdir2 != "" else ""),_dir,swBits,ans)
+                (nF,ans) = multicpy(sourcePath+_dir+slh,newdir,pFmt(targetPath+newdir2),_dir,swBits,ans)
                 if os.listdir(targetPath+newdir2+slh+_dir) == []:
                     os.rmdir(targetPath+newdir2+slh+_dir)
                 nFiles += nF
@@ -291,11 +302,11 @@ def xcopy():
     # Check that first argument has a valid path, exists and (is not a directory file unless recursive copy)
         if not earlyError and validPath and ("*" in newdir or "?" in newdir or \
             (newdir in os.listdir(sourcePath) and (swBits & int('000010',2) or \
-            os.stat(sourcePath+(slh if sourcePath[-1] != slh else "")+newdir)[0] & (2**15) != 0))):
+            os.stat(pFmt(sourcePath)+newdir)[0] & (2**15) != 0))):
 
             # Recursive copy from folder
             if newdir in os.listdir(sourcePath) and swBits & int('000010',2) and \
-                os.stat(sourcePath+(slh if sourcePath[-1] != slh else "")+newdir)[0] & (2**15) == 0:
+                os.stat(pFmt(sourcePath)+newdir)[0] & (2**15) == 0:
 
                 aPath.append(newdir)
                 newdir = "*"
@@ -310,7 +321,7 @@ def xcopy():
             if newdir2 != ""  and swBits & int('000010',2) and \
                 (newdir2 not in os.listdir(targetPath) or \
                 (newdir2 in os.listdir(targetPath) and \
-                os.stat(targetPath+(slh if targetPath[-1] != slh else "")+newdir2)[0] & (2**15) == 0)):
+                os.stat(pFmt(targetPath)+newdir2)[0] & (2**15) == 0)):
 
                 if newdir2 != "*":
                     aPath2.append(newdir2)
@@ -343,10 +354,8 @@ def xcopy():
 
     # Second argument has valid path
             if validPath2:
-                if sourcePath == "" or sourcePath[-1] != slh:
-                    sourcePath += slh
-                if targetPath == "" or targetPath[-1] != slh:
-                    targetPath += slh
+                sourcePath = pFmt(sourcePath)
+                targetPath = pFmt(targetPath)
 
                 gc.collect()
 
@@ -367,23 +376,23 @@ def xcopy():
                             print("The file cannot be copied onto itself")
 
                         elif swBits & int('001000',2) or input("Overwrite "+args[1]+"? (y/n): ").upper() == "Y":
-                            os.remove(targetPath+(slh if targetPath[-1] != slh else "")+newdir2)
-                            if filecpy(sourcePath+(slh if sourcePath[-1] != slh else "")+newdir,targetPath+(slh if targetPath[-1] != slh else "")+newdir2,bool(swBits&int('10000000'))):
+                            os.remove(pFmt(targetPath)+newdir2)
+                            if filecpy(pFmt(sourcePath)+newdir,pFmt(targetPath)+newdir2,bool(swBits&int('10000000'))):
                                 nFiles += 1
 
     # Second argument target is a directory
                     else:
                         if wildCardOp or swBits & int('000010',2):
                             nFiles += multicpy(sourcePath,newdir,targetPath,newdir2,swBits)[0]
-                        elif newdir in os.listdir(targetPath+newdir2):
-                            if sourcePath == targetPath+newdir2+("" if newdir2 == "" else slh):
+                        elif newdir in os.listdir(pFmt(targetPath+newdir2,False)):
+                            if sourcePath == pFmt(targetPath+newdir2):
                                 print("The file cannot be copied onto itself")
                             elif swBits & int('001000',2) or input("Overwrite "+targetPath+newdir2+("" if newdir2 == "" else slh)+newdir+"? (y/n): ").upper() == "Y":
-                                os.remove(targetPath+newdir2+("" if newdir2 == "" else slh)+newdir)
-                                if filecpy(sourcePath+newdir,targetPath+newdir2+("" if newdir2 == "" else slh)+newdir,bool(swBits&int('10000000'))):
+                                os.remove(pFmt(targetPath+newdir2)+newdir)
+                                if filecpy(sourcePath+newdir,pFmt(targetPath+newdir2)+newdir,bool(swBits&int('10000000'))):
                                     nFiles += 1
                         else:
-                            if filecpy(sourcePath+newdir,targetPath+newdir2+("" if newdir2 == "" else slh)+newdir,bool(swBits&int('10000000'))):
+                            if filecpy(sourcePath+newdir,pFmt(targetPath+newdir2)+newdir,bool(swBits&int('10000000'))):
                                 nFiles += 1
     # Second argument is a new file
                 else:
@@ -395,7 +404,7 @@ def xcopy():
                         else:
                             print("Cannot find the specified path: ",enteredArg)
                     else:
-                        if filecpy(sourcePath+(slh if sourcePath[-1] != slh else "")+newdir,targetPath+(slh if targetPath[-1] != slh else "")+newdir2,bool(swBits&int('10000000'))):
+                        if filecpy(pFmt(sourcePath)+newdir,pFmt(targetPath)+newdir2,bool(swBits&int('10000000'))):
                             nFiles += 1
 
                 print(" "*7,nFiles,"files(s) copied.")

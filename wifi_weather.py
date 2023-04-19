@@ -55,36 +55,40 @@ def wifi_weather():
 
     print("-" * _scrWidth)
     print("JSON Response: ")
-    for prop in json_response['properties']:
-        if prop != 'periods':
-            print(prop,":",json_response['properties'][prop])
-    print()
-    print("-" * _scrWidth)
-    print()
-    for forecaststruct in json_response['properties']['periods']:
-        print(forecaststruct['name'])
+    if 'properties' not in json_response:
+        print("*** ERROR *** Invalid JSON Response")
+    else:
+        for prop in json_response['properties']:
+            if prop != 'periods':
+                print(prop,":",json_response['properties'][prop])
         print()
-        forecast = forecaststruct['detailedForecast']
+        print("-" * _scrWidth)
+        print()
+        for forecaststruct in json_response['properties']['periods']:
+            print(forecaststruct['name'])
+            print()
+            forecast = forecaststruct['detailedForecast']
+            nLines = int(len(forecast)/_scrWidth)
+            if len(forecast) != nLines*_scrWidth:
+                nLines += 1
+            for i in range(nLines):
+                print(forecast[i*_scrWidth:min(((i+1)*_scrWidth)-1,len(forecast))])
+            print("\n")
+        print()
+        print("-" * _scrWidth)
+        print()
+        print(json_response['properties']['periods'][0]['name'])
+        print()
+        forecast = json_response['properties']['periods'][0]['detailedForecast']
         nLines = int(len(forecast)/_scrWidth)
         if len(forecast) != nLines*_scrWidth:
             nLines += 1
         for i in range(nLines):
             print(forecast[i*_scrWidth:min(((i+1)*_scrWidth)-1,len(forecast))])
-        print("\n")
-    print()
-    print("-" * _scrWidth)
-    print()
-    print(json_response['properties']['periods'][0]['name'])
-    print()
-    forecast = json_response['properties']['periods'][0]['detailedForecast']
-    nLines = int(len(forecast)/_scrWidth)
-    if len(forecast) != nLines*_scrWidth:
-        nLines += 1
-    for i in range(nLines):
-        print(forecast[i*_scrWidth:min(((i+1)*_scrWidth)-1,len(forecast))])
+
+        del forecast
 
     Pydos_wifi.close()
-    del forecast
     del json_response
     
 if __name__ == "PyDOS":

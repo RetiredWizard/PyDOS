@@ -4,7 +4,6 @@
 Pydos_pins = {
     'led' : ("D13","PA17 D13"),
     'sndPin' : ("D12","PA19 D12"),
-    'I2C_NUM' : (0,None),
     'SCL' : ("SCL","SCL PA23 D21"),
     'SDA' : ("SDA","SDA PA22 D20"),
     'SCK' : [("SCK","SCK PB13 D24")],

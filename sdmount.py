@@ -12,6 +12,7 @@ if implementation.name.upper() == "MICROPYTHON":
     import sdcard as sdcardLIB
 elif implementation.name.upper() == "CIRCUITPYTHON":
     from digitalio import DigitalInOut
+    # Teensy 4.1 needs adafruit_scard so must try that first
     try:
         import adafruit_sdcard
     except:
@@ -90,10 +91,33 @@ def sdMount(drive,spiNo):
                 if spiNo == 0:
                     try:
                         os.mount(SDCard(), drive)
+                        os.listdir(drive)  # Check that card is accessible
                         Pydos_hw.SDdrive[spiNo] = drive
                         sdMounted = True
                     except:
-                        pass
+                        # Failed use of machine.SDCard() may have corrupted SPI for DotStar
+                        if Pydos_hw.dotStar_Clock:
+                            from pydos_rgb import PyDOS_rgb
+                            PyDOS_rgb._spi = [None]
+                            PyDOS_rgb._pixels[0] = None
+                            PyDOS_rgb._rgblist[0] = [()]
+                            PyDOS_rgb._neoName[0] = None
+                    if not sdMounted:
+                        for slot in range(4):
+                            try:
+                                os.mount(SDCard(slot=slot), drive)
+                                os.listdir(drive)  # Check that card is accessible
+                                Pydos_hw.SDdrive[spiNo] = drive
+                                sdMounted = True
+                                break
+                            except:
+                                # Failed use of machine.SDCard() may have corrupted SPI for DotStar
+                                if Pydos_hw.dotStar_Clock:
+                                    from pydos_rgb import PyDOS_rgb
+                                    PyDOS_rgb._spi = [None]
+                                    PyDOS_rgb._pixels[0] = None
+                                    PyDOS_rgb._rgblist[0] = [()]
+                                    PyDOS_rgb._neoName[0] = None
                 if not sdMounted:
                     try:
                         sd = sdcardLIB.SDCard(Pydos_hw.SPI(spiNo), Pin(Pydos_hw.CS[spiNo],Pin.OUT))

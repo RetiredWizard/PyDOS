@@ -3,12 +3,12 @@
 import board
 
 Pydos_pins = {
-    'sndPin' : (board.D12,"GPIO12 D12"),
-    'neoPixel' : (board.NEOPIXEL,None),
-    'SCL' : (board.SCL,"GPIO4 SCL"),
-    'SDA' : (board.SDA,"GPIO3 SDA"),
-    'SCK' : [(board.SCK,"GPIO36 SCK")],
-    'MOSI' : [(board.MOSI,"GPIO35 MO")],
-    'MISO' : [(board.MISO,"GPIO37 MI")],
-    'CS' : [(board.D5,"GPIO5 D5")]
+    'sndPin' : (board.D12,"D12 GPIO12"),
+    'neoPixel' : (board.NEOPIXEL,"NEOPIXEL"),
+    'SCL' : (board.SCL,"SCL GPIO4"),
+    'SDA' : (board.SDA,"SDA GPIO3"),
+    'SCK' : [(board.SCK,"SCK GPIO36")],
+    'MOSI' : [(board.MOSI,"MOSI GPIO35 MO")],
+    'MISO' : [(board.MISO,"MISO GPIO37 MI")],
+    'CS' : [(board.D5,"D5 GPIO5")]
 }

@@ -11,6 +11,9 @@ if __name__ != "PyDOS":
 if passedIn == "":
     passedIn = input("Enter python file to launch in thread: ")
 
+if "." not in passedIn:
+    passedIn = passedIn + ".py"
+
 cf = open(passedIn)
 
 newF = "import _thread\n"

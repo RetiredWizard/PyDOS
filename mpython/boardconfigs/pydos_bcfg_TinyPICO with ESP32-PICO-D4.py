@@ -6,7 +6,6 @@ Pydos_pins = {
     'dotStar_Data' : (2,"IO2"),
     'dotStar_Extra' : (4,"IO4"),
     'dotStar_Pow' : (13,"IO13"),
-    'I2C_NUM' : (1,None),
     'SCL' : (22,"SCL IO22"),
     'SDA' : (21,"SDA IO21"),
     'SPI_NUM' : [(1,None)],

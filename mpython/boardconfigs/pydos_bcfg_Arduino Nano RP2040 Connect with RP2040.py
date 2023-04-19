@@ -3,7 +3,7 @@
 Pydos_pins = {
     'sndPin' : (29,"GPIO29 A3 D17"),
     'led' : (6,"GPIO6 D13"),
-    'I2C_NUM' : (0,None),
+    'I2C_NUM' : (0,"machine.I2C(0)"),
     'SCL' : (13,"GPIO13 A5"),
     'SDA' : (12,"GPIO12 A4"),
     'SCK' : [(6,"GPIO6 D13")],

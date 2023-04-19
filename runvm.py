@@ -82,8 +82,10 @@ def runvm(runargv):
         if newdir in os.listdir(pFmt(tmpDir,False)):
             if startupfile+'.py' in os.listdir('/'):
                 if startupfile+'._PyD' in os.listdir('/'):
-                    os.remove('/'+startupfile+'.py')
-                os.rename('/'+startupfile+'.py','/'+startupfile+'._PyD')
+                    if startupfile+'.py' in os.listdir('/'):
+                        os.remove('/'+startupfile+'.py')
+                else:
+                    os.rename('/'+startupfile+'.py','/'+startupfile+'._PyD')
 
             t = open('/'+startupfile+'.py','w')
             r = open(tmpDir+newdir,'r')
@@ -92,18 +94,23 @@ def runvm(runargv):
                 t.write('from supervisor import reload\n')
             elif sys.implementation.name.upper() == "MICROPYTHON":
                 t.write('from sys import exit\n')
-            t.write('import os\nos.chdir("'+tmpDir[:(-1 if tmpDir != "/" else None)]+'")\n')
-            t.write("global passedIn\n")
-            t.write("passedIn = '"+" ".join(args[1:])+"'\n")
-            t.write("global envVars\n")
-            t.write("envVars = {}\n")
+            t.write('import os\n')
+            t.write('try:\n')
+            t.write('    os.chdir("'+tmpDir[:(-1 if tmpDir != "/" else None)]+'")\n')
+            t.write("    global passedIn\n")
+            t.write("    passedIn = '"+" ".join(args[1:])+"'\n")
+            t.write("    global envVars\n")
+            t.write("    envVars = {}\n")
             for _ in envVars:
                 if _ != ".neopixel":
-                    t.write("envVars['"+_+"']='"+str(envVars[_]).replace("'",chr(92)+"'")+"'\n")
+                    t.write("    envVars['"+_+"']='"+str(envVars[_]).replace("'",chr(92)+"'")+"'\n")
 
-            t.write("__name__ = 'PyDOS'\n")
-            t.write(r.read())
-            t.write("\nos.chdir('/')\n")
+            t.write("    __name__ = 'PyDOS'\n")
+            for pgmLine in r:
+                t.write("    "+pgmLine)
+            t.write("\nexcept:\n")
+            t.write("    print('****ERROR**** running '+'"+tmpDir+newdir+"')\n")
+            t.write("os.chdir('/')\n")
             t.write("os.remove('/"+startupfile+".py')\n")
             t.write("os.rename('/"+startupfile+"._PyD','/"+startupfile+".py')\n")
             t.write('print("\\n\\nIf PyDOS doesn'+"'"+'t start, press Ctrl-D at the >>> REPL prompt")\n')

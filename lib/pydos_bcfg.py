@@ -116,9 +116,6 @@ elif implementation.name.upper() == "CIRCUITPYTHON":
     elif 'CLK' in dir(board):
         _SCK = board.CLK
     if _SCK:
-        Pydos_pins["SCK"] = []
-        Pydos_pins["MOSI"] = []
-        Pydos_pins["MISO"] = []
         if 'MOSI' in dir(board):
             Pydos_pins["SCK"].append((_SCK,"SCK"))
             Pydos_pins["MOSI"].append((board.MOSI,"MOSI"))
@@ -129,6 +126,8 @@ elif implementation.name.upper() == "CIRCUITPYTHON":
             Pydos_pins["MISO"].append((board.SD_CIPO,"CIPO"))
         if "CS" in dir(board):
             Pydos_pins["CS"].append((board.CS,"CS"))
+        elif "SS" in dir(board):
+            Pydos_pins["CS"].append((board.SS,"SS"))
         else:
             Pydos_pins["CS"].append((None,"None"))
 

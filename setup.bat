@@ -1,4 +1,5 @@
 @echo off
+del /README.md
 pexec from sys import implementation
 pexec envVars["_implementation"] = implementation.name.upper()
 if %_implementation% == CIRCUITPYTHON set _ans = C
@@ -9,8 +10,12 @@ if %_ans% == M goto mpython
 copy/y /cpython/* /
 if not exist /lib mkdir /lib
 copy /cpython/lib/* /lib/
+pexec/q import adafruit_bus_device
+if errorlevel 0 goto bus_device_builtin
+echo copy /mpython/lib/optional/adafruit_bus_device /lib/
 if not exist /lib/adafruit_bus_device mkdir /lib/adafruit_bus_device
-copy /cpython/lib/adafruit_bus_device/* /lib/adafruit_bus_device/
+copy /cpython/lib/optional/adafruit_bus_device/* /lib/adafruit_bus_device/
+:bus_device_builtin
 pexec import board
 pexec envVars["_boardID"] = board.board_id
 pexec/q import sdcardio
@@ -42,16 +47,27 @@ copy/y /flash/mpython/main.py /sdcard/main.py
 echo .
 echo *** Power Cycle the board and run setup again....  ***
 echo .
-/flash/reboot
+exit
 :flashmountedroot
 copy/y /mpython/* /
 if not exist /lib mkdir /lib
 copy /mpython/lib/* /lib/
+pexec/q import neopixel
+rem if not errorlevel 0 echo copy /mpython/lib/optional/ws2812.py /lib/
+rem if not errorlevel 0 copy /mpython/lib/optional/ws2812.py /lib/
+if not errorlevel 0 echo copy /mpython/lib/optional/neopixel.py /lib/
+if not errorlevel 0 copy /mpython/lib/optional/neopixel.py /lib/
 pexec envVars["_uname"] = implementation._machine
 if not "%_uname%" == "Sparkfun SAMD51 Thing Plus with SAMD51J20A" goto skip_SAMD51
 if not exist /lib mkdir /lib
-copy /mpython/samd51/lib/* /lib/
+copy /mpython/extFlash/lib/* /lib/
+del /lib/XIAO_nRF52840.py
 :skip_SAMD51
+if not "%_uname%" == "XIAO nRF52840 Sense with nRF52840" goto skip_nRF
+if not exist /lib mkdir /lib
+copy /mpython/extFlash/lib/* /lib/
+del /lib/ThngPls_SAMD51.py
+:skip_nRF
 if exist "/mpython/boardconfigs/pydos_bcfg_%_uname%.py" goto foundbcfg
 echo *** Warning *** No board configuration file found:
 echo   /mpython/boardconfigs/pydos_bcfg_%_uname%.py
@@ -81,9 +97,9 @@ copy /mpython/NanoConnect/lib/* /lib/
 goto esp32MP
 
 :nanoconnectCP
-if exist /ntpdate.py del /ntpdate.py
 if exist /wifi_test.py del wifi_test.py
-copy /cpython/NanoConnect/* /
+echo copy /cpython/ESP32/autoexec.bat /
+copy /cpython/ESP32/autoexec.bat /
 if not exist /lib mkdir /lib
 copy /cpython/NanoConnect/lib/* /lib/
 if not exist /lib/adafruit_esp32spi mkdir /lib/adafruit_esp32spi
@@ -100,15 +116,23 @@ goto other
 
 :esp32MP
 copy /mpython/ESP32/* /
+pexec/q import urequests
+if not errorlevel 0 echo copy /mpython/lib/optional/urequests.py /lib/
+if not exist /lib mkdir /lib
+if not errorlevel 0 copy /mpython/lib/optional/urequests.py /lib/
 
 :other
 if %_ans2% == N goto wifienv
 if %_ans2% == o set _ans2 = O
 if "%_boardID%" == "raspberry_pi_pico_w" goto copy_code
+rem Feather Huzzah may need the sound pin mod but doesn't have the memory to spare
+if "%_boardID%" == "adafruit_feather_huzzah32" del /autoexec.bat
+if "%_boardID%" == "adafruit_feather_huzzah32" del /boot.py
+if "%_boardID%" == "adafruit_feather_huzzah32" goto copy_code
 if %_ans2% == E goto skip_codecopy
 if exist /lib/pydos_wifi.py del /lib/pydos_wifi.py
 if exist /ntpdate.py del /ntpdate.py
-del wifi_*.py
+del /wifi_*.py
 goto skip_codecopy
 :copy_code
 echo copy /cpython/code.py /

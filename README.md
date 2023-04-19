@@ -58,7 +58,9 @@ If a command argument contains spaces the argument must be enclosed in quotes.
     - _scrWidth - The number of columns on the terminal or screen
     - errorlevel - The result code from the previous BAT file or pexec command executed
 
-**PROMPT [prompt text]** - Changes or displays the DOS command prompt. Supported strings "$R,$D,$T,$P,$G,$C,$F,$A,$B,$E,$H,$L,$Q,$S,$V,$_,$."  
+**PROMPT [prompt text]** - Changes or displays the DOS command prompt. Supported strings "$R,$D,$T,$P,$G,$C,$F,$A,$B,$E,$H,$L,$Q,$S,$V,$_,$." and text litterals  
+Example: `prompt $e[44m$p$g` sets the backgound blue and displays the current directory + >
+
 **PATH [path1;path2;...]** - Changes or displays the directory search list for executing python scripts and DOS batch files
 
 **RENAME (REN, MOVE, MV) [path]filename [path]filename** - Changes the filename under which a file is stored.
@@ -226,30 +228,29 @@ the **setup.bat** file in PyDOS you can delete both the **cpython** and **mpytho
 script. For very limited Flash boards you may want to delete the **PyBasic** folder until after setup is run. Once setup has ben run, delete the **cpython** and/or **mpython** folders from
 the microcontroller and copy as much of the **PyBasic** directory as space permits, copying just the *.py files is all that's needed for PyBasic to run.
 
-**Building custom CircuitPython firmware**
-
-For CircuitPython the first thing you should do is compile a custom CircuitPython image, the steps for doing so are described in the Adafruit learning guide
-at: https://learn.adafruit.com/building-circuitpython/build-circuitpython.  Upon downloading the latest version of CircuitPython from the github repository,
-modify the **py/circuitpy_mpconfig.h** file and change the value on the line that reads "#**define MICROPY_ENABLE_PYSTACK**" from "(1)" to "(0)". On an 
-ESP32S2 microcontroller it's also necessary to modify the **py/mpconfig.h** file and change the value on the line that reades "**#define MICROPY_STACKLESS**"
-from "(0)" to "(1)". You can find custom UF2 images for some boards as release resources here: https://github.com/RetiredWizard/PyDOS/releases. If you're using a board not included you
-can open a Github issue on this repository to request it.
-
-An earlier version of the build process is demonstrated in the YouTube video at: https://www.youtube.com/watch?v=sWy5_B3LL8c, but be sure to check the Adafruit
-guide and use the updated instructions.
-
-**PyDOS will run without using this custom CircuitPython image however PyBasic and some of the other applications will not run as well since PyDOS will be memory limited.**
-
 **CircuitPython Setup**
 
-To install the custom CircuitPython image, put your microcontroller board in "bootloader" mode and copy the compiled .UF2 file to the USB mass storage device that
-shows up on your host computer.
+Thanks to the great work of @bill88t, starting with CircuitPython version 8.0.4, you no longer need to build custom CirucitPython firmware (ESP32 based boards are still being worked on but should have this feature in 8.1.x). PyDOS will run without issue on a standard downloaded CircuitPython image from https://circuitpython.org/downloads. 
+
+*By the way, if you like PyDOS you'll probably also enjoy ljinux from https://github.com/bill88t/ljinux.* 
+
+To install the CircuitPython image, put your microcontroller board in "bootloader" mode and copy the .UF2 file to the USB mass storage device that shows up on your host computer. 
 
 After the .UF2 file is copied to the microcontroller board it should re-boot and a new USB mass storage device should appear. 
 
 To copy PyDOS to the Microcontroller, simply drag the PyDOS directory structure
 (after removing the **mpython** folder if space is a concern) to the root directory of the device that appears on the host computer.
 Your microcontroller now has PyDOS installed.
+
+If there is less than 800K of flash available, as is the case with the Pico W, you should not
+ copy the PyBasic folder until after completing the rest of the installation steps below. Once
+ PyDOS has been installed give the host computer write access to the CIRCUIPY drive by running
+ "fs ro" from PyDOS and then power cycling the board. Delete the entire cpython folder and
+ then copy PyBasic to the board. All of PyBasic may still not fix in which case you can either
+ delete some of the PyDOS external programs you don't need or copy only Part of the PyBasic
+ folder. The *.py files in the PyBasic folder are all that is needed to run PyBasic. If you
+ want to run Adventure you need enouch space for adventure-fast.pgm, ADESCRIP, AITEMS,
+ AMESSAGE, AMOVING, BITEMS and AMESSAGE.IDX.
 
 If the copy worked without any errors, you should power cycle the microcontroller board so that the file system is configured to allow
 the microcontroller to have Read/Write access.
@@ -315,10 +316,15 @@ To interact with the microcontroller you can connect to the REPL by simply typin
 
 At the REPL prompt type "**import PyDOS*** to start PyDOS and then type **setup** to run the customization script.
 
+**Note** If the board you're using has an onboard SD card slot, Micropython may not mount the flash at the root mount point. In this case copy the PyDOS files to the "/Flash" folder during the initial PyDOS setup. If you plan to boot your device with an SD card inserted you should install PyDOS and run setup before inserting the SD card, then copy boot.py to the SD card.
+
+**Note** To set up the Seeed (XIAO) nRF52840 board running MicroPython, copy the PyDOS /mpython folder to the /flash folder on the device and then copy the /mpython/boot.py file to /Flash/boot.py and reboot the microcontroller. You should then be able to install PyDOS as usual although the current version of Thonny has difficulty with this board so you should only copy a single folder (i.e. lib, mpython, PyBasic and then all the root files) at a time.
 
 ## To Do  
 *Possible updates depending on RAM impact*
 
+- investigate porting micropython flash mount to circuitpython
+- investigate date/time stamp issue on seeed nrf52840 files
 - support for connected color displays  
 - support for touch screens  
 - Rename should allow wildcards in filenames, i.e. "rename *.bas *.txt" or "rename code.py *.sav"  

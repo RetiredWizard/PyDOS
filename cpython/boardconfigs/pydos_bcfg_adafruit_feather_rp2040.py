@@ -4,7 +4,7 @@ import board
 
 Pydos_pins = {
     'sndPin' : (board.D12,"D12 GPIO12"),
-    'neoPixel' : (board.NEOPIXEL,None),
+    'neoPixel' : (board.NEOPIXEL,"NEOPIXEL"),
     'SCL' : (board.SCL,"SCL GPIO3"),
     'SDA' : (board.SDA,"SDA GPIO2"),
     'SCK' : [(board.SCK,"SCK GPIO18")],

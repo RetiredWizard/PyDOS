@@ -27,7 +27,7 @@ except:
     pass
 try:
     from pydos_hw import sndPin as hwsndPin
-    from pydos_hw import sndGPIO, quietSnd
+    from pydos_hw import Pydos_hw, quietSnd
     sndPin = hwsndPin
 except:
     sndPin = None
@@ -124,15 +124,19 @@ class BASICParser:
         #file handle list
         self.__file_handles = {}
 
+        self.__pwm = None
         if implementation.name.upper() == 'MICROPYTHON':
             if sndPin:
                 try:
                     self.__pwm = PWM(sndPin,freq=0)
                 except:
-                    self.__pwm = PWM(sndPin)
+                    try:
+                        self.__pwm = PWM(sndPin)
+                    except:
+                        pass
                 if 'duty_u16' in dir(self.__pwm):
                     self.__pwm.duty_u16(0)
-                else:
+                elif 'duty' in dir(self.__pwm):
                     self.__pwm.duty(0)
 
 
@@ -893,7 +897,7 @@ class BASICParser:
             volume = 800
 
         if implementation.name.upper() == 'MICROPYTHON':
-            if sndPin:
+            if sndPin and self.__pwm:
                 self.__pwm.freq(freq)
                 if "duty_u16" in dir(self.__pwm):
                     self.__pwm.duty_u16(volume)
@@ -906,8 +910,8 @@ class BASICParser:
         elif implementation.name.upper() == 'CIRCUITPYTHON':
             if sndPin:
                 try:
-                    sndGPIO.deinit() # Workaround for ESP32-S2 GPIO issue
-                    audioPin = PWMOut(sndPin, duty_cycle=volume, frequency=freq, variable_frequency=True)
+                    Pydos_hw.sndGPIO.deinit() # Workaround for ESP32-S2 GPIO issue
+                    audioPin = PWMOut(sndPin, duty_cycle=volume, frequency=freq)
                     sleep(duration/18.2)
                     audioPin.deinit()
                     quietSnd() # Workaround for ESP32-S2 GPIO issue
