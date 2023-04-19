@@ -1,4 +1,4 @@
-PyDOS_wifi_VER = "1.20.b3"
+PyDOS_wifi_VER = "1.20"
 
 import os
 import time
