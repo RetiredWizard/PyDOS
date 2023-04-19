@@ -58,7 +58,7 @@ If a command argument contains spaces the argument must be enclosed in quotes.
     - _scrWidth - The number of columns on the terminal or screen
     - errorlevel - The result code from the previous BAT file or pexec command executed
 
-**PROMPT [prompt text]** - Changes or displays the DOS command prompt. Supported strings "$R,$D,$T,$P,$G,$C,$F,$A,$B,$E,$H,$L,$Q,$S,$V,$_,$." and text litterals  
+**PROMPT [prompt text]** - Changes or displays the DOS command prompt. Supported strings "$R,$D,$T,$P,$G,$C,$F,$A,$B,$E,$H,$L,$Q,$S,$V,$_,$." and text literals  
 Example: `prompt $e[44m$p$g` sets the backgound blue and displays the current directory + >
 
 **PATH [path1;path2;...]** - Changes or displays the directory search list for executing python scripts and DOS batch files
@@ -128,7 +128,7 @@ PyDOS.
 
 **setdate.py** - initalizes the real time clock to an entered date  
 **settime.py** - initalizes the real time clock to an entered time  
-**ntpdate.py** (ESP32xxx, Pico W and MicroPython Nano Connect) - sets the time and date using the Internet NTP protocol
+**ntpdate.py** (ESP32xxx, Pico W and Nano Connect) - sets the time and date using the Internet NTP protocol
 
 **diff.py** - performs a file comparison
 
@@ -230,7 +230,7 @@ the microcontroller and copy as much of the **PyBasic** directory as space permi
 
 **CircuitPython Setup**
 
-Thanks to the great work of @bill88t, starting with CircuitPython version 8.0.4, you no longer need to build custom CirucitPython firmware (ESP32 based boards are still being worked on but should have this feature in 8.1.x). PyDOS will run without issue on a standard downloaded CircuitPython image from https://circuitpython.org/downloads. 
+Thanks to the great work of @bill88t, starting with CircuitPython version 8.0.4, you no longer need to build custom CirucitPython firmware (ESP32 based boards are still being worked on but should have this feature in 8.0.6/8.1.0). PyDOS will run without issue on a standard downloaded CircuitPython image from https://circuitpython.org/downloads. 
 
 *By the way, if you like PyDOS you'll probably also enjoy ljinux from https://github.com/bill88t/ljinux.* 
 
