@@ -264,12 +264,10 @@ At the REPL prompt type "**import PyDOS**" to start PyDOS and then type **setup*
 
 Once the **setup.bat** script has been run if you have more files to copy to the microcontroller (PyBasic for example), you will need to give the host computer read/write access to the mounted microcontroller drive. This is done by typing **"fs ro"** at the PyDOS prompt and then power cycling the board.
 
-After deleting and/or copying files from the Host computer when you want to run PyDOS normally again, edit the **boot.py** file in the root folder of the mounted microcontroller drive (usally CIRCUITPY) and change the line that reads:  
-
-            storage.remount("/",True)
-to:
-            storage.remount("/",False)
-
+After deleting and/or copying files using the Host computer, when you want to run PyDOS normally again, edit the **boot.py** file in the root folder of the mounted microcontroller drive (usally CIRCUITPY) and change the line that reads:  
+            storage.remount("/",True)  
+to:  
+            storage.remount("/",False)  
 and then powercycle the board once again.
 
 --------------------------------------------------------------------------------------------------------------------
@@ -313,8 +311,6 @@ To interact with the microcontroller you can connect to the REPL by simply typin
 (>>>) is displayed.
 
 At the REPL prompt type "**import PyDOS*** to start PyDOS and then type **setup** to run the customization script.
-
-If your board has very limited flash space, you may want to delay copying the **PyBASIC** folder until after running **setup**. Once **setup** completes, delete the **mpython** folder and then copy as much of the **PyBasic** directory as space permits to the Microcontroller. Copying just the *.py files is all that's needed for PyBasic to run.
 
 **Note** If the board you're using has an onboard SD card slot, Micropython may not mount the flash at the root mount point. In this case copy the PyDOS files to the "/Flash" folder during the initial PyDOS setup. If you plan to boot your device with an SD card inserted you should install PyDOS and run setup before inserting the SD card, then copy boot.py to the SD card.
 
