@@ -265,9 +265,13 @@ At the REPL prompt type "**import PyDOS**" to start PyDOS and then type **setup*
 Once the **setup.bat** script has been run if you have more files to copy to the microcontroller (PyBasic for example), you will need to give the host computer read/write access to the mounted microcontroller drive. This is done by typing **"fs ro"** at the PyDOS prompt and then power cycling the board.
 
 After deleting and/or copying files using the Host computer, when you want to run PyDOS normally again, edit the **boot.py** file in the root folder of the mounted microcontroller drive (usally CIRCUITPY) and change the line that reads:  
+
             storage.remount("/",True)  
+
 to:  
+
             storage.remount("/",False)  
+
 and then powercycle the board once again.
 
 --------------------------------------------------------------------------------------------------------------------
