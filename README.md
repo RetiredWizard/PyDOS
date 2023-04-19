@@ -221,12 +221,6 @@ For PyDOS_wifi API documentation see https://github.com/RetiredWizard/PyDOS_wifi
 
 ## Installation
 
-Thanks to the great work of **@bill88t**, starting with CircuitPython version 8.0.4, you no longer need to build custom CirucitPython firmware (ESP32 based boards are still being worked on but should have this feature in 8.0.6/8.1.0). PyDOS will run without issue on a standard downloaded CircuitPython image from https://circuitpython.org/downloads. 
-
-Starting with version 8.0.4 when CircuitPython boots on a microcontroller the pystack size can be set by the **CIRCUITPY_PYSTACK_SIZE** value in the settings.toml file. PyDOS comes with this value set to 3600. PyDOS this will derive a maximum wildcard length based on this value that should be adequate in most cases. If you find yourself using particuarly long file names you can increase this parameter value as needed. As you increase the pystack size the memory available for PyDOS to run will decrease slightly.
-
-*By the way, if you like PyDOS you'll probably also enjoy ljinux from https://github.com/bill88t/ljinux.* 
-
 **Before copying PyDOS files**
 
 If the board you're using has limited flash storage, as is the case with the Pico W, you can delete either the **cpython** (if you're not using CircuitPython) or **mpython**
@@ -234,6 +228,12 @@ If the board you're using has limited flash storage, as is the case with the Pic
 for specific micro controller boards, you can free up further space by deleting anything other than the board you are using (the "Pico W" and "Arduino Nano Connect" boards use the ESP folder). For very limited Flash boards you may want to delete the **PyBasic** folder until after the **setup.bat** step is run. Once setup has ben run, delete the **cpython** and/or **mpython** folders from the microcontroller and copy as much of the **PyBasic** directory as space permits to the Microcontroller. Copying just the *.py files is all that's needed for PyBasic to run.
 
 **CircuitPython install**
+
+Thanks to the great work of **@bill88t**, starting with CircuitPython version 8.0.4, you no longer need to build custom CirucitPython firmware (ESP32 based boards are still being worked on but should have this feature in 8.0.6/8.1.0). PyDOS will run without issue on a standard downloaded CircuitPython image from https://circuitpython.org/downloads. 
+
+Starting with version 8.0.4 when CircuitPython boots on a microcontroller the pystack size can be set by the **CIRCUITPY_PYSTACK_SIZE** value in the settings.toml file. PyDOS comes with this value set to 3600. PyDOS this will derive a maximum wildcard length based on this value that should be adequate in most cases. If you find yourself using particuarly long file names you can increase this parameter value as needed. As you increase the pystack size the memory available for PyDOS to run will decrease slightly.
+
+*By the way, if you like PyDOS you'll probably also enjoy ljinux from https://github.com/bill88t/ljinux.* 
 
 To install the CircuitPython image, put your microcontroller board in "bootloader" mode and copy the .UF2 file to the USB mass storage device that shows up on your host computer. 
 
