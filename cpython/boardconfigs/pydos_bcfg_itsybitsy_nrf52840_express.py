@@ -3,13 +3,13 @@
 import board
 
 Pydos_pins = {
-    'sndPin' : (board.D12,"GPIO10 D12"),
-    'dotStar_Clock' : (board.DOTSTAR_CLOCK,None),
-    'dotStar_Data' : (board.DOTSTAR_DATA,None),
-    'SCL' : (board.SCL,"D22 SCL"),
-    'SDA' : (board.SDA,"D21 SDA"),
-    'SCK' : (board.SCK,"D25 SCK"),
-    'MOSI' : (board.MOSI,"D24 MO"),
-    'MISO' : (board.MISO,"D23 MI"),
-    'CS' : (board.D9,"D9")
+    'sndPin' : (board.D12,"D12 GPIO10"),
+    'dotStar_Clock' : (board.DOTSTAR_CLOCK,"DOTSTAR_CLOCK"),
+    'dotStar_Data' : (board.DOTSTAR_DATA,"DOTSTAR_DATA"),
+    'SCL' : (board.SCL,"SCL D22"),
+    'SDA' : (board.SDA,"SDA D21"),
+    'SCK' : [(board.SCK,"SCK D25")],
+    'MOSI' : [(board.MOSI,"MOSI D24 MO")],
+    'MISO' : [(board.MISO,"MISO D23 MI")],
+    'CS' : [(board.D9,"D9")]
 }

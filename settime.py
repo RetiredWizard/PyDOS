@@ -55,13 +55,12 @@ def settime(newTime):
                 print("invalid seconds entered (0-60)")
             else:
                 if implementation.name.upper() == 'MICROPYTHON':
-                    rtcBase=0x4005c000
-                    atomicBSet=0x2000
-                    machine.mem32[rtcBase+8] = (int(inTime[0]) << 16) | (int(inTime[1]) << 8) | int(inTime[2]) | iweekDay() << 24
-                    machine.mem32[rtcBase+atomicBSet+0xc] = 0x10
+                    machine.RTC().datetime(tuple([time.localtime()[i] for i in [0,1,2,6]] + \
+                        [int(inTime[0]), int(inTime[1]), int(inTime[2]), time.localtime()[7]]))
+
                 elif implementation.name.upper() == 'CIRCUITPYTHON':
-                    RTC().datetime = time.struct_time((RTC().datetime[0],RTC().datetime[1],RTC().datetime[1], \
-                        int(inTime[0]),int(inTime[1]),int(inTime[1]),RTC().datetime[6],-1,-1))
+                    RTC().datetime = time.struct_time((RTC().datetime[0],RTC().datetime[1],RTC().datetime[2], \
+                        int(inTime[0]),int(inTime[1]),int(inTime[2]),RTC().datetime[6],-1,-1))
     else:
         print("Real Time Clock (rtc) not available on board")
 

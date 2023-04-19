@@ -3,12 +3,12 @@
 import cyt_mpp_board as board
 
 Pydos_pins = {
-    'sndPin' : (board.SNDPIN,"GP18 Onboard Buzzer"),
-    'neoPixel' : (board.NEOPIXEL,None),
-    'SCL' : (board.GP3,"GP3 GROVE#2"),
-    'SDA' : (board.GP2,"GP2 GROVE#2"),
-    'SD_SCK' : (board.SCK,"GP10 Onboard SD"),
-    'SD_MOSI' : (board.MOSI,"GP11 Onboard SD"),
-    'SD_MISO' : (board.MISO,"GP12 Onboard SD"),
-    'SD_CS' : (board.GP15,"GP15 Onboard SD")
+    'sndPin' : (board.SNDPIN,"SNDPIN GP18 Onboard Buzzer"),
+    'neoPixel' : (board.NEOPIXEL,"NEOPIXEL Onboard Neopixel"),
+    'SCL' : (board.GP5,"GP5 GROVE#3"),
+    'SDA' : (board.GP4,"GP4 GROVE#3"),
+    'SCK' : [(board.SCK,"SCK GP10 Onboard SD")],
+    'MOSI' : [(board.MOSI,"MOSI GP11 Onboard SD")],
+    'MISO' : [(board.MISO,"MISO GP12 Onboard SD")],
+    'CS' : [(board.GP15,"GP15 Onboard SD")]
 }

@@ -4,11 +4,11 @@ import board
 
 Pydos_pins = {
     'sndPin' : (board.IO10,"IO10"),
-    'neoPixel' : (board.NEOPIXEL,None),
-    'SCL' : (board.IO7,"IO7"),
-    'SDA' : (board.IO6,"IO6"),
-    'SCK' : (board.IO36,"IO36"),
-    'MOSI' : (board.IO35,"IO35"),
-    'MISO' : (board.IO37,"IO37"),
-    'CS' : (board.IO9,"IO9")
+    'neoPixel' : (board.NEOPIXEL,"NEOPIXEL"),
+    'SCL' : (board.IO9,"IO9"),
+    'SDA' : (board.IO8,"IO8"),
+    'SCK' : [(board.IO12,"IO12")],
+    'MOSI' : [(board.IO11,"IO11")],
+    'MISO' : [(board.IO13,"I13")],
+    'CS' : [(board.IO7,"IO7")]
 }

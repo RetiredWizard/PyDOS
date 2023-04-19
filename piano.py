@@ -1,6 +1,7 @@
 import sys
 from pydos_ui import Pydos_ui
 from pydos_hw import Pydos_hw
+from pydos_hw import quietSnd
 
 if sys.implementation.name.upper() == 'MICROPYTHON':
     import machine
@@ -14,15 +15,16 @@ elif sys.implementation.name.upper() == 'CIRCUITPYTHON':
 def piano():
 
     if sys.implementation.name.upper() == 'MICROPYTHON':
-        pwm=machine.PWM(Pydos_hw.sndPin)
+        oldPWM = False
+        try:
+            # Check if alternate PWM mode (nrf boards) is being used
+            pwm=machine.PWM(0,period=10000,pin=Pydos_hw.sndPin,freq=250,duty=0)
+            oldPWM = True
+        except:
+            pwm=machine.PWM(Pydos_hw.sndPin)
     elif sys.implementation.name.upper() == 'CIRCUITPYTHON':
         Pydos_hw.sndGPIO.deinit() # Workaround for ESP32-S2 GPIO issue
         pwm=PWMOut(Pydos_hw.sndPin, duty_cycle=0, frequency=440, variable_frequency=True)
-        # Hack for Teensy 4.1 PWM bug
-        pwm.deinit()
-        pwm = PWMOut(Pydos_hw.sndPin,duty_cycle=0,frequency=440,variable_frequency=True)
-        pwm.deinit()
-        pwm = PWMOut(Pydos_hw.sndPin,duty_cycle=0,frequency=440,variable_frequency=True)
 
     print ("\nPress +/- to change volume, 'q' to quit...")
 
@@ -98,6 +100,10 @@ def piano():
         if press:
             if sys.implementation.name.upper() == 'MICROPYTHON':
                 pwm.freq(note)
+                if oldPWM:
+                    pwm=machine.PWM(0,period=(1000-note)*20,pin=Pydos_hw.sndPin,freq=250, \
+                        duty=int((volume/65535)*200))
+                    pwm.init()
                 if 'duty_u16' in dir(pwm):
                     pwm.duty_u16(volume)
                 else:
@@ -119,7 +125,9 @@ def piano():
             #pressedat = time.time()
         else:
             if sys.implementation.name.upper() == 'MICROPYTHON':
-                if 'duty_u16' in dir(pwm):
+                if oldPWM:
+                    pwm.deinit()
+                elif 'duty_u16' in dir(pwm):
                     pwm.duty_u16(0)
                 else:
                     pwm.duty(0)
@@ -130,7 +138,7 @@ def piano():
 
     if sys.implementation.name.upper() == 'CIRCUITPYTHON':
         pwm.deinit()
-        Pydos_hw.quietSnd() # Workaround for ESP32-S2 GPIO issue
+        quietSnd() # Workaround for ESP32-S2 GPIO issue
 
 if Pydos_hw.sndPin:
     piano()

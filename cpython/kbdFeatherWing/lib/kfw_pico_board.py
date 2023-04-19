@@ -70,6 +70,7 @@ SMPS_MODE = board.SMPS_MODE
 VBUS_SENSE = board.VBUS_SENSE
 VOLTAGE_MONITOR = board.VOLTAGE_MONITOR
 board_id = board.board_id
+kfw = True
 
 def SPI():
     global _SPI

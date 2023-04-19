@@ -3,12 +3,12 @@
 import board
 
 Pydos_pins = {
-    'sndPin' : (board.BUZZER,"board.BUZZER"),
-    'neoPixel' : (board.NEOPIXEL,None),
-    'SCL' : (board.GP3,"GP3 GROVE#2"),
-    'SDA' : (board.GP2,"GP2 GROVE#2"),
-    'SD_SCK' : (board.GP14,"GP14 SERVO HEADER"),
-    'SD_MOSI' : (board.GP15,"GP15 SERVO HEADER"),
-    'SD_MISO' : (board.GP12,"GP12 SERVO HEADER"),
-    'SD_CS' : (board.GP5,"GP5 GROVE#3")
+    'sndPin' : (board.BUZZER,"BUZZER"),
+    'neoPixel' : (board.NEOPIXEL,"NEOPIXEL"),
+    'SCL' : (board.GP5,"GP5 GROVE#3"),
+    'SDA' : (board.GP4,"GP4 GROVE#3"),
+    'SCK' : [(board.GP12,"GP12 SERVO HEADER")],
+    'MOSI' : [(board.GP13,"GP13 SERVO HEADER")],
+    'MISO' : [(board.GP14,"GP14 SERVO HEADER")],
+    'CS' : [(board.GP15,"GP15 SERVO HEADER")]
 }

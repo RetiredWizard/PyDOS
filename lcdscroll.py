@@ -22,19 +22,32 @@ def lcdScroll(argv):
 
     # The PCF8574 has a jumper selectable address: 0x20 - 0x27
     DEFAULT_I2C_ADDR = 0x27
+    foundLCD = False
 
-    i2c = Pydos_hw.I2C()
+    i2c = None
+    for i2cNo in range(3):
+        try:
+            i2c = Pydos_hw.I2C(i2cNo)
+        except:
+            pass
+        if i2c:
+            if sys.implementation.name.upper() == "CIRCUITPYTHON":
+                # circuitpython seems to require locking the i2c bus
+                while not i2c.try_lock():
+                    pass
+
+            if DEFAULT_I2C_ADDR in i2c.scan():
+                foundLCD = True
+                break
+
+            if sys.implementation.name.upper() == 'CIRCUITPYTHON':
+                i2c.unlock()
+
+    if not foundLCD:
+        print("LCD not found at address: ",hex(DEFAULT_I2C_ADDR))
+        return
 
     if sys.implementation.name.upper() == "CIRCUITPYTHON":
-
-        # circuitpython seems to require locking the i2c bus
-        while i2c.try_lock():
-            pass
-
-        if DEFAULT_I2C_ADDR not in i2c.scan():
-            print("LCD not found at address: ",hex(DEFAULT_I2C_ADDR))
-            i2c.unlock()
-            return
 
         # 2 lines, 16 characters per line
         lcd = I2cLcd(i2c, DEFAULT_I2C_ADDR, 2, 16)

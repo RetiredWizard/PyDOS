@@ -10,24 +10,41 @@
 from pydos_hw import Pydos_hw
 from sys import implementation
 
-i2c = Pydos_hw.I2C()
+if __name__ != "PyDOS":
+    passedIn = ""
 
-print('Scan i2c bus...')
-
-if implementation.name.upper() == 'CIRCUITPYTHON':
-    while not i2c.try_lock():
-        pass
-
-devices = i2c.scan()
-
-if len(devices) == 0:
-    print("No i2c device !")
+if passedIn == "":
+    i2cNo = 0
 else:
-    print('i2c devices found:',len(devices))
+    i2cNo = int(passedIn)
 
-for device in devices:
-    print("Decimal address: ",device," | Hex address: ",hex(device))
+try:
+    i2c = Pydos_hw.I2C(i2cNo)
+except:
+    print("Trying next i2c bus")
+    i2cNo += 1
+    i2c = Pydos_hw.I2C(i2cNo)
 
-if implementation.name.upper() == 'CIRCUITPYTHON':
-    i2c.unlock()
-    #i2c.deinit()
+if i2c:
+
+    print('Scan i2c bus '+str(i2cNo)+'...\n')
+
+    if implementation.name.upper() == 'CIRCUITPYTHON':
+        while not i2c.try_lock():
+            pass
+
+    devices = i2c.scan()
+
+    if len(devices) == 0:
+        print("No i2c device !")
+    else:
+        print('i2c devices found:',len(devices))
+
+    for device in devices:
+        print("Decimal address: ",device," | Hex address: ",hex(device))
+
+    if implementation.name.upper() == 'CIRCUITPYTHON':
+        i2c.unlock()
+        #i2c.deinit()
+else:
+    print('i2c bus '+str(i2cNo)+' not found')
