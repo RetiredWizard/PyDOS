@@ -223,6 +223,8 @@ For PyDOS_wifi API documentation see https://github.com/RetiredWizard/PyDOS_wifi
 
 Thanks to the great work of **@bill88t**, starting with CircuitPython version 8.0.4, you no longer need to build custom CirucitPython firmware (ESP32 based boards are still being worked on but should have this feature in 8.0.6/8.1.0). PyDOS will run without issue on a standard downloaded CircuitPython image from https://circuitpython.org/downloads. 
 
+Starting with version 8.0.4 when CircuitPython boots on a microcontroller the pystack size can be set by the **CIRCUITPY_PYSTACK_SIZE** value in the settings.toml file. PyDOS comes with this value set to 3600. PyDOS this will derive a maximum wildcard length based on this value that should be adequate in most cases. If you find yourself using particuarly long file names you can increase this parameter value as needed. As you increase the pystack size the memory available for PyDOS to run will decrease slightly.
+
 *By the way, if you like PyDOS you'll probably also enjoy ljinux from https://github.com/bill88t/ljinux.* 
 
 **Before copying PyDOS files**
