@@ -142,12 +142,12 @@ copy/y /cpython/main.py /
 :skip_codecopy
 if %_ans% == M goto Cytron
 set/p _ans3 = Are you using a Keyboard FeatherWing (Y/N)?:
-if %_ans3% == N goto Cytron
-if %_ans3% == n goto Cytron
+if %_ans3% == N goto bbkeyboard
+if %_ans3% == n goto bbkeyboard
 if %_ans3% == Y goto kbdFeatherW
 if %_ans3% == y goto kbdFeatherW
 echo Invalid Selection (Y or N)
-goto other
+goto skip_codecopy
 
 :kbdFeatherW
 copy /cpython/kbdFeatherWing/* /
@@ -159,6 +159,22 @@ copy /lib/pydos_ui_kfw.py /lib/pydos_ui.py
 if %_ans2% == O del /lib/kfw_s2_board.py
 if %_ans2% == E del /lib/kfw_pico_board.py
 goto wifienv
+
+:bbkeyboard
+set/p _ans3 = Do you have a BB Q10/Q20 I2C keyboard connected (Y/N)?:
+if %_ans3% == N goto Cytron
+if %_ans3% == n goto Cytron
+if %_ans3% == Y goto keyboardui
+if %_ans3% == y goto keyboardui
+echo Invalid Selection (Y or N)
+goto bbkeyboard
+
+:keyboardui
+rename /lib/pydos_ui.py /lib/pydos_ui_uart.py
+echo copy /cpython/lib/optional/pydos_ui_bbkeybd.py /lib/pydos_ui.py
+copy /cpython/lib/optional/pydos_ui_bbkeybd.py /lib/pydos_ui.py
+copy /cpython/kbdFeatherWing/*.bat /
+copy /cpython/kbdFeatherWing/lib/bbq10keyboard.* /lib/
 
 :Cytron
 if not %_ans2% == O goto wifienv

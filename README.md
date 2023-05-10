@@ -93,15 +93,15 @@ An **autoexec.bat** batch file will automatically execute when PyDOS starts.
 
 **pydospins.py** - Displays the GPIO pins for sound output and I2C for the particular board PyDOS is running on.
 
-**PyBasic.py** - a Basic interpreter from https://github.com/richpl/PyBasic. Tweaked and modified to run on Micropython and Circuitpython.
-	basicparser.py, basictoken.py, flowsignal.py, lexer.py, program.py, basicdata.py
+**PyBasic.py [basic program file]** - a Basic interpreter from https://github.com/richpl/PyBasic. Tweaked and modified to run on Micropython and Circuitpython.
+	interpreter.py, basicparser.py, basictoken.py, flowsignal.py, lexer.py, program.py, basicdata.py
 	
-**runasthread.py** (Micropython only) - This program will attempt to launch a python program on the second RP2040 core. Threading is
+**runasthread.py [python program file]** (Micropython only) - This program will attempt to launch a python program on the second RP2040 core. Threading is
 experimental on Micropython so it's not difficult to crash the microcontroller using this program. I have not found a way to kill
 a thread started on the second core so be sure any threads you launch will shutdown on their own or monitor a global variable or
 thread.lock to respond to a shutdown request (see the badblink.py for an example).
 
-**runvm.py** - This program is used to launch Python programs that require more memory
+**runvm.py [python program file]** - This program is used to launch Python programs that require more memory
 than is available while running PyDOS. **runvm** will write a **code.py**/**main.py**
 file which launches the specfied python program after the next soft reboot. The program then
 uses **supervisor.reload()** for CircuitPython or **sys.exit** for MicroPython to
@@ -111,7 +111,7 @@ environment variables to the newly booted environment as well as code that resto
 original **code.py**/**main.py** files and causes a second soft reboot returning control to
 PyDOS.
 
-**edlin.py** - line editor inspired by DOS edlin. Intial program structure of line editor by Joesph Long
+**edlin.py [filename]** - line editor inspired by DOS edlin. Intial program structure of line editor by Joesph Long
     https://github.com/j-osephlong/Python-Text-Editor
     
 **edit.py** - shell to load full screen editor from https://github.com/robert-hh/Micropython-Editor
@@ -121,42 +121,42 @@ PyDOS.
 - /Y Suppresses prompting to confirm you want to overwrite an existing destination file
 - /V Performs a verification read of the copied file to ensure it matches the source
 
-**fileview.py** - scrollable text file viewer
+**fileview.py [filename]** - scrollable text file viewer
 
 **sdmount.py [[mount path][,pydos spi bus#]]** - mounts an sd card to the file system  
 **sdumount.py [mount path]** - dismounts an sd card from the file system
 
-**setdate.py** - initalizes the real time clock to an entered date  
-**settime.py** - initalizes the real time clock to an entered time  
-**ntpdate.py** (ESP32xxx, Pico W and Nano Connect) - sets the time and date using the Internet NTP protocol
+**setdate.py [mm-dd-yy]** - initalizes the real time clock to an entered date  
+**settime.py [hh:mm:ss]** - initalizes the real time clock to an entered time  
+**ntpdate.py [timzone offset]** (ESP32xxx, Pico W and Nano Connect) - sets the time and date using the Internet NTP protocol
 
-**diff.py** - performs a file comparison
+**diff.py [filename1,filename2]** - performs a file comparison
 
 **sound.py** - outputs a sound to a speaker cicruit connected to GPIO pin defined in lib/pydos_bcfg.py  
 **tsound.py** - test program that plays a short sound sequence  
 **piano.py** - emulates a small piano keyboard
 
-**i2cscan.py** - scans the I2C bus and displays any found device addresses
+**i2cscan.py [bus number]** - scans the I2C bus and displays any found device addresses
 
 CircuitPython LCD libraries from https://github.com/dhylands/python_lcd  
-**lcdprint.py** - displays text on an I2C LCD display  
-**lcdscroll.py** - scrolls text on an I2C LCD display  
+**lcdprint.py [text to display]** - displays text on an I2C LCD display  
+**lcdscroll.py [text to scroll]** - scrolls text on an I2C LCD display  
 **temperature.py** - displays temperature value from onboard temperature sensor to screen and I2C LCD display
 
 **basicpython.py** - Shell modeled after basic interpreter shell from https://github.com/tannewt/basicpython
 
-**blink.py** - program to blink onboard LED
+**blink.py [led pin number]** - program to blink onboard LED
 
-**rgbset.py** - program to set the rgb color of an onboard neopixel or dotstar  
-**rgbblink.py** - program to blink an onboard neopixel or dotstar  
-**rgbrainbow.py** - program to color cycle an onboard neopixel or dotstar  
+**rgbset.py [rgb led pin number]** - program to set the rgb color of an onboard neopixel or dotstar  
+**rgbblink.py [rgb led pin number]** - program to blink an onboard neopixel or dotstar  
+**rgbrainbow.py [rgb led pin number]** - program to color cycle an onboard neopixel or dotstar  
 
 **reboot.py** - performs a soft reboot (Micropython requires a Ctrl-D to complete)
 
 **keys.bat** - (Keyboard Featherwing only) Displays keyboard mappings for hidden keys and functions  
-**ui.bat** - (Keyboard Featherwing only) Switches between using the Keyboard Featherwing and USB Serial port for PyDOS I/O
+**ui.bat [u/k]** - (Keyboard Featherwing only) Switches between using the Keyboard Featherwing and USB Serial port for PyDOS I/O
 
-**fs.py** - (Circuitpython only) By selecting the "RO" option the flash mode is set such that when the microcontroller
+**fs.py [ro/rw]** - (Circuitpython only) By selecting the "RO" option the flash mode is set such that when the microcontroller
 is power cycled or hard reset, the host computer will have read/write access to the flash and the microcontoller will be
 restricted to read only access. To give PyDOS access to the flash after switching to this mode the boot.py file must be
 replaced or modified from the host computer so that it contains the following instructions:
