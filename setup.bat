@@ -173,6 +173,7 @@ goto bbkeyboard
 rename /lib/pydos_ui.py /lib/pydos_ui_uart.py
 echo copy /cpython/lib/optional/pydos_ui_bbkeybd.py /lib/pydos_ui.py
 copy /cpython/lib/optional/pydos_ui_bbkeybd.py /lib/pydos_ui.py
+copy /lib/pydos_ui.py /lib/pydos_ui_kfw.py
 copy /cpython/kbdFeatherWing/*.bat /
 copy /cpython/kbdFeatherWing/lib/bbq10keyboard.* /lib/
 

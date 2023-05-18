@@ -93,15 +93,15 @@ An **autoexec.bat** batch file will automatically execute when PyDOS starts.
 
 **pydospins.py** - Displays the GPIO pins for sound output and I2C for the particular board PyDOS is running on.
 
-**PyBasic.py [basic program file]** - a Basic interpreter from https://github.com/richpl/PyBasic. Tweaked and modified to run on Micropython and Circuitpython.
+**PyBasic.py [[path]basic program file .py|.bas]** - a Basic interpreter from https://github.com/richpl/PyBasic. Tweaked and modified to run on Micropython and Circuitpython.
 	interpreter.py, basicparser.py, basictoken.py, flowsignal.py, lexer.py, program.py, basicdata.py
 	
-**runasthread.py [python program file]** (Micropython only) - This program will attempt to launch a python program on the second RP2040 core. Threading is
+**runasthread.py [[path]python program file[.py]]** (Micropython only) - This program will attempt to launch a python program on the second RP2040 core. Threading is
 experimental on Micropython so it's not difficult to crash the microcontroller using this program. I have not found a way to kill
 a thread started on the second core so be sure any threads you launch will shutdown on their own or monitor a global variable or
 thread.lock to respond to a shutdown request (see the badblink.py for an example).
 
-**runvm.py [python program file]** - This program is used to launch Python programs that require more memory
+**runvm.py [[path]python program file[.py]]** - This program is used to launch Python programs that require more memory
 than is available while running PyDOS. **runvm** will write a **code.py**/**main.py**
 file which launches the specfied python program after the next soft reboot. The program then
 uses **supervisor.reload()** for CircuitPython or **sys.exit** for MicroPython to
@@ -111,17 +111,17 @@ environment variables to the newly booted environment as well as code that resto
 original **code.py**/**main.py** files and causes a second soft reboot returning control to
 PyDOS.
 
-**edlin.py [filename]** - line editor inspired by DOS edlin. Intial program structure of line editor by Joesph Long
+**edlin.py [[path]filename]** - line editor inspired by DOS edlin. Intial program structure of line editor by Joesph Long
     https://github.com/j-osephlong/Python-Text-Editor
     
-**edit.py** - shell to load full screen editor from https://github.com/robert-hh/Micropython-Editor
+**edit.py [[path]filename]** - shell to load full screen editor from https://github.com/robert-hh/Micropython-Editor
 
 **xcopy.py[/S][/Y][/V] [path]filename [path][filename]** - a more robust version of the copy command  
 - /S Copies specified files from directories and subdirectories, except for empty ones  
 - /Y Suppresses prompting to confirm you want to overwrite an existing destination file
 - /V Performs a verification read of the copied file to ensure it matches the source
 
-**fileview.py [filename]** - scrollable text file viewer
+**fileview.py [[path]filename]** - scrollable text file viewer
 
 **sdmount.py [[mount path][,pydos spi bus#]]** - mounts an sd card to the file system  
 **sdumount.py [mount path]** - dismounts an sd card from the file system
@@ -132,7 +132,7 @@ PyDOS.
 
 **diff.py [filename1,filename2]** - performs a file comparison
 
-**sound.py** - outputs a sound to a speaker cicruit connected to GPIO pin defined in lib/pydos_bcfg.py  
+**sound.py [Frequency,Duration(miliseconds),Volume]** - outputs a sound to a speaker cicruit connected to GPIO pin defined in lib/pydos_bcfg.py  
 **tsound.py** - test program that plays a short sound sequence  
 **piano.py** - emulates a small piano keyboard
 
@@ -153,8 +153,8 @@ CircuitPython LCD libraries from https://github.com/dhylands/python_lcd
 
 **reboot.py** - performs a soft reboot (Micropython requires a Ctrl-D to complete)
 
-**keys.bat** - (Keyboard Featherwing only) Displays keyboard mappings for hidden keys and functions  
-**ui.bat [u/k]** - (Keyboard Featherwing only) Switches between using the Keyboard Featherwing and USB Serial port for PyDOS I/O
+**keys.bat** - (Keyboard Featherwing/BBQ Keyboard only) Displays keyboard mappings for hidden keys and functions  
+**ui.bat [u/k]** - (Keyboard Featherwing/BBQ Keyboard only) Switches between using the Keyboard Featherwing and USB Serial port for PyDOS I/O
 
 **fs.py [ro/rw]** - (Circuitpython only) By selecting the "RO" option the flash mode is set such that when the microcontroller
 is power cycled or hard reset, the host computer will have read/write access to the flash and the microcontoller will be
