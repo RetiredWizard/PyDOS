@@ -1,4 +1,4 @@
-PyDOS_wifi_VER = "1.20"
+PyDOS_wifi_VER = "1.21"
 
 import os
 import time
@@ -8,7 +8,7 @@ if implementation.name.upper() == "CIRCUITPYTHON":
     import board
     import adafruit_requests as requests
 
-    if board.board_id == 'arduino_nano_rp2040_connect':
+    if board.board_id in ['arduino_nano_rp2040_connect'] or 'ESP_CS' in dir(board):
         import busio
         from digitalio import DigitalInOut
         from adafruit_esp32spi import adafruit_esp32spi
@@ -55,7 +55,7 @@ class PyDOS_wifi:
         self._poller = None
 
         if implementation.name.upper() == "CIRCUITPYTHON":
-            if board.board_id == 'arduino_nano_rp2040_connect':
+            if board.board_id in ['arduino_nano_rp2040_connect'] or 'ESP_CS' in dir(board):
                 self._https = requests
         elif implementation.name.upper() == 'MICROPYTHON':
             self._socket = socket
@@ -91,7 +91,7 @@ class PyDOS_wifi:
     @property
     def is_connected(self):
         if implementation.name.upper() == "CIRCUITPYTHON":
-            if board.board_id == 'arduino_nano_rp2040_connect':
+            if board.board_id in ['arduino_nano_rp2040_connect'] or 'ESP_CS' in dir(board):
                 if self.esp != None:
                     retVal = self.esp.is_connected
                 else:
@@ -109,15 +109,21 @@ class PyDOS_wifi:
 
     def connect(self,ssid,passwd,espspi_debug=False):
         if implementation.name.upper() == "CIRCUITPYTHON":
-            if board.board_id == 'arduino_nano_rp2040_connect':
+            if board.board_id in ['arduino_nano_rp2040_connect'] or 'ESP_CS' in dir(board):
                 if not self.is_connected:
                     #  ESP32 pins
-                    self._esp32_cs = DigitalInOut(board.CS1)
+                    if 'ESP_CS' in dir(board):
+                        self._esp32_cs = DigitalInOut(board.ESP_CS)
+                    else:
+                        self._esp32_cs = DigitalInOut(board.CS1)
                     self._esp32_ready = DigitalInOut(board.ESP_BUSY)
                     self._esp32_reset = DigitalInOut(board.ESP_RESET)
 
-                    #  uses the secondary SPI connected through the ESP32
-                    self._spi = busio.SPI(board.SCK1, board.MOSI1, board.MISO1)
+                    if 'SCK1' in dir(board):
+                        #  uses the secondary SPI connected through the ESP32
+                        self._spi = busio.SPI(board.SCK1, board.MOSI1, board.MISO1)
+                    else:
+                        self._spi = busio.SPI(board.SCK, board.MOSI, board.MISO)
 
                     self.esp = adafruit_esp32spi.ESP_SPIcontrol(self._spi, self._esp32_cs, \
                         self._esp32_ready, self._esp32_reset, debug=espspi_debug)
@@ -275,7 +281,7 @@ class PyDOS_wifi:
 
     def close(self):
         if implementation.name.upper() == 'CIRCUITPYTHON':
-            if board.board_id == 'arduino_nano_rp2040_connect':
+            if board.board_id in ['arduino_nano_rp2040_connect'] or 'ESP_CS' in dir(board):
                 self.esp.disconnect()
                 self.esp = None
                 self._esp32_cs.deinit()

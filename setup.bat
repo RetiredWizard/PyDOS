@@ -129,6 +129,7 @@ rem Feather Huzzah may need the sound pin mod but doesn't have the memory to spa
 if "%_boardID%" == "adafruit_feather_huzzah32" del /autoexec.bat
 if "%_boardID%" == "adafruit_feather_huzzah32" del /boot.py
 if "%_boardID%" == "adafruit_feather_huzzah32" goto copy_code
+if "%_boardID%" == "matrixportal_m4" goto copy_code
 if %_ans2% == E goto skip_codecopy
 if exist /lib/pydos_wifi.py del /lib/pydos_wifi.py
 if exist /ntpdate.py del /ntpdate.py
@@ -173,7 +174,8 @@ goto bbkeyboard
 rename /lib/pydos_ui.py /lib/pydos_ui_uart.py
 echo copy /cpython/lib/optional/pydos_ui_bbkeybd.py /lib/pydos_ui.py
 copy /cpython/lib/optional/pydos_ui_bbkeybd.py /lib/pydos_ui.py
-copy /lib/pydos_ui.py /lib/pydos_ui_kfw.py
+rem Make kfw copy so that ui.bat can be used to switch modes
+copy /cpython/lib/optional/pydos_ui_bbkeybd.py /lib/pydos_ui_kfw.py
 copy /cpython/kbdFeatherWing/*.bat /
 copy /cpython/kbdFeatherWing/lib/bbq10keyboard.* /lib/
 
@@ -200,15 +202,17 @@ echo copy /cpython/boardconfigs/pydos_bcfg_cytron_maker_pi_pico.py /lib/pydos_bc
 copy/y /cpython/boardconfigs/pydos_bcfg_cytron_maker_pi_pico.py /lib/pydos_bcfg.py
 
 :wifienv
+if "%_boardID%" == "matrixportal_m4" goto entercreds
 if %_ans2% == O goto done
 
+:entercreds
 set/p _ans3 = Enter Wifi credentials now (/settings.toml file can be edited later) (Y/N)?:
 if %_ans3% == N goto done
 if %_ans3% == n goto done
 if %_ans3% == Y goto dotenv
 if %_ans3% == y goto dotenv
 echo Invalid Selection (Y or N)
-goto wifienv
+goto entercreds
 
 :dotenv
 setenv.py

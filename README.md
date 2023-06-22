@@ -17,7 +17,8 @@ The setup batch file will then copy the programs and libraries appropriate for t
 ## Implemented DOS Commands:  
 (syntax and descriptions taken from https://home.csulb.edu/~murdock/dosindex.html)
 
-PyDOS requires all switches to immediatly following the command with no spaces between the command or switches.
+PyDOS requires all switches to immediatly follow the command with no spaces between the command or switches. This 
+is necessary becuase PyDOS currently adopts the *nix forward slash directory seperator rather than the DOS back slash.
 
 If a command argument contains spaces the argument must be enclosed in quotes.
 
@@ -71,7 +72,7 @@ Example: `prompt $e[44m$p$g` sets the backgound blue and displays the current di
 **TYPE (MORE)[/P] [path]filename** - Displays the contents of a file.  
 - /P Pauses after each screenful of information (Q or C to abort listing)
 
-**CD [[d:]path]** - Displays working (current) directory and/or changes to a different directory.  
+**CD [[d:]path]** - Displays working (current) directory or changes to a different directory.  
 **CD ..** - Changes to parent directory of current directory.
 
 **MKDIR (MD) path** - Creates a new subdirectory.
@@ -128,7 +129,7 @@ PyDOS.
 
 **setdate.py [mm-dd-yy]** - initalizes the real time clock to an entered date  
 **settime.py [hh:mm:ss]** - initalizes the real time clock to an entered time  
-**ntpdate.py [timzone offset]** (ESP32xxx, Pico W and Nano Connect) - sets the time and date using the Internet NTP protocol
+**ntpdate.py [timzone offset]** (WiFi enabled boards) - sets the time and date using the Internet NTP protocol
 
 **diff.py [filename1,filename2]** - performs a file comparison
 
@@ -166,6 +167,10 @@ replaced or modified from the host computer so that it contains the following in
     
 and then power cycled or hard reset.
 
+**WiFi Enabled Boards Only**
+**wifi_finance** - Displays the current Nasdaq prices by connecting to finance.yahoo.com and scraping the website.
+
+**wifi_weather** - Displays the 7 day forcast from api.weather.gov
 
 ## Hardware (Pin) customization file (pydos_bcfg.py)
 
@@ -334,3 +339,4 @@ At the REPL prompt type "**import PyDOS*** to start PyDOS and then type **setup*
 - Rename should allow wildcards in filenames, i.e. "rename *.bas *.txt" or "rename code.py *.sav"  
 - Quiet, /Q switches to DEL, RMDIR, COPY, XCOPY commands
 - PgUp/PgDwn support in fileview.py
+- switch directory seperator to back slash
