@@ -86,7 +86,7 @@ def PyDOS():
 
     (wldCLen,recursiveFail) = calcWildCardLen(wldCLen,recursiveFail)
     wldCAdj = int(1+.2*wldCLen)
-    if implementation.name.upper() == "CIRCUITPYTHON":
+    if imp == "C":
         wldCAdj += 5
     wldCLen = max(1,wldCLen-wldCAdj)
 

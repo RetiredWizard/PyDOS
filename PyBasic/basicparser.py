@@ -18,6 +18,7 @@
 from basictoken import BASICToken as Token
 from flowsignal import FlowSignal
 from sys import implementation
+from os import uname
 from time import sleep
 import math
 import random
@@ -45,7 +46,10 @@ elif implementation.name.upper() == 'CIRCUITPYTHON':
         except:
             sndPin = None
 else:
-    import winsound
+    try:
+        import winsound
+    except:
+        pass
     from time import monotonic
 
 import gc
@@ -679,7 +683,8 @@ class BASICParser:
             self.__file_handles[filenum].seek(0)
             filelen = 0
             for lines in self.__file_handles[filenum]:
-                filelen += (len(lines)+(0 if implementation.name.upper() in ['MICROPYTHON','CIRCUITPYTHON'] else 1))
+                filelen += (len(lines)+(0 if uname()[0].upper() == 'LINUX' or \
+                    implementation.name.upper() in ['MICROPYTHON','CIRCUITPYTHON'] else 1))
 
             self.__file_handles[filenum].seek(filelen)
 
@@ -918,7 +923,10 @@ class BASICParser:
                 except:
                     pass
         else:
-            winsound.Beep(freq,int(self.__operand_stack.pop()*1000/18.2))
+            try:
+                winsound.Beep(freq,int(self.__operand_stack.pop()*1000/18.2))
+            except:
+                pass
 
 
     def __expr(self):
