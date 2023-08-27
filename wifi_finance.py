@@ -37,9 +37,6 @@ def wifi_finance():
     headers = {"user-agent": "RetiredWizard@"+implementation.name.lower()+uname()[2]}
 
     print("Fetching text from %s" % TEXT_URL)
-    Pydos_wifi.get(TEXT_URL)
-    for _ in range(1000000):
-        pass
     response = Pydos_wifi.get(TEXT_URL)
     response_window = []
     for _ in range(4):
@@ -82,7 +79,7 @@ def wifi_finance():
     pct = found_window[nasdaq:].find('%)')
     pctst = found_window[nasdaq+pct-17:].find('->')+2
     pctend = found_window[nasdaq+pct:].find('<')
-    print("Debug: %s\n" % found_window[nasdaq:nasdaq+pct+pctend])
+    #print("Debug: %s\n" % found_window[nasdaq:nasdaq+pct+pctend])
 
     if nasdaq != -1:
         print("Nasdaq: %s\n" % found_window[nasdaq+pct-17+pctst:nasdaq+pct+pctend-1].replace("<!-- -->",""))
