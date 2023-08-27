@@ -22,18 +22,33 @@ def wifi_finance():
     print("My IP address is", Pydos_wifi.ipaddress)
 
     #TEXT_URL = "https://money.cnn.com/data/markets"
-    TEXT_URL = "https://finance.yahoo.com/quote/%5EIXIC"
+
+    #TEXT_URL = "https://finance.yahoo.com/quote/%5EIXIC"
+    #search_string = 'data-symbol="^IXIC" data-field="regularMarketChangePercent"'
+
+    #TEXT_URL = "https://finance.yahoo.com/lookup"
+    #search_string = 'data-symbol="^IXIC" data-field="regularMarketChangePercent"'
+
+    TEXT_URL = "https://www.moneycontrol.com/us-markets"
+    search_string = '<!-- -->Nasdaq<!-- -->'
+
     HOST = "finance.yahoo.com"
     PORT = 443
     headers = {"user-agent": "RetiredWizard@"+implementation.name.lower()+uname()[2]}
 
     print("Fetching text from %s" % TEXT_URL)
+    Pydos_wifi.get(TEXT_URL)
+    for _ in range(1000000):
+        pass
     response = Pydos_wifi.get(TEXT_URL)
     response_window = []
     for _ in range(4):
         response_window.append(Pydos_wifi.next(256))
 
-    sample_resp = (b''.join(response_window))[0:800].decode().replace('\n','').replace('\r','')
+    try:
+        sample_resp = (b''.join(response_window))[0:800].decode().replace('\n','').replace('\r','')
+    except:
+        sample_resp = (b''.join(response_window))[0:800].replace(b'\n',b'').replace(b'\r',b'')
 
     print("\nText Response:")
     print("-" * _scrWidth)
@@ -41,7 +56,7 @@ def wifi_finance():
         print(pline)
     print("-" * _scrWidth)
 
-    nasdaq = str(b''.join(response_window)).find('data-symbol="^IXIC" data-field="regularMarketChangePercent"')
+    nasdaq = str(b''.join(response_window)).find(search_string)
     iKount = 0
     while nasdaq == -1 and iKount<800:
         iKount +=1
@@ -52,24 +67,25 @@ def wifi_finance():
         try:
             response_window[3] = Pydos_wifi.next(256)
         except:
-            for i in [3,2,1]:
-                response_window[i+1] = response_window[i]
+            iKount=800
 
-        nasdaq = str(b''.join(response_window)).find('data-symbol="^IXIC" data-field="regularMarketChangePercent"')
+        nasdaq = str(b''.join(response_window)).find(search_string)
     print("*")
 
-    for _ in range(2):
-        response_window.append(Pydos_wifi.next(256))
+    if iKount < 800:
+        for _ in range(2):
+            response_window.append(Pydos_wifi.next(256))
 
     found_window = str(b''.join(response_window))
-    nasdaq = found_window.find('data-symbol="^IXIC" data-field="regularMarketChangePercent"')
+    nasdaq = found_window.find(search_string)
 
     pct = found_window[nasdaq:].find('%)')
-    pctst = found_window[nasdaq+pct-15:].find('>')
+    pctst = found_window[nasdaq+pct-17:].find('->')+2
     pctend = found_window[nasdaq+pct:].find('<')
+    print("Debug: %s\n" % found_window[nasdaq:nasdaq+pct+pctend])
 
     if nasdaq != -1:
-        print("Nasdaq: %s\n" % found_window[nasdaq+pct-14+pctst:nasdaq+pct+pctend])
+        print("Nasdaq: %s\n" % found_window[nasdaq+pct-17+pctst:nasdaq+pct+pctend-1].replace("<!-- -->",""))
     else:
         print("Nasdaq symbol not found\n")
 

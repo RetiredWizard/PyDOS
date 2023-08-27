@@ -5,6 +5,8 @@
 
 **Check out the demo video at https://www.youtube.com/watch?v=Az_oiq8GE4Y**
 
+See the Installation section below to install all the external commands and customize the install for the particular microcontroller you are using. However **if you want to just launch the shell or have limited flash space, the PyDOS.py program will run standadlone** so simply copy it to your microcontroller to begin.
+
 To start the shell type **import PyDOS** at the REPL prompt.
 
 At the PyDOS prompt a python program (.py) or batch (.bat) file can be run by simply entering the filename with or without

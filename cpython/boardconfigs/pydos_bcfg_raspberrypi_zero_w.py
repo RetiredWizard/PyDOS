@@ -1,8 +1,10 @@
 # PyDOS Board Configuration for 'raspberrypi_zero2w'
 
 import board
+import microcontroller
 
 Pydos_pins = {
+    'led' : (microcontroller.pin.GPIO47,"GPIO47"),
     # 'sndPin' : (board.D6,"D6 GPIO6"), # pwmio not currently supported
     'SCL' : (board.SCL,"SCL D3 GPIO3"),
     'SDA' : (board.SDA,"SDA D2 GPIO2"),
