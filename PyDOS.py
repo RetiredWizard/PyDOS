@@ -1,9 +1,10 @@
 import os
+from os import sep
 from time import localtime
 from sys import stdin,implementation,path
-if not '/lib' in path:
-    path.insert(1,'/lib')
-path.append('/PyBasic')
+if not sep+'lib' in path:
+    path.insert(1,sep+'lib')
+path.append(sep+'PyBasic')
 try:
     from pydos_ui import Pydos_ui
 except ImportError:
@@ -43,7 +44,7 @@ def _match(first, second):
         and len(second) !=0 and first[0] == second[0]):
         return _match(first[1:],second[1:])
 
-    if len(first) !=0 and first[0] == '*':
+    if first[:1] == '*':
         return _match(first[1:],second) or _match(first,second[1:])
 
     return False
@@ -63,17 +64,14 @@ def PyDOS():
     global envVars
     if "envVars" not in globals().keys():
         envVars = {}
-    _VER = "1.22"
-    if imp == "B" and os.name.upper() != "POSIX":
-        slh = '\\'
-    else:
-        slh = '/'
+    _VER = "1.23"
     prmpVals = ['>','(',')','&','|','\x1b','\b','<','=',' ',_VER,'\n','$','']
 
     print("Starting Py-DOS...")
-    envVars["PATH"] = slh+";/PyBasic"
+    envVars["PATH"] = sep+";/PyBasic"
     envVars["PROMPT"] = "$C$R$F$P$G"
     envVars["LIB"] = ";".join(path[1:])
+    envVars["DIRSEP"] = sep
     if Pydos_ui:
         (envVars["_scrHeight"],envVars["_scrWidth"]) = Pydos_ui.get_screensize()
     else:
@@ -150,16 +148,17 @@ def PyDOS():
         if tstPath != []:
             savDir = os.getcwd()
             for path in tstPath:
-                path = path.replace("C:","")
+                if path[1:2] == ":":
+                    path = path[2:]
                 if path == "":
-                    os.chdir(slh)
-                elif os.getcwd() == slh and path == "..":
+                    os.chdir(sep)
+                elif os.getcwd() == sep and path == "..":
                     validPath = False
                     break
                 elif path == ".":
                     continue
-                elif path == ".." and len(os.getcwd().split(slh)) == 2:
-                    os.chdir(slh)
+                elif path == ".." and len(os.getcwd().split(sep)) == 2:
+                    os.chdir(sep)
                 elif path == "..":
                     os.chdir("..")
                 elif path in os.listdir() and not aFile(path):
@@ -174,24 +173,24 @@ def PyDOS():
 
         return((validPath,simpPath))
 
-    def pFmt(dPath,trailSlh=True):
+    def pFmt(dPath,trailsep=True):
         if dPath == "":
-            return slh
-        elif dPath == slh:
+            return sep
+        elif dPath == sep:
             return dPath
-        elif trailSlh:
-            return dPath+(slh if dPath[-1]!=slh else "")
+        elif trailsep:
+            return dPath+(sep if dPath[-1]!=sep else "")
         else:
-            return dPath[:(-1 if dPath[-1] == slh else None)]
+            return dPath[:(-1 if dPath[-1] == sep else None)]
 
     def absolutePath(argPath,currDir):
 
-        if argPath[0] == slh:
+        if argPath[:1] == sep:
             fullPath = argPath
-        elif currDir == slh:
-            fullPath = slh+argPath
+        elif currDir == sep:
+            fullPath = sep+argPath
         else:
-            fullPath = currDir+slh+argPath
+            fullPath = currDir+sep+argPath
 
         fullPath = pFmt(fullPath,False)
 
@@ -214,12 +213,12 @@ def PyDOS():
             dirPat = None
 
         dPath = pFmt(pFmt(tmpDir)+lastDir,False)
-        if dPath == slh+".":
-            dPath = slh
+        if dPath == sep+".":
+            dPath = sep
             lastDir = ""
 
         if dirPat is None:
-            (quit,nLines) = scrnPause(swPause,nLines,["","Directory of "+dPath])
+            (quit,nLines) = scrnPause(swPause,nLines,["","Directory of "+dPath.replace('/',('\\' if envVars.get('DIRSEP','/') == '\\' else '/'))])
             dirHeadPrntd = True
             nDirs += 2
             if swWide:
@@ -243,7 +242,7 @@ def PyDOS():
                 ForD = aFile(pFmt(dPath)+_dir)
 
                 if not dirHeadPrntd:
-                    (quit,nLines) = scrnPause(swPause,nLines,["","Directory of "+dPath])
+                    (quit,nLines) = scrnPause(swPause,nLines,["","Directory of "+dPath.replace('/',('\\' if envVars.get('DIRSEP','/') == '\\' else '/'))])
                     if quit:
                         break
                     dirHeadPrntd = True
@@ -326,7 +325,7 @@ def PyDOS():
         savDir = os.getcwd()
         fullPath = absolutePath(dirPath,savDir)
 
-        pathDirs = fullPath.split(slh)
+        pathDirs = fullPath.split(sep)
         lastDir = pathDirs.pop(-1)
 
         (validPath, tmpDir) = chkPath(pathDirs)
@@ -335,18 +334,18 @@ def PyDOS():
 
             os.chdir(tmpDir)
 
-            if tmpDir == slh:
+            if tmpDir == sep:
                 pathDirs = [""]
             else:
-                pathDirs = tmpDir.split(slh)
+                pathDirs = tmpDir.split(sep)
 
             # Check for relative directory from possible mount point root
             if len(pathDirs) == 2:
                 if lastDir == ".":
-                    os.chdir(slh)
+                    os.chdir(sep)
                     lastDir = tmpDir[1:]
                 elif lastDir == "..":
-                    os.chdir(slh)
+                    os.chdir(sep)
                     lastDir = ""
 
             tmpDir = os.getcwd()
@@ -360,7 +359,7 @@ def PyDOS():
                     else:
                         isFile = False
                 else:
-                    if lastDir in ".." or (tmpDir == slh and lastDir == ""):
+                    if lastDir in ".." or (tmpDir == sep and lastDir == ""):
                         isFile = False
                     else:
                         isFile = True
@@ -390,12 +389,12 @@ def PyDOS():
                     if aFile(Dir+_dir):
                         try:
                             os.remove(Dir+_dir)
-                            print(Dir+_dir,"deleted.")
+                            print((Dir+_dir).replace('/',('\\' if envVars.get('DIRSEP','/') == '\\' else '/')),"deleted.")
                         except Exception as err:
                             print("Unable to delete: "+Dir+_dir+", Exception:",str(err))
                             break
                     elif Recurs:
-                        delFiles(Dir+_dir+slh,'*',Recurs,removDirs)
+                        delFiles(Dir+_dir+sep,'*',Recurs,removDirs)
                         if removDirs:
                             if os.getcwd() == Dir+_dir:
                                 os.chdir("..")
@@ -407,7 +406,7 @@ def PyDOS():
                 else:
                     print("Unable to delete: "+Dir+_dir+". Filename too long for wildcard operation.")
             elif Recurs and not removDirs and not aFile(Dir+_dir):
-                delFiles(Dir+_dir+slh,File,Recurs,removDirs)
+                delFiles(Dir+_dir+sep,File,Recurs,removDirs)
 
     def setCondCmd(args,i,condResult):
         condCmd = ""
@@ -435,9 +434,8 @@ def PyDOS():
         for batLine in BATfile:
             batIndex.append(batIndex[batLineNo]+len(batLine))
             batLineNo += 1
-            if batLine.strip() != "":
-                if batLine.strip()[0] == ":" and len(batLine.strip().split(" ")[0]) > 1:
-                    batLabels[batLine.strip().split(" ")[0][1:]] = [batLineNo,batIndex[batLineNo]]
+            if batLine.strip()[:1] == ":" and len(batLine.strip().split(" ")[0]) > 1:
+                batLabels[batLine.strip().split(" ")[0][1:]] = [batLineNo,batIndex[batLineNo]]
         BATfile.seek(0)
         del batIndex,batLineNo,batLine
 
@@ -446,7 +444,7 @@ def PyDOS():
     batEcho = True
     cmd = ""
     condCmd = ""
-    os.chdir(slh)
+    os.chdir(sep)
     if "autoexec.bat" in ",".join(os.listdir()).lower().split(','):
         activeBAT = True
         BATfile = open(os.listdir()[(",".join(os.listdir()).lower().split(",")).index("autoexec.bat")])
@@ -502,7 +500,7 @@ def PyDOS():
                         elif prmpToken == 'T':
                             prompt += "%2.2i:%2.2i:%2.2i" % (localtime()[3], localtime()[4], localtime()[5])
                         elif prmpToken == 'P':
-                            prompt += os.getcwd()
+                            prompt += os.getcwd().replace('/',('\\' if envVars.get('DIRSEP','/') == '\\' else '/'))
                         else:
                             prompt += prmpVals['GCFABEHLQSV_.'.find(prmpToken)]
                 cmdLine = input(prompt)
@@ -529,7 +527,34 @@ def PyDOS():
                 else:
                     doublepct = False
                     fndVar += _
-        cmdLine = newCmdLine
+
+        if envVars.get('DIRSEP','/') == '\\':
+            switches = []
+            switch = ""
+            nxt = False
+            cmdLine = newCmdLine[:1].replace('\\','/')
+
+            for _ in newCmdLine[1:]:
+                if nxt and _ not in " /":
+                    switch += _.upper()
+                elif _ == '/':
+                    nxt = True
+                    if switch != "":
+                        switches.append(switch)
+                        switch = ""
+                elif nxt and _ == " ":
+                    cmdLine += _
+                    nxt = False
+                    switches.append(switch)
+                    switch = ""
+                elif _ == "\\":
+                    cmdLine += sep
+                else:
+                    cmdLine += _
+            if switch != "":
+                switches.append(switch)
+        else:
+            cmdLine = newCmdLine
 
         args = cmdLine.split(" ")
 
@@ -560,10 +585,14 @@ def PyDOS():
                     i += 1
 
         if cmdLine != "" and cmdLine[0] != '/':
-            switches = (args[0].upper()).split('/')
-            cmd = switches.pop(0)
+            if envVars.get('DIRSEP','/') != '\\':
+                switches = (args[0].upper()).split('/')
+                cmd = switches.pop(0)
+            else:
+                cmd = (args[0].upper()).split('/').pop(0)
         else:
-            switches = ""
+            if envVars.get('DIRSEP','/') != '\\':
+                switches = []
             cmd = args[0]
 
         # Error=1, (S)Recur=2, (P)Pause=4, (Y)Conf=8, (W)Wide=16, (D)debug=32, (Q)uiet=64
@@ -582,7 +611,7 @@ def PyDOS():
             if len(args) > 1:
                 savDir = os.getcwd()
                 args[1] = absolutePath(args[1],savDir)
-                aPath = args[1].split(slh)
+                aPath = args[1].split(sep)
                 if cmd not in ["RMDIR","RD","CHDIR","CD","DELTREE"]:
                     newdir = aPath.pop(-1)
                 (validPath,tmpDir) = chkPath(aPath)
@@ -593,11 +622,11 @@ def PyDOS():
             continue
         elif cmd == "DIR":
             if len(args) == 1:
-                prDir(os.getcwd().replace("C:",""),swBits)
+                prDir(os.getcwd()[(2 if os.getcwd()[1:2]==":" else 2):],swBits)
             elif len(args) == 2:
                 prDir(args[1],swBits)
             else:
-                print("Too many arguments. Command Format: DIR/p/w [path][file]")
+                print("Too many arguments. Command Format: DIR/p/w/s [path][file]")
 
         elif cmd == "DATE":
             i = localtime()[6]*3
@@ -689,7 +718,7 @@ def PyDOS():
                         savDir = os.getcwd()
                         args[i] = absolutePath(args[i],savDir)
 
-                        aPath = args[i].split(slh)
+                        aPath = args[i].split(sep)
                         newdir = aPath.pop(-1)
                         (validPath, tmpDir) = chkPath(aPath)
                         tmpDir = pFmt(tmpDir)
@@ -773,9 +802,8 @@ def PyDOS():
                         envCmd = envCmd.split(" ")
 
                         for _ in envCmd:
-                            if _ != "":
-                                if _[0].isalpha() or _[0] == "_":
-                                    cmdLine = cmdLine.replace(_.strip(),str(envVars.get(_,0)))
+                            if _[:1].isalpha() or _[:1] == "_":
+                                cmdLine = cmdLine.replace(_.strip(),str(envVars.get(_,0)))
 
                         # Evaluate right sight of = after value substituion
                         args = cmdLine.split(" ")
@@ -827,24 +855,24 @@ def PyDOS():
 
             if len(args) == 3:
 # Check that first argument has a valid path and exists
-                if validPath and newdir in os.listdir(tmpDir) and args[1][-1] != slh:
+                if validPath and newdir in os.listdir(tmpDir) and args[1][-1] != sep:
 
                     args[2] = absolutePath(args[2],savDir)
-                    aPath2 = args[2].split(slh)
+                    aPath2 = args[2].split(sep)
                     newdir2 = aPath2.pop(-1)
                     (validPath, tmpDir2) = chkPath(aPath2)
 
                     if newdir2 == '*':
                         newdir2 = newdir
 # Second argument has valid path
-                    if validPath and args[2][-1] != slh and '?' not in newdir2 and \
+                    if validPath and args[2][-1] != sep and '?' not in newdir2 and \
                         '*' not in newdir2 and newdir2 !="." and newdir2 != "..":
                         
 # second argument doesn't specify an existing target
                         if newdir2 not in os.listdir(tmpDir2):
                             currDRen = False
-                            if not aFile(tmpDir+slh+newdir):
-                                if tmpDir+slh+newdir == os.getcwd():
+                            if not aFile(tmpDir+sep+newdir):
+                                if tmpDir+sep+newdir == os.getcwd():
                                     currDRen = True
                             os.rename(pFmt(tmpDir)+newdir,pFmt(tmpDir2)+newdir2)
                             if currDRen:
@@ -875,14 +903,14 @@ def PyDOS():
                             if newdir in os.listdir(pFmt(tmpDir,False)):
                                 if aFile(tmpDir+newdir):
                                     os.remove(tmpDir+newdir)
-                                    print(tmpDir+newdir,"deleted.")
+                                    print((tmpDir+newdir).replace('/',('\\' if envVars.get('DIRSEP','/') == '\\' else '/')),"deleted.")
                                 else:
-                                    ans = input(tmpDir+newdir+slh+"*, Are you sure (y/n)? ").upper()
+                                    ans = input(tmpDir+newdir+sep+"*, Are you sure (y/n)? ").upper()
                                     if ans == "Y":
-                                        delFiles(tmpDir+newdir+slh,'*',bool(swBits&int('000010',2)),False)
+                                        delFiles(tmpDir+newdir+sep,'*',bool(swBits&int('000010',2)),False)
                             else:
                                 if swBits & int('000010',2):
-                                    ans = input(tmpDir+newdir+slh+"*, Are you sure (y/n)? ").upper()
+                                    ans = input(tmpDir+newdir+sep+"*, Are you sure (y/n)? ").upper()
                                     if ans == "Y":
                                         delFiles(tmpDir,newdir,True,False)
                                 else:
@@ -935,7 +963,7 @@ def PyDOS():
         elif cmd in ["CHDIR","CD"]:
 
             if len(args) == 1:
-                print(os.getcwd())
+                print(os.getcwd().replace('/',('\\' if envVars.get('DIRSEP','/') == '\\' else '/')))
             else:
                 if validPath:
                     os.chdir(tmpDir)
@@ -962,17 +990,17 @@ def PyDOS():
                     swBits = int('000010',2)
 
                 if not (swBits & (swAllB-int('000010',2))):
-                    if tmpDir != slh:
+                    if tmpDir != sep:
                         if swBits & int('000010',2):
                             ans = input(tmpDir+" Are you sure (y/n)? ").upper()
                             if ans == "Y":
-                                delFiles(tmpDir+slh,'*',bool(swBits&int('000010',2)),True)
+                                delFiles(tmpDir+sep,'*',bool(swBits&int('000010',2)),True)
 
                         if os.listdir(tmpDir) == []:
                             if os.getcwd() == tmpDir:
                                 os.chdir("..")
-                            if len(tmpDir.split(slh)) > 2:
-                                os.chdir(slh+tmpDir.split(slh)[1])
+                            if len(tmpDir.split(sep)) > 2:
+                                os.chdir(sep+tmpDir.split(sep)[1])
                             try:
                                 os.rmdir(tmpDir)
                             except Exception as err:
@@ -999,10 +1027,10 @@ def PyDOS():
                 nFiles = 0
                 earlyError = False
                 trailingSlash = False
-                if args[1][-1] == slh:
+                if args[1][-1] == sep:
                     print("The source file cannot be a directory")
                     earlyError = True
-                if args[2][-1] == slh:
+                if args[2][-1] == sep:
                     trailingSlash = True
 
 # Check that first argument has a valid path, exists and is not a directory file
@@ -1017,7 +1045,7 @@ def PyDOS():
 
                     enteredArg = args[2]
                     args[2] = absolutePath(args[2],savDir)
-                    aPath2 = args[2].split(slh)
+                    aPath2 = args[2].split(sep)
                     newdir2 = aPath2.pop(-1)
                     (validPath, tmpDir) = chkPath(aPath2)
                     if newdir2 == "*":
@@ -1031,15 +1059,15 @@ def PyDOS():
                         targetPath = tmpDir
 
                         if newdir2 in "..":
-                            (validPath,tmpDir) = chkPath((pFmt(targetPath)+newdir2).split(slh))
-                            aPath2 = tmpDir.split(slh)
+                            (validPath,tmpDir) = chkPath((pFmt(targetPath)+newdir2).split(sep))
+                            aPath2 = tmpDir.split(sep)
                             newdir2 = aPath2.pop(-1)
                             targetPath = chkPath(aPath2)[1]
                             if not validPath:
                                 print("Impossible Target Error:",args[2])
 
 # Second argument specifies an existing target
-                        if newdir2 in os.listdir(targetPath) or (targetPath == slh and newdir2 == ""):
+                        if newdir2 in os.listdir(targetPath) or (targetPath == sep and newdir2 == ""):
 
 # Second argument target is a file
                             if aFile(pFmt(targetPath)+newdir2):
@@ -1161,7 +1189,7 @@ def PyDOS():
             savDir = os.getcwd()
             args[0] = absolutePath(args[0],savDir)
 
-            aPath = args[0].split(slh)
+            aPath = args[0].split(sep)
             if 'xcopy' in aPath:
                 envVars["_switches"] = [i.upper() for i in aPath[aPath.index('xcopy')+1:]]
                 aPath = aPath[0:aPath.index('xcopy')+1]

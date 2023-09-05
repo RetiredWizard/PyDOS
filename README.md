@@ -5,22 +5,23 @@
 
 **Check out the demo video at https://www.youtube.com/watch?v=Az_oiq8GE4Y**
 
-See the Installation section below to install all the external commands and customize the install for the particular microcontroller you are using. However **if you want to just launch the shell or have limited flash space, the PyDOS.py program will run standadlone** so simply copy it to your microcontroller to begin.
+See the Installation section below to install all the external commands and customize the install for the particular microcontroller you are using. However, **if you just want to launch the shell or have limited flash space, the PyDOS.py program will run standadlone** so you can simply copy **PyDOS.py** to your microcontroller to begin.
 
 To start the shell type **import PyDOS** at the REPL prompt.
 
 At the PyDOS prompt a python program (.py) or batch (.bat) file can be run by simply entering the filename with or without
 the extension.
 
-**setup.bat** in the root folder, will prompt the user to indicate the board they are using.
+**setup.bat** in the root folder, will prompt the user to indicate the the type of board they are using.
 The setup batch file will then copy the programs and libraries appropriate for the user's
  platform to the root and /lib folders of the Microcontroller flash.
 
 ## Implemented DOS Commands:  
 (syntax and descriptions taken from https://home.csulb.edu/~murdock/dosindex.html)
 
-PyDOS requires all switches to immediatly follow the command with no spaces between the command or switches. This 
-is necessary becuase PyDOS currently adopts the *nix forward slash directory seperator rather than the DOS back slash.
+When run on an operating system that uses a forward slash as the Directory Seperator, PyDOS requires all switches to immediatly follow the command with no spaces between the command or switches. This 
+is necessary becuase the forward slash directory seperator conflicts with the DOS switch seperator. If the PyDOS environement variable DIRSEP is set to \ (i.e. set DIRSEP=\\) PyDOS will utilize the traditional backslash as the directory seperator and DOS switches can then be placed anywhere on the command line.
+Many of the messages displayed by PyDOS and virtually all external Python programs will not respect this environment variable so the *nix forward slash seperator may still be displayed or required when inputting path names to external programs.
 
 If a command argument contains spaces the argument must be enclosed in quotes.
 
@@ -93,6 +94,7 @@ Example: `prompt $e[44m$p$g` sets the backgound blue and displays the current di
 An **autoexec.bat** batch file will automatically execute when PyDOS starts.
 
 ### External programs included:
+*External programs may require one-time board configuration using setup.bat*
 
 **pydospins.py** - Displays the GPIO pins for sound output and I2C for the particular board PyDOS is running on.
 
@@ -169,9 +171,8 @@ replaced or modified from the host computer so that it contains the following in
     
 and then power cycled or hard reset.
 
-**WiFi Enabled Boards Only**
-**wifi_finance** - Displays the current Nasdaq prices by connecting to finance.yahoo.com and scraping the website.
-
+*WiFi enabled boards only*  
+**wifi_finance** - Displays the current Nasdaq prices by connecting to a financial website and scraping the information.  
 **wifi_weather** - Displays the 7 day forcast from api.weather.gov
 
 ## Hardware (Pin) customization file (pydos_bcfg.py)
@@ -341,4 +342,4 @@ At the REPL prompt type "**import PyDOS*** to start PyDOS and then type **setup*
 - Rename should allow wildcards in filenames, i.e. "rename *.bas *.txt" or "rename code.py *.sav"  
 - Quiet, /Q switches to DEL, RMDIR, COPY, XCOPY commands
 - PgUp/PgDwn support in fileview.py
-- switch directory seperator to back slash
+- Properly implement edlin cursor position and append command

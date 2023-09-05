@@ -1,5 +1,6 @@
 import gc
 import os
+from os import sep
 from sys import implementation
 
 if "_match" not in dir():
@@ -46,14 +47,14 @@ def xcopy():
             for path in tstPath:
                 path = path.replace("C:","")
                 if path == "":
-                    os.chdir(slh)
-                elif os.getcwd() == slh and path == "..":
+                    os.chdir(sep)
+                elif os.getcwd() == sep and path == "..":
                     validPath = False
                     break
                 elif path == ".":
                     continue
-                elif path == ".." and len(os.getcwd().split(slh)) == 2:
-                    os.chdir(slh)
+                elif path == ".." and len(os.getcwd().split(sep)) == 2:
+                    os.chdir(sep)
                 elif path == "..":
                     os.chdir("..")
                 elif path in os.listdir() and (os.stat(path)[0] & (2**15) == 0):
@@ -75,27 +76,27 @@ def xcopy():
 
         return((validPath,simpPath))
 
-    def pFmt(dPath,trailSlh=True):
-    # Formats a path/filename string either with a trailing slash (trailSlh=True) or without
+    def pFmt(dPath,trailsep=True):
+    # Formats a path/filename string either with a trailing slash (trailsep=True) or without
         if dPath == "":
-            return slh
-        elif dPath == slh:
+            return sep
+        elif dPath == sep:
             return dPath
-        elif trailSlh:
-            return dPath+(slh if dPath[-1]!=slh else "")
+        elif trailsep:
+            return dPath+(sep if dPath[-1]!=sep else "")
         else:
-            return dPath[:(-1 if dPath[-1] == slh else None)]
+            return dPath[:(-1 if dPath[-1] == sep else None)]
 
     def absolutePath(argPath,currDir):
 
-        if argPath[0] == slh:
+        if argPath[0] == sep:
             fullPath = argPath
-        elif currDir == slh:
-            fullPath = slh+argPath
+        elif currDir == sep:
+            fullPath = sep+argPath
         else:
-            fullPath = currDir+slh+argPath
+            fullPath = currDir+sep+argPath
 
-        if len(fullPath) > 1 and fullPath[-1] == slh:
+        if len(fullPath) > 1 and fullPath[-1] == sep:
             fullPath = fullPath[:-1]
 
         return(fullPath)
@@ -144,7 +145,7 @@ def xcopy():
         for _dir in curDLst:
             if os.stat(sourcePath+_dir)[0] & (2**15) != 0 and _match(newdir,_dir[:wildcardLen]):
                 if _dir in os.listdir(pFmt(targetPath+newdir2,False)):
-                    if sourcePath == targetPath+newdir2+("" if newdir2 == "" else slh):
+                    if sourcePath == targetPath+newdir2+("" if newdir2 == "" else sep):
                         print("The file cannot be copied onto itself")
                         #break
                     else:
@@ -162,9 +163,9 @@ def xcopy():
                         nFiles += 1
                 gc.collect()
             elif os.stat(sourcePath+_dir)[0] & (2**15) == 0 and swBits & int('000010',2):
-                (nF,ans) = multicpy(sourcePath+_dir+slh,newdir,pFmt(targetPath+newdir2),_dir,swBits,ans)
-                if os.listdir(targetPath+newdir2+slh+_dir) == []:
-                    os.rmdir(targetPath+newdir2+slh+_dir)
+                (nF,ans) = multicpy(sourcePath+_dir+sep,newdir,pFmt(targetPath+newdir2),_dir,swBits,ans)
+                if os.listdir(targetPath+newdir2+sep+_dir) == []:
+                    os.rmdir(targetPath+newdir2+sep+_dir)
                 nFiles += nF
                 if ans == "Q":
                     break
@@ -173,7 +174,6 @@ def xcopy():
 
     wildcardLen = 0
     recursiveFail = False
-    slh = '/'
 
     (wildcardLen,recursiveFail) = calcWildCardLen(wildcardLen,recursiveFail)
 
@@ -238,11 +238,11 @@ def xcopy():
         earlyError = True
     elif len(args) == 1:
         args.append(".")
-    if args[1][-1] == slh:
+    if args[1][-1] == sep:
         trailingSlash = True
     if len(args) == 2 and not swBits & (swAllB-int('10001010',2)):
         args[0] = absolutePath(args[0],os.getcwd())
-        aPath = args[0].split(slh)
+        aPath = args[0].split(sep)
 
         n = 0
         for i in range(len(aPath)):
@@ -271,7 +271,7 @@ def xcopy():
         sourcePath = tmpDir
         enteredArg = args[1]
         args[1] = absolutePath(args[1],os.getcwd())
-        aPath2 = args[1].split(slh)
+        aPath2 = args[1].split(sep)
 
         n = 0
         for i in range(len(aPath2)):
@@ -361,7 +361,7 @@ def xcopy():
 
     # Second argument specifies an existing target
                 if newdir2 == "" or newdir2 in os.listdir(targetPath) or \
-                    (targetPath == slh and newdir2 == ""):
+                    (targetPath == sep and newdir2 == ""):
 
     # Second argument target is a file
                     if os.stat(targetPath[:-1 if newdir2=="" else None]+newdir2)[0] & (2**15) != 0:
@@ -387,7 +387,7 @@ def xcopy():
                         elif newdir in os.listdir(pFmt(targetPath+newdir2,False)):
                             if sourcePath == pFmt(targetPath+newdir2):
                                 print("The file cannot be copied onto itself")
-                            elif swBits & int('001000',2) or input("Overwrite "+targetPath+newdir2+("" if newdir2 == "" else slh)+newdir+"? (y/n): ").upper() == "Y":
+                            elif swBits & int('001000',2) or input("Overwrite "+targetPath+newdir2+("" if newdir2 == "" else sep)+newdir+"? (y/n): ").upper() == "Y":
                                 os.remove(pFmt(targetPath+newdir2)+newdir)
                                 if filecpy(sourcePath+newdir,pFmt(targetPath+newdir2)+newdir,bool(swBits&int('10000000'))):
                                     nFiles += 1
