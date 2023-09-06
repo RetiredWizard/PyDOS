@@ -20,7 +20,7 @@ The setup batch file will then copy the programs and libraries appropriate for t
 (syntax and descriptions taken from https://home.csulb.edu/~murdock/dosindex.html)
 
 When run on an operating system that uses a forward slash as the Directory Seperator, PyDOS requires all switches to immediatly follow the command with no spaces between the command or switches. This 
-is necessary becuase the forward slash directory seperator conflicts with the DOS switch seperator. If the PyDOS environement variable DIRSEP is set to \ (i.e. set DIRSEP=\\) PyDOS will utilize the traditional backslash as the directory seperator and DOS switches can then be placed anywhere on the command line.
+is necessary becuase the forward slash directory seperator conflicts with the DOS switch seperator. If the PyDOS environement variable DIRSEP is set to \ (i.e. `set DIRSEP=\`) PyDOS will utilize the traditional backslash as the directory seperator and DOS switches can then be placed anywhere on the command line.
 Many of the messages displayed by PyDOS and virtually all external Python programs will not respect this environment variable so the *nix forward slash seperator may still be displayed or required when inputting path names to external programs.
 
 If a command argument contains spaces the argument must be enclosed in quotes.

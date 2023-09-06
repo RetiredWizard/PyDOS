@@ -26,13 +26,30 @@ class PyDOS_UI:
 
         self.i2c = busio.I2C(SCL_pin, SDA_pin)
         self.ft = adafruit_focaltouch.Adafruit_FocalTouch(self.i2c, debug=False)
+        self.touches = []
         
         self.SHIFTED = False
         self.CAPLOCK = False
-        
+
+        displayio.release_displays()
+
+        keyboard_bitmap,keyboard_palette = adafruit_imageload.load("/lib/keyboard.bmp",bitmap=displayio.Bitmap,palette=displayio.Palette)
+        htile=displayio.TileGrid(keyboard_bitmap,pixel_shader=keyboard_palette)
+        htile.x=15
+        htile.y=220
+        self._kbd_group = displayio.Group()
+        self._kbd_group.append(htile)
+
+        fb=dotclockframebuffer.DotClockFramebuffer(**board.TFT,**board.TIMINGS800)
+        self._display=framebufferio.FramebufferDisplay(fb)
+
+        self._touched = False
+
     def serial_bytes_available(self):
+        self._touched = False
         if self.virt_touched():
             retval = 1
+            self._touched = True
         else:        
             if implementation.name.upper() == "CIRCUITPYTHON":
                 # Does the same function as supervisor.runtime.serial_bytes_available
@@ -70,13 +87,15 @@ class PyDOS_UI:
 
 
     def read_keyboard(self,num):
-        if self.virt_touched():
-            if Pydos_ui.ft.touches[0]['x'] > 740 and Pydos_ui.ft.touches[0]['y'] < 75:
-                return '\n'
+        if self.virt_touched() or self._touched:
+            if self.touches[0]['x'] > 740 and self.touches[0]['y'] < 75:
+                retVal = '\n'
             else:
-                return self.read_virtKeyboard(num)
+                retVal = self.read_virtKeyboard(num)
         else:
-            return stdin.read(num)
+            retVal = stdin.read(num)
+
+        return retVal
     
     def get_screensize(self):
         return (19,65)
@@ -123,6 +142,7 @@ class PyDOS_UI:
             retKey = ''
         elif retKey == 'C':
             self.CAPLOCK = not self.CAPLOCK
+            self.SHIFTED = self.CAPLOCK
             retKey = ''
 
         if self.CAPLOCK:
@@ -148,25 +168,17 @@ class PyDOS_UI:
     
     def virt_touched(self):
         if self.ft.touched:
-            if self.ft.touches != []:
-                return self.ft.touched
+            self.touches = self.ft.touches
+            if self.touches != []:
+                return True
 
+        self.touches = []
         return False
 
     def read_virtKeyboard(self,num=0):
-        displayio.release_displays()
-
-        keyboard_bitmap,keyboard_palette = adafruit_imageload.load("/lib/keyboard.bmp",bitmap=displayio.Bitmap,palette=displayio.Palette)
-        htile=displayio.TileGrid(keyboard_bitmap,pixel_shader=keyboard_palette)
-        fb=dotclockframebuffer.DotClockFramebuffer(**board.TFT,**board.TIMINGS800)
-        display=framebufferio.FramebufferDisplay(fb)
-        display.show(None)
-        display.refresh()
-        kbd_group = displayio.Group()
-        display.show(kbd_group)
-        htile.x=15
-        htile.y=220
-        kbd_group.append(htile)
+        #self._display.show(None)
+        #self._display.refresh()
+        self._display.show(self._kbd_group)
 
         font = terminalio.FONT
         color = 0xFFFFFF
@@ -175,18 +187,18 @@ class PyDOS_UI:
         keyedTxt.x = 15
         keyedTxt.y = 200
         keyedTxt.scale = 2
-        kbd_group.append(keyedTxt)
+        self._kbd_group.append(keyedTxt)
         
         shftIndicator = label.Label(font,text="",color=0x00FF00)
         shftIndicator.x = 15
         shftIndicator.y = 15
         shftIndicator.scale = 2
-        kbd_group.append(shftIndicator)
+        self._kbd_group.append(shftIndicator)
         capsIndicator = label.Label(font,text="",color=0x00FF00)
         capsIndicator.x = 90
         capsIndicator.y = 15
         capsIndicator.scale = 2
-        kbd_group.append(capsIndicator)
+        self._kbd_group.append(capsIndicator)
 
         while self.virt_touched():
             pass
@@ -197,35 +209,35 @@ class PyDOS_UI:
         keysPressed = 0
         while True:
             if self.virt_touched():
-                ts = self.ft.touches
-                if ts != []:
-                    point = ts[0]
-                    #print(point)
-                    pressedKey = self._identifyLocation(point["x"],point["y"])
+                point = self.touches[0]
+                pressedKey = self._identifyLocation(point["x"],point["y"])
+                
+                if pressedKey == '\x08':
+                    keyString = keyString[:-1]
+                    keyedTxt.text = keyString
+                    pressedKey = ''
+                elif pressedKey == '\n':
+                    break
+                keyString += pressedKey
                     
-                    if pressedKey == '\x08':
-                        keyString = keyString[:-1]
-                        keyedTxt.text = keyString
-                        pressedKey = ''
-                    elif pressedKey == '\n':
-                        keyString += '\n'
+                shftIndicator.text = ('SHIFT' if self.SHIFTED else '')
+                capsIndicator.text = ('CAPS' if self.CAPLOCK else '')
+                if len(pressedKey) != 0:
+                    keyedTxt.text = keyString
+                    keysPressed += 1
+                    if num > 0 and keysPressed >= num:
                         break
-                    keyString += pressedKey
-                        
-                    shftIndicator.text = ('SHIFT' if self.SHIFTED else '')
-                    capsIndicator.text = ('CAPS' if self.CAPLOCK else '')
-                    if len(pressedKey) != 0:
-                        keyedTxt.text = keyString
-                        keysPressed += 1
-                        if num > 0 and keysPressed >= num:
-                            break
                     
                 while self.virt_touched():
                     pass
 
             time.sleep(0.0001)
 
-        display.root_group = displayio.CIRCUITPYTHON_TERMINAL
+#        display.root_group = displayio.CIRCUITPYTHON_TERMINAL
+        self._kbd_group.pop()
+        self._kbd_group.pop()
+        self._kbd_group.pop()
+        self._display.show(None)
         return keyString
 
 Pydos_ui = PyDOS_UI()
@@ -251,11 +263,13 @@ def input(disp_text=None):
             if done:
                 break
         elif Pydos_ui.virt_touched():
-            if Pydos_ui.ft.touches != []:
-                if Pydos_ui.ft.touches[0]['x'] > 740 and Pydos_ui.ft.touches[0]['y'] < 75:
-                    keys = '\n'
-                else:
-                    keys = Pydos_ui.read_virtKeyboard()
-                break
+            if Pydos_ui.touches[0]['x'] > 740 and Pydos_ui.touches[0]['y'] < 75:
+                keys = ''
+            else:
+                keys = Pydos_ui.read_virtKeyboard()
+            print(keys)
+            while Pydos_ui.virt_touched():
+                pass
+            break
         
     return keys

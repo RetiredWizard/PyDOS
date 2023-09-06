@@ -64,7 +64,7 @@ def PyDOS():
     global envVars
     if "envVars" not in globals().keys():
         envVars = {}
-    _VER = "1.23"
+    _VER = "1.24"
     prmpVals = ['>','(',')','&','|','\x1b','\b','<','=',' ',_VER,'\n','$','']
 
     print("Starting Py-DOS...")
@@ -585,11 +585,10 @@ def PyDOS():
                     i += 1
 
         if cmdLine != "" and cmdLine[0] != '/':
+            tmp = (args[0].upper()).split('/')
             if envVars.get('DIRSEP','/') != '\\':
-                switches = (args[0].upper()).split('/')
-                cmd = switches.pop(0)
-            else:
-                cmd = (args[0].upper()).split('/').pop(0)
+                switches = tmp
+            cmd = tmp.pop(0)
         else:
             if envVars.get('DIRSEP','/') != '\\':
                 switches = []
@@ -622,7 +621,7 @@ def PyDOS():
             continue
         elif cmd == "DIR":
             if len(args) == 1:
-                prDir(os.getcwd()[(2 if os.getcwd()[1:2]==":" else 2):],swBits)
+                prDir(os.getcwd()[(2 if os.getcwd()[1:2]==":" else 0):],swBits)
             elif len(args) == 2:
                 prDir(args[1],swBits)
             else:
