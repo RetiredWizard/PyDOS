@@ -61,6 +61,7 @@ If a command argument contains spaces the argument must be enclosed in quotes.
     - _scrHeight - The number of lines on the terminal or screen
     - _scrWidth - The number of columns on the terminal or screen
     - errorlevel - The result code from the previous BAT file or pexec command executed
+    - DIRSEP - If set to a backslash (\\) PyDOS will use a backslash as the directory seperator character regardless of the seperator used by the local filesystem (i.e. `os.sep`). If set to anything other than a backslash PyDOS will use a forward slash as the directory seperator character.
 
 **PROMPT [prompt text]** - Changes or displays the DOS command prompt. Supported strings "$R,$D,$T,$P,$G,$C,$F,$A,$B,$E,$H,$L,$Q,$S,$V,$_,$." and text literals  
 Example: `prompt $e[44m$p$g` sets the backgound blue and displays the current directory + >
