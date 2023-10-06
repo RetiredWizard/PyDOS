@@ -5,6 +5,10 @@
 
 **Check out the demo video at https://www.youtube.com/watch?v=Az_oiq8GE4Y**
 
+*Related Repositories:*  
+[PyDOS_virtkey](https://github.com/RetiredWizard/PyDOS_virtkeyboard) - The modules needed to add virtual keybaord support to PyDOS  
+[PyDOS_wifi](https://github.com/RetiredWizard/PyDOS_wifi) - Generalized Python based microcontroller WiFi API
+
 See the Installation section below to install all the external commands and customize the install for the particular microcontroller you are using. However, **if you just want to launch the shell or have limited flash space, the PyDOS.py program will run standadlone** so you can simply copy **PyDOS.py** to your microcontroller to begin.
 
 To start the shell type **import PyDOS** at the REPL prompt.
