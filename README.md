@@ -67,8 +67,30 @@ If a command argument contains spaces the argument must be enclosed in quotes.
     - errorlevel - The result code from the previous BAT file or pexec command executed
     - DIRSEP - If set to a backslash (\\) PyDOS will use a backslash as the directory seperator character regardless of the seperator used by the local filesystem (i.e. `os.sep`). If set to anything other than a backslash PyDOS will use a forward slash as the directory seperator character.
 
-**PROMPT [prompt text]** - Changes or displays the DOS command prompt. Supported strings "$R,$D,$T,$P,$G,$C,$F,$A,$B,$E,$H,$L,$Q,$S,$V,$_,$." and text literals  
+**PROMPT [prompt text]** - Changes or displays the DOS command prompt. Supported strings "$R,$D,$T,$P,$G,$L,$C,$F,$A,$B,$E,$H,$Q,$S,$V,$_,$$" and text literals  
 Example: `prompt $e[44m$p$g` sets the backgound blue and displays the current directory + >
+
+```
+Character	Description
+---------   -----------
+$R          Available RAM
+$D	        Current date
+$T	        Current time
+$P          Current path
+$G	        > (Greater than sign)
+$L	        < (Less than sign)
+$C	        ( (Left parenthesis)
+$F	        ) (Right parenthesis)
+$A	        & (Ampersand)
+$B	        | (Pipe symbol)
+$E	        ANSI escape code (code 27)
+$H	        Backspace (delete last character from displayed prompt)
+$Q	        = (Equal sign)
+$S	        Space
+$V	        Version number
+$_	        ENTER-LINEFEED
+$$	        $ (Dollar sign)
+```
 
 **PATH [path1;path2;...]** - Changes or displays the directory search list for executing python scripts and DOS batch files
 
