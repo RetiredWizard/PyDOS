@@ -1,5 +1,8 @@
 import os
-from os import sep
+try:
+    from os import sep
+except:
+    sep = os.getcwd()[0]
 from time import localtime
 from sys import stdin,implementation,path
 if not sep+'lib' in path:
@@ -64,7 +67,7 @@ def PyDOS():
     global envVars
     if "envVars" not in globals().keys():
         envVars = {}
-    _VER = "1.24"
+    _VER = "1.25"
     prmpVals = ['>','(',')','&','|','\x1b','\b','<','=',' ',_VER,'\n','$','']
 
     print("Starting Py-DOS...")
