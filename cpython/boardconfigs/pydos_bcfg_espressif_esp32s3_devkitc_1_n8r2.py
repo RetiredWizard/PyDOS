@@ -9,6 +9,6 @@ Pydos_pins = {
     'SDA' : (board.IO8,"IO8"),
     'SCK' : [(board.IO12,"IO12")],
     'MOSI' : [(board.IO11,"IO11")],
-    'MISO' : [(board.IO13,"I13")],
+    'MISO' : [(board.IO13,"IO13")],
     'CS' : [(board.IO7,"IO7")]
 }

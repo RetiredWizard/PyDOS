@@ -42,7 +42,3 @@ if ans.upper() != "A":
     with open('/settings.toml','w') as envfile:
         for param in envline:
             envfile.write(param+"="+envline.get(param,"")+"\n")
-# Copy settings.toml to old .env file until 8.0.0 is released out of beta
-    with open('/.env','w') as envfile:
-        for param in paramlist:
-            envfile.write(param+"="+envline.get(param,"").replace('"','')+"\n")
