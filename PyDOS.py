@@ -67,7 +67,7 @@ def PyDOS():
     global envVars
     if "envVars" not in globals().keys():
         envVars = {}
-    _VER = "1.26"
+    _VER = "1.27"
     prmpVals = ['>','(',')','&','|','\x1b','\b','<','=',' ',_VER,'\n','$','']
 
     print("Starting Py-DOS...")
@@ -440,7 +440,7 @@ def PyDOS():
             if batLine.strip()[:1] == ":" and len(batLine.strip().split(" ")[0]) > 1:
                 batLabels[batLine.strip().split(" ")[0][1:]] = [batLineNo,batIndex[batLineNo]]
         BATfile.seek(0)
-        del batIndex,batLineNo,batLine
+        del batIndex,batLineNo
 
         return batLabels
 

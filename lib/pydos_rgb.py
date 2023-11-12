@@ -66,7 +66,7 @@ class PyDOS_rgb:
 
                 #  ESP32 pins
                 if not self._esp32_cs[0]:
-                    self._esp32_cs[0] = DigitalInOut(board.CS1)
+                    self._esp32_cs[0] = DigitalInOut(board.ESP_CS)
                 if not self._esp32_ready[0]:
                     self._esp32_ready[0] = DigitalInOut(board.ESP_BUSY)
                 if not self._esp32_reset[0]:

@@ -65,20 +65,6 @@ uuuu P        Y    BBBB   A   A  SSSS    I    CCC
     tmpfile = open('_pybTmp.tmp','w+')
     infile = tmpfile
 
-    #Attempting memory pre-allocation to prepare for large Basic programs
-    if implementation.name.upper() in ['MICROPYTHON','CIRCUITPYTHON']:
-        gc.collect()
-        for i in range(1600):
-            if i % 100 == 0:
-                print(".",end="")
-            try:
-                program.__program[i] = i
-            except:
-                print("\nMemory pre-allocation limit reached at ",i)
-                break
-        print()
-        program.__program.clear()
-
     if passedIn != "":
         infile = program.load(passedIn,tmpfile)
         program.execute(infile,tmpfile)
