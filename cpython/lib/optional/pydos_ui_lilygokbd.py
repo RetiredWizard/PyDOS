@@ -46,6 +46,8 @@ class PyDOS_UI:
             if self._key[0] != 0:
                 retval = 1
                 self._touched = True
+            else:
+                retval = self.uart_bytes_available()
         else:
             retval = 1
 
@@ -65,6 +67,10 @@ class PyDOS_UI:
                 retval = chr(self._key[0])
                 self._touched = False
                 num -= 1
+            else:
+                if self.uart_bytes_available():
+                    retval = stdin.read(1)
+                    num -= 1
 
         return retval
 
