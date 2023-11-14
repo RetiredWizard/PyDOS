@@ -81,8 +81,6 @@ if not "%_boardID%" == "lilygo_tdeck" goto not_lilygo_tdeck
 rename /lib/pydos_ui.py /lib/pydos_ui_uart.py
 echo copy /cpython/lib/optional/pydos_ui_lilygokbd.py /lib/pydos_ui.py
 copy/y /cpython/lib/optional/pydos_ui_lilygokbd.py /lib/pydos_ui.py
-echo copy /cpython/lib/optional/settings.toml.large /settings.toml
-copy/y /cpython/lib/optional/settings.toml.large /settings.toml
 set _ans2 = A
 goto skip_touchmsg
 
@@ -91,8 +89,6 @@ if "%_boardID%" == "makerfabs_tft7" goto tablet
 if "%_boardID%" == "espressif_esp32s3_devkitc_1_n8r8_hacktablet" goto tablet
 goto not_tablet
 :tablet
-echo copy /cpython/lib/optional/settings.toml.large /settings.toml
-copy/y /cpython/lib/optional/settings.toml.large /settings.toml
 set _ans2 = A
 goto esp32
 
@@ -139,8 +135,6 @@ if %_ans% == M goto esp32MP
 copy/y /cpython/ESP32/* /
 copy /cpython/ESP32/lib/* /lib/
 if %_ans2% == A goto wifienv
-echo copy /cpython/lib/optional/settings.toml.medium /settings.toml
-copy/y /cpython/lib/optional/settings.toml.medium /settings.toml
 goto other
 
 :esp32MP

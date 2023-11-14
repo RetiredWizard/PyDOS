@@ -83,7 +83,7 @@ def input(disp_text=None):
     bld_chr1 = '_(+'
     bld_chr2 = '-+)'
     bld_chr =  '=[]'
-    bld_started = [False, False, False]
+    bld_started = False
 
     histPntr = len(Pydos_ui.commandHistory)
 
@@ -189,17 +189,17 @@ def input(disp_text=None):
             # '_-' -> '='     '(+' -> '['       '+)' -> ']'
             bld_done = False
             bcindx = bld_chr2.find(keys[editCol-1:editCol])
-            if bld_chr1.find(keys[editCol-1:editCol]) != -1 and not True in bld_started and arrow == "":
-                bld_started[bld_chr1.find(keys[editCol-1:editCol])] = True
-            elif keys[editCol-2:editCol] ==  bld_chr1[bcindx]+bld_chr2[bcindx] and bld_started[bcindx]:
-                bld_started = [False for _ in bld_started]
+            if bld_chr1.find(keys[editCol-1:editCol]) != -1 and not bld_started and arrow == "":
+                bld_started = True
+            elif keys[editCol-2:editCol] ==  bld_chr1[bcindx]+bld_chr2[bcindx] and bld_started:
+                bld_started = False
                 keys = keys[:editCol-2]+bld_chr[bcindx]+keys[editCol:]
                 print('\x08'+keys[editCol-2:]+' '+('\x08'*(len(keys[editCol:])+(1 if onLast else 2))),end="")
                 editCol -= 1
                 bld_done = True
             else:
-                bld_started = [False for _ in bld_started]
-
+                bld_started = False
+                
             if arrow != "" and ctrlkeys != "":
                 editCol -= 1
             elif arrow !='':
