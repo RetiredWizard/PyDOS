@@ -11,6 +11,10 @@ import time
 class PyDOS_UI:
 
     def __init__(self):
+        self.scrollable = False
+        self.arrow = ""
+        self._cmdhistlock = False
+        self._seqCnt = 0
     	self._key = bytearray(1)
        	self._touched = False
        	_ADDRESS_KBD = 0x55
@@ -27,26 +31,48 @@ class PyDOS_UI:
         self.click = keypad.Keys([board.TRACKBALL_CLICK], value_when_pressed=False)
 
     def get_screensize(self):
-        #return (round(self._display.height*.04),round(self._display.width*.0817))
-        #return (
-        #    round(self._display.height/(terminalio.FONT.bitmap.height*displayio.CIRCUITPYTHON_TERMINAL.scale))-1,
-        #    round(self._display.width/((terminalio.FONT.bitmap.width/95)*displayio.CIRCUITPYTHON_TERMINAL.scale))-1
-        #)
-        return (19,53)
+        return (19,51)
 
     def serial_bytes_available(self):
         if not self._touched:
             retval = 0
-            with self._i2c as i2c:
-                try:
-                    i2c.readinto(self._key)
-                except:
-                    self._key=bytearray(1)
-            if self._key[0] != 0:
-                retval = 1
-                self._touched = True
-            else:
-                retval = self.uart_bytes_available()
+
+            # Find the last direction the trackball was moved
+            #  and wait for trackball to stop moving
+            largestDir = 0
+            self.arrow = ''
+            trackloop = True
+            while trackloop:
+                trackloop = False
+                for p,c in Pydos_ui.trackball.items():
+                    if c.count > largestDir:
+                        trackloop = True
+                        if p not in "AB" or not self._cmdhistlock:
+                            self.arrow = p
+                            largestDir = c.count
+                        c.reset()
+                    else:
+                        c.reset()
+                if self.arrow != "" and not trackloop:
+                    time.sleep(.05)
+                    # clear all counters
+                    for p,c in Pydos_ui.trackball.items():
+                        if c.count > 0:
+                            c.reset()
+                    retval = 1
+                    self._touched = True
+
+            if not self._touched:
+                with self._i2c as i2c:
+                    try:
+                        i2c.readinto(self._key)
+                    except:
+                        self._key=bytearray(1)
+                if self._key[0] != 0:
+                    retval = 1
+                    self._touched = True
+                else:
+                    retval = self.uart_bytes_available()
         else:
             retval = 1
 
@@ -63,13 +89,29 @@ class PyDOS_UI:
         while num > 0:
             self.serial_bytes_available()
             if self._touched:
-                retval = chr(self._key[0])
-                self._touched = False
-                num -= 1
+                if self.arrow != "":
+                    if self._seqCnt == 0:
+                        retval += chr(27)
+                        self._seqCnt = 1
+                        num -= 1
+                    elif self._seqCnt == 1:
+                        retval += chr(91)
+                        self._seqCnt = 2
+                        num -= 1
+                    elif self._seqCnt == 2:
+                        retval += self.arrow
+                        self._seqCnt = 0
+                        self._touched = False
+                        self.arrow = ""
+                        num -= 1
+                else:
+                    retval += chr(self._key[0])
+                    self._touched = False
+                    num -= 1
             else:
                 if self.uart_bytes_available():
-                    retval = stdin.read(1)
-                    num -= 1
+                    retval = stdin.read(num)
+                    num -= len(retval)
 
         return retval
 
@@ -86,6 +128,7 @@ def input(disp_text=None):
     bld_started = False
 
     histPntr = len(Pydos_ui.commandHistory)
+    Pydos_ui._cmdhistlock = False
 
     keys = ''
     editCol = 0
@@ -101,31 +144,8 @@ def input(disp_text=None):
         #print(editCol,keys)
         if ctrlkeys == '':
             arrow = ""
-            trackloop = True
         else:
             ctrlkeys = ''
-            trackloop = False
-
-        # Find the last direction the trackball was moved
-        #  and wait for trackball to stop moving
-        largestDir = 0
-        while trackloop:
-            trackloop = False
-            for p,c in Pydos_ui.trackball.items():
-                if c.count > largestDir:
-                    trackloop = True
-                    if p not in "AB" or onLast:
-                        arrow = p
-                        largestDir = c.count
-                    c.reset()
-                else:
-                    c.reset()
-            if arrow != "" and not trackloop:
-                time.sleep(.05)
-                # clear all counters
-                for p,c in Pydos_ui.trackball.items():
-                    if c.count > 0:
-                        c.reset()
 
         if arrow == 'A' or arrow == 'B':
             if len(Pydos_ui.commandHistory) > 0:
@@ -145,6 +165,7 @@ def input(disp_text=None):
                 else:
                     onFirst = False
         elif arrow == 'D':
+            Pydos_ui._cmdhistlock = True
             if len(keys) > editCol:
                 print(keys[editCol:editCol+1]+"\x08",end="")
             elif editCol == len(keys):
@@ -171,19 +192,23 @@ def input(disp_text=None):
                 if not onLast:
                     print(keys[editCol-1:],end="")
                     onLast = True
+                    Pydos_ui._cmdhistlock = False
 
         if Pydos_ui.serial_bytes_available():
             if Pydos_ui.uart_bytes_available():
                 keys = keys[:editCol]+stdin.read(1)+keys[editCol:]
-                editCol += 1
-                if keys[editCol-1] == '\x1b':
-                    keys = keys[:editCol-1]+keys[editCol:]
-                    ctrlkeys = stdin.read(2)
-                    # ctrlkeys = up:[A down:[B right:[C left:[D
-                    arrow = ctrlkeys[1]
             else:
                 keys = keys[:editCol]+Pydos_ui.read_keyboard(1)+keys[editCol:]
-                editCol += 1
+
+            editCol += 1
+            if keys[editCol-1] == '\x1b':
+                keys = keys[:editCol-1]+keys[editCol:]
+                if Pydos_ui.uart_bytes_available():
+                    ctrlkeys = stdin.read(2)
+                else:
+                    ctrlkeys = Pydos_ui.read_keyboard(2)
+                # ctrlkeys = up:[A down:[B right:[C left:[D
+                arrow = ctrlkeys[1]
 
             # Convert two character sequences into missing keyboard keys
             # '_-' -> '='     '(+' -> '['       '+)' -> ']'
@@ -197,6 +222,8 @@ def input(disp_text=None):
                 print('\x08'+keys[editCol-2:]+' '+('\x08'*(len(keys[editCol:])+(1 if onLast else 2))),end="")
                 editCol -= 1
                 bld_done = True
+            elif bld_chr1.find(keys[editCol-1:editCol]) != -1 and arrow == "":
+                bld_started = True
             else:
                 bld_started = False
                 

@@ -60,9 +60,16 @@ def viewFile(args):
 
         scrLines = int(envVars["_scrHeight"])
         scrWidth = int(envVars["_scrWidth"])
+    elif 'get_screensize' in dir(Pydos_ui):
+        (scrLines,scrWidth) = Pydos_ui.get_screensize()
     else:
         scrLines = 24
         scrWidth = 80
+
+    try:
+        scrollable = Pydos_ui.scrollable
+    except:
+        scrollable = False
 
     savDir = os.getcwd()
     args = absolutePath(args,savDir)
@@ -109,15 +116,24 @@ def viewFile(args):
                 seqCnt = 0
                 if currLineNum > scrLines:
                     currLineNum -= 1
-                    print (chr(27)+"[1;1H"+chr(27)+"M",end="")
+                    print (chr(27)+"[1;1H",end="")
                     #print (chr(27)+"[2;0H"+chr(27)+"[T",end="")
                     f.seek(index[currLineNum-scrLines])
                     line = f.readline()
-                    print((line[:-1])[strtCol:scrWidth+strtCol],end="")
                     scrnMem.pop()
                     scrnMem.insert(0,line[:-1])
                     linelengths.pop()
                     linelengths.insert(0,len(line[:-1]))
+                    if not scrollable:
+                        #cret = chr(27)+"[H"
+                        cret = " "*scrWidth+chr(8)*scrWidth
+                        print(cret+((line[:-1])[strtCol:scrWidth+strtCol]),end="")
+                        cret = "\n"+(" "*scrWidth)+chr(8)*scrWidth
+                        for line in scrnMem[1:]:
+                            print(cret+line[strtCol:scrWidth+strtCol],end="")
+                            #cret = "\n"
+                    else:
+                        print((chr(27)+"M")+(line[:-1])[strtCol:scrWidth+strtCol],end="")
 
             elif ord(cmnd) == 66 and seqCnt == 2:
                 # Down Arrow
@@ -129,7 +145,16 @@ def viewFile(args):
                         if currLineNum == maxRead:
                             index.append(index[currLineNum]+len(line))
                             maxRead += 1
-                        print(chr(27)+"["+str(scrLines)+";1H"+chr(27)+"D",end="")
+
+                        if not scrollable:
+                            cret = chr(27)+"[1;1H"+(" "*scrWidth)+chr(8)*scrWidth
+                            for _ in scrnMem[1:]:
+                                print(cret+_[strtCol:scrWidth+strtCol],end="")
+                                cret = "\n"+(" "*scrWidth)+chr(8)*scrWidth
+
+                            print(chr(27)+"["+str(scrLines)+";1H"+chr(8)+(" "*scrWidth)+chr(8)*scrWidth,end="")
+                        else:
+                            print(chr(27)+"["+str(scrLines)+";1H"+chr(27)+"D",end="")
                         #print(chr(27)+"["+str(scrLines+1)+";0H"+chr(27)+"[S",end="")
                         print((line[:-1])[strtCol:scrWidth+strtCol],end="")
                         scrnMem.pop(0)
@@ -145,7 +170,7 @@ def viewFile(args):
                 seqCnt = 0
                 if max(linelengths) > scrWidth+strtCol:
                     strtCol += 1
-                    cret = chr(27)+"[H"
+                    cret = chr(27)+"[1;1H"
                     for line in scrnMem:
                         if scrWidth+strtCol > len(line.rstrip()):
                             print(cret+line[strtCol:len(line.rstrip())]+" ",end="")
@@ -158,7 +183,7 @@ def viewFile(args):
                 seqCnt = 0
                 if strtCol > 0:
                     strtCol -= 1
-                    cret = chr(27)+"[H"
+                    cret = chr(27)+"[1;1H"
                     for line in scrnMem:
                         print(cret+line[strtCol:scrWidth+strtCol],end="")
                         cret = "\n"

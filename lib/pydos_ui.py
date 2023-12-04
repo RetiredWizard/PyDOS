@@ -11,7 +11,7 @@ elif implementation.name.upper() == "CIRCUITPYTHON":
 class PyDOS_UI:
 
     def __init__(self):
-        pass
+        self.scrollable = True
 
     def serial_bytes_available(self):
         if implementation.name.upper() == "CIRCUITPYTHON":
