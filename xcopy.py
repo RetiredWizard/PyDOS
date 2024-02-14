@@ -171,6 +171,11 @@ def xcopy():
                     break
         return (nFiles,ans)
 
+    if __name__ != "PyDOS":
+        passedIn = input("Source File: ")
+        passedIn = passedIn+" "+input("Destination Filename: ")
+        envVars = {}
+        envVars["_switches"] = (input("Command Switches: ").upper()).split("/")
 
     wildcardLen = 0
     recursiveFail = False
@@ -422,12 +427,5 @@ def xcopy():
             print("Illegal switch, Command Format: xcopy[/y][/s][/v] [path]file [path][file]")
         else:
             print("Wrong number of arguments")
-
-
-if __name__ != "PyDOS":
-    passedIn = input("Source File: ")
-    passedIn = passedIn+" "+input("Destination Filename: ")
-    envVars = {}
-    envVars["_switches"] = (input("Command Switches: ").upper()).split("/")
 
 xcopy()

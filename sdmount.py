@@ -149,7 +149,7 @@ def sdMount(drive,spiNo):
         if sdMounted:
             print(drive+" mounted")
 
-        return
+        return sdMounted
 
     savDir = os.getcwd()
     args = absolutePath(drive,savDir)
@@ -167,9 +167,12 @@ def sdMount(drive,spiNo):
             elif tmpDir+newdir == '/':
                 print("Target can not be root folder")
             else:
-                do_mount(tmpDir+newdir,spiNo)
+                if not do_mount(tmpDir+newdir,spiNo):
+                    os.mkdir(tmpDir+newdir)
+                    print("Mount point",tmpDir+newdir,"created")
+                    do_mount(tmpDir+newdir,spiNo)
         else:
-            print("Target name already exists")
+            do_mount(tmpDir+newdir,spiNo)
     else:
         print("Invalid path")
 

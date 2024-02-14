@@ -7,6 +7,11 @@ if sys.implementation.name.upper() == "MICROPYTHON":
 elif sys.implementation.name.upper() == 'CIRCUITPYTHON':
     from supervisor import ticks_ms
     from pwmio import PWMOut
+    try:
+        import synthio
+        import audiobusio
+    except:
+        pass
 
 if __name__ != "PyDOS":
     passedIn = ""
@@ -50,14 +55,26 @@ if sys.implementation.name.upper() == "MICROPYTHON":
     else:
         pwm.duty(0)
 elif sys.implementation.name.upper() == "CIRCUITPYTHON":
-    if not Pydos_hw.sndPin:
-        print("Sound Pin not found")
+    if not Pydos_hw.i2sSCK:
+        if not Pydos_hw.sndPin:
+            print("Sound Pin not found")
+        else:
+            Pydos_hw.sndGPIO.deinit() # Workaround for ESP32-S2 GPIO issue
+            audioPin = PWMOut(Pydos_hw.sndPin, duty_cycle=vol, frequency=freq)
+            #audioPin.frequency = freq
+            #audioPin.duty_cycle = vol
+            time.sleep(dur/1000)
+            #audioPin.duty_cycle = 0
+            audioPin.deinit()
+            quietSnd() # Workaround for ESP32-S2 GPIO issue
     else:
-        Pydos_hw.sndGPIO.deinit() # Workaround for ESP32-S2 GPIO issue
-        audioPin = PWMOut(Pydos_hw.sndPin, duty_cycle=vol, frequency=freq)
-        #audioPin.frequency = freq
-        #audioPin.duty_cycle = vol
+        i2s = audiobusio.I2SOut(Pydos_hw.i2sSCK,Pydos_hw.i2sWS,Pydos_hw.i2sDATA)
+        synth = synthio.Synthesizer(sample_rate=22050)
+        e = synthio.Envelope(attack_time=0,decay_time=0,release_time=0,attack_level=vol/100,sustain_level=vol/100)
+        note = synthio.Note(frequency=freq,envelope=e)
+        i2s.play(synth)
+        synth.press(note)
         time.sleep(dur/1000)
-        #audioPin.duty_cycle = 0
-        audioPin.deinit()
-        quietSnd() # Workaround for ESP32-S2 GPIO issue
+        synth.release(note)
+        synth.deinit()
+        i2s.deinit()

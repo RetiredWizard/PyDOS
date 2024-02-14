@@ -6,6 +6,9 @@
 
     led
     sndPin
+    i2s_BitClock
+    i2s_WordSelect
+    i2s_Data
     neoPixel
     neoPixel_Pow
     dotStar_Clock
@@ -68,6 +71,14 @@ elif implementation.name.upper() == "CIRCUITPYTHON":
         Pydos_pins['sndPin'] = (board.BUZZER,"board.BUZZER")
     elif 'D12' in dir(board):
         Pydos_pins['sndPin'] = (board.D12,"D12 GPIO12")
+    if 'I2S_BIT_CLOCK' in dir(board):
+        Pydos_pins['i2s_BitClock'] = (board.I2S_BIT_CLOCK,"board.I2S_BIT_CLOCK")
+        Pydos_pins['i2s_WordSelect'] = (board.I2S_WORD_SELECT,"board.I2S_WORD_SELECT")
+        Pydos_pins['i2s_Data'] = (board.I2S_DATA,"board.I2S_DATA")
+    elif 'SPEAKER_SCK' in dir(board):
+        Pydos_pins['i2s_BitClock'] = (board.SPEAKER_SCK,"board.SPEAKER_SCK")
+        Pydos_pins['i2s_WordSelect'] = (board.SPEAKER_WS,"board.SPEAKER_WS")
+        Pydos_pins['i2s_Data'] = (board.SPEAKER_DOUT,"board.SPEAKER_DOUT")
     if 'NEOPIXEL' in dir(board):
         Pydos_pins['neoPixel'] = (board.NEOPIXEL,"NEOPIXEL")
     if 'NEOPIXEL_POWER' in dir(board):

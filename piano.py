@@ -11,9 +11,15 @@ elif sys.implementation.name.upper() == 'CIRCUITPYTHON':
     from supervisor import ticks_ms
     from pwmio import PWMOut
     from board import board_id
+    try:
+        import synthio
+        import audiobusio
+    except:
+        pass
 
 def piano():
 
+    noteMS = 500
     if sys.implementation.name.upper() == 'MICROPYTHON':
         oldPWM = False
         try:
@@ -23,66 +29,78 @@ def piano():
         except:
             pwm=machine.PWM(Pydos_hw.sndPin)
     elif sys.implementation.name.upper() == 'CIRCUITPYTHON':
-        Pydos_hw.sndGPIO.deinit() # Workaround for ESP32-S2 GPIO issue
-        pwm=PWMOut(Pydos_hw.sndPin, duty_cycle=0, frequency=440, variable_frequency=True)
+        if Pydos_hw.i2sSCK:
+            noteMS = 375
+            i2s = audiobusio.I2SOut(Pydos_hw.i2sSCK,Pydos_hw.i2sWS,Pydos_hw.i2sDATA)
+            synth = synthio.Synthesizer(sample_rate=22050)
+            e = synthio.Envelope(attack_time=.0001,decay_time=.0001,release_time=0,attack_level=.5,sustain_level=.5)
+            i2s.play(synth)
+        else:
+            Pydos_hw.sndGPIO.deinit() # Workaround for ESP32-S2 GPIO issue
+            pwm=PWMOut(Pydos_hw.sndPin, duty_cycle=0, frequency=440, variable_frequency=True)
 
     print ("\nPress +/- to change volume, 'q' to quit...")
 
     volume = 400
+    lastVol = 400
     cmnd = None
     press = False
     noneAt = ticks_ms()
     firstNone = True
     note = 0
+    rnote = 0.0
+    lastNote = -1
     while cmnd != "q":
         if Pydos_ui.serial_bytes_available() != 0:
             cmnd = Pydos_ui.read_keyboard(1)
             #print("->"+cmnd+"<- : ",ord(cmnd[0]))
             firstNone = True
             if cmnd=="h": # middle C
-                note=int(261.6256+.5)
+                rnote=261.6256
                 press = True
             elif cmnd == "a": # E
-                note=int(164.8138+.5)
+                rnote=164.8138
                 press = True
             elif cmnd == "s": # F
-                note=int(174.6141+.5)
+                rnote=174.6141
                 press = True
             elif cmnd == "d": # G
-                note=int(195.9977+.5)
+                rnote=195.9977
                 press = True
             elif cmnd == "r": # G sharp/A flat
-                note=int(207.6523+.5)
+                rnote=207.6523
                 press = True
             elif cmnd == "f": # A
-                note=int(220)
+                rnote=220.0
                 press = True
             elif cmnd == "t": # A sharp/B flat
-                note=int(233.0819+.5)
+                rnote=233.0819
                 press = True
             elif cmnd == "g": # B
-                note=int(246.9417+.5)
+                rnote=246.9417
                 press = True
             elif cmnd == "u": # C sharp/D flat
-                note=int(277.1826+.5)
+                rnote=277.1826
                 press = True
             elif cmnd == "j": # D
-                note=int(293.6648+.5)
+                rnote=293.6648
                 press = True
             elif cmnd == "k": # E
-                note=int(329.6276+.5)
+                rnote=329.6276
                 press = True
             elif cmnd == "l": # F
-                note=int(349.2262+.5)
+                rnote=349.2262
                 press = True
             elif cmnd == "o": # F sharp/G flat
-                note=int(369.9944+.5)
+                rnote=369.9944
                 press = True
             elif cmnd == ";": # G
-                note=int(391.9954+.5)
+                rnote=391.9954
                 press = True
             elif cmnd == "q":
                 break
+            if press:
+                note = int(rnote+.5)
 
             if cmnd == "+":
                 volume += 100
@@ -93,7 +111,7 @@ def piano():
                 noneAt = ticks_ms()
                 firstNone = False
             else:
-                if ticks_ms() > noneAt+500:
+                if ticks_ms() > noneAt+noteMS:
                     firstNone = True
                     press = False
 
@@ -111,18 +129,25 @@ def piano():
                 if "ESP32" in sys.implementation._machine or "S2" in sys.implementation._machine:
                     sleep(.1)
             elif sys.implementation.name.upper() == 'CIRCUITPYTHON':
-                if pwm.frequency != note:
-                    pwm.frequency = note
-                if pwm.duty_cycle != volume:
-                    pwm.duty_cycle = volume
-                if "s2" in board_id or "s3" in board_id:
-                    sleep(.1)
+                if Pydos_hw.i2sSCK:
+                    if lastNote != rnote:
+                        if lastNote != -1:
+                            synth.release(snote)
+                        volume = max(0,min(1000,volume))
+                        if lastVol != volume:
+                            lastVol = volume
+                            e = synthio.Envelope(attack_time=.0001,decay_time=.0001,release_time=0,attack_level=volume/1000,sustain_level=volume/1000)
+                        snote = synthio.Note(frequency=rnote,envelope=e)
+                        synth.press(snote)
+                        lastNote = rnote
+                else:
+                    if pwm.frequency != note:
+                        pwm.frequency = note
+                    if pwm.duty_cycle != volume:
+                        pwm.duty_cycle = volume
+                    if "s2" in board_id or "s3" in board_id:
+                        sleep(.1)
 
-            #time.sleep(.1)
-            #cmnd = kbdInterrupt()
-            #while cmnd != None:
-                #cmnd = kbdInterrupt()
-            #pressedat = time.time()
         else:
             if sys.implementation.name.upper() == 'MICROPYTHON':
                 if oldPWM:
@@ -132,15 +157,23 @@ def piano():
                 else:
                     pwm.duty(0)
             elif sys.implementation.name.upper() == 'CIRCUITPYTHON':
-                if pwm.duty_cycle != 0:
-                    pwm.duty_cycle = 0
-            #print("Release")
+                if Pydos_hw.i2sSCK:
+                    if lastNote != -1:
+                        synth.release(snote)
+                        lastNote = -1
+                else:
+                    if pwm.duty_cycle != 0:
+                        pwm.duty_cycle = 0
 
     if sys.implementation.name.upper() == 'CIRCUITPYTHON':
-        pwm.deinit()
-        quietSnd() # Workaround for ESP32-S2 GPIO issue
+        if Pydos_hw.i2sSCK:
+            synth.deinit()
+            i2s.deinit()
+        else:
+            pwm.deinit()
+            quietSnd() # Workaround for ESP32-S2 GPIO issue
 
-if Pydos_hw.sndPin:
+if Pydos_hw.sndPin or Pydos_hw.i2sSCK:
     piano()
 else:
     print("Sound Pin not found")

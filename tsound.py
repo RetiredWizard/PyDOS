@@ -2,8 +2,13 @@ import time
 import sys
 from pydos_hw import Pydos_hw
 from pydos_hw import quietSnd
+try:
+    import synthio
+    import audiobusio
+except:
+    pass
 
-if Pydos_hw.sndPin == None:
+if Pydos_hw.sndPin == None and Pydos_hw.i2sSCK == None:
     print("Sound Pin not found")
 else:
     if sys.implementation.name.upper() == "MICROPYTHON":
@@ -14,9 +19,16 @@ else:
         except:
             piezo=machine.PWM(Pydos_hw.sndPin)
     elif sys.implementation.name.upper() == 'CIRCUITPYTHON':
-        from pwmio import PWMOut
-        Pydos_hw.sndGPIO.deinit() # Workaround for ESP32-S2 GPIO issue
-        piezo = PWMOut(Pydos_hw.sndPin,duty_cycle=0,frequency=440,variable_frequency=True)
+        if Pydos_hw.i2sSCK:
+            noteMS = 375
+            i2s = audiobusio.I2SOut(Pydos_hw.i2sSCK,Pydos_hw.i2sWS,Pydos_hw.i2sDATA)
+            synth = synthio.Synthesizer(sample_rate=22050)
+            e = synthio.Envelope(attack_time=.0001,decay_time=.0001,release_time=0,attack_level=.5,sustain_level=.5)
+            i2s.play(synth)
+        else:
+            from pwmio import PWMOut
+            Pydos_hw.sndGPIO.deinit() # Workaround for ESP32-S2 GPIO issue
+            piezo = PWMOut(Pydos_hw.sndPin,duty_cycle=0,frequency=440,variable_frequency=True)
 
     cmnd = "Y"
     while cmnd.upper() == "Y":
@@ -41,10 +53,16 @@ else:
                 else:
                     piezo.duty(0)
             elif sys.implementation.name.upper() == "CIRCUITPYTHON":
-                piezo.frequency = f
-                piezo.duty_cycle = 65535 // 3
-                time.sleep(0.25)
-                piezo.duty_cycle = 0
+                if Pydos_hw.i2sSCK:
+                    note = synthio.Note(frequency=f,envelope=e)
+                    synth.press(note)
+                    time.sleep(0.25)
+                    synth.release(note)
+                else:
+                    piezo.frequency = f
+                    piezo.duty_cycle = 65535 // 3
+                    time.sleep(0.25)
+                    piezo.duty_cycle = 0
 
             time.sleep(0.05)
         time.sleep(0.5)
@@ -52,5 +70,9 @@ else:
         cmnd = input("Again (y/n): ")
 
     if sys.implementation.name.upper() == "CIRCUITPYTHON":
-        piezo.deinit()
-        quietSnd() # Workaround for ESP32-S2 GPIO issue
+        if Pydos_hw.i2sSCK:
+            synth.deinit()
+            i2s.deinit()
+        else:
+            piezo.deinit()
+            quietSnd() # Workaround for ESP32-S2 GPIO issue

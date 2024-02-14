@@ -76,6 +76,9 @@ class PyDOS_HW:
                 pass
 
         self.sndPin = Pydos_pins.get('sndPin',(None,None))[0]
+        self.i2sSCK = Pydos_pins.get('i2s_BitClock',(None,None))[0]
+        self.i2sWS = Pydos_pins.get('i2s_WordSelect',(None,None))[0]
+        self.i2sDATA = Pydos_pins.get('i2s_Data',(None,None))[0]
         self.neoPixel = Pydos_pins.get('neoPixel',(None,None))[0]
         self.neoPixel_Pow = Pydos_pins.get('neoPixel_Pow',(None,None))[0]
         self.dotStar_Clock = Pydos_pins.get('dotStar_Clock',(None,None))[0]
@@ -125,6 +128,21 @@ class PyDOS_HW:
                     pass
 
         if implementation.name.upper() == 'CIRCUITPYTHON':
+            if not self.i2sSCK:
+                if 'I2S_BIT_CLOCK' in dir(board):
+                    try:
+                        self.i2sWS = board.I2S_WORD_SELECT
+                        self.i2sDATA = board.I2S_DATA
+                        self.i2sSCK = board.I2S_BIT_CLOCK
+                    except:
+                        self.i2sWS = None
+                elif 'SPEAKER_SCK' in dir(board):
+                    try:
+                        self.i2sWS = board.SPEAKER_WS
+                        self.i2sDATA = board.SPEAKER_DOUT
+                        self.i2sSCK = board.SPEAKER_SCK
+                    except:
+                        self.i2sWS = None
             if not self.led:
                 if 'LED1' in dir(board):
                     self.led = board.LED1

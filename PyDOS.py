@@ -67,7 +67,7 @@ def PyDOS():
     global envVars
     if "envVars" not in globals().keys():
         envVars = {}
-    _VER = "1.29"
+    _VER = "1.30"
     prmpVals = ['>','(',')','&','|','\x1b','\b','<','=',' ',_VER,'\n','$','']
 
     print("Starting Py-DOS...")
@@ -250,7 +250,7 @@ def PyDOS():
                         break
                     dirHeadPrntd = True
 
-                if not ForD: 
+                if not ForD:
                     fSize = 0
                     nDirs += 1
                 else:
@@ -459,6 +459,7 @@ def PyDOS():
         gc.collect()
 
     while True:
+        scrWdth = int(envVars["_scrWidth"])
         if condCmd != "":
             cmdLine = condCmd
             condCmd = ""
@@ -836,7 +837,7 @@ def PyDOS():
                                 envVars[envCmdVar] = tHeight
                         elif envVars.get(envCmdVar) != None:
                             envVars.pop(envCmdVar)
-                    
+
                     scrWdth = int(envVars["_scrWidth"])
                     if envCmdVar == 'LIB':
                         path.clear()
@@ -869,7 +870,7 @@ def PyDOS():
 # Second argument has valid path
                     if validPath and args[2][-1] != sep and '?' not in newdir2 and \
                         '*' not in newdir2 and newdir2 !="." and newdir2 != "..":
-                        
+
 # second argument doesn't specify an existing target
                         if newdir2 not in os.listdir(tmpDir2):
                             currDRen = False

@@ -12,20 +12,16 @@ if not exist /lib mkdir /lib
 copy /cpython/lib/* /lib/
 pexec/q import adafruit_bus_device
 if errorlevel 0 goto bus_device_builtin
-echo copy /mpython/lib/optional/adafruit_bus_device /lib/
 if not exist /lib/adafruit_bus_device mkdir /lib/adafruit_bus_device
 copy /cpython/lib/optional/adafruit_bus_device/* /lib/adafruit_bus_device/
 :bus_device_builtin
 pexec import board
 pexec envVars["_boardID"] = board.board_id
 pexec/q import sdcardio
-if not errorlevel 0 echo copy /cpython/lib/optional/adafruit_sdcard.mpy /lib/
-if not errorlevel 0 copy /cpython/lib/optional/adafruit_sdcard.mpy /lib/
-if "%_boardID%" == "teensy41" echo copy/y /cpython/lib/optional/adafruit_sdcard.mpy /lib/
-if "%_boardID%" == "teensy41" copy/y /cpython/lib/optional/adafruit_sdcard.mpy /lib/
+if not errorlevel 0 copy /cpython/lib/optional/adafruit_sdcard.* /lib/
+if "%_boardID%" == "teensy41" copy/y /cpython/lib/optional/adafruit_sdcard.* /lib/
 pexec/q import neopixel
-if not errorlevel 0 echo copy /cpython/lib/optional/neopixel.mpy /lib/
-if not errorlevel 0 copy /cpython/lib/optional/neopixel.mpy /lib/
+if not errorlevel 0 copy /cpython/lib/optional/neopixel.* /lib/
 if exist /cpython/boardconfigs/pydos_bcfg_%_boardID%.py goto foundbcfgCP
 echo *** Warning *** No board configuration file found
 echo *** Warning *** /cpython/boardconfigs/pydos_bcfg_%_boardID%.py
@@ -55,8 +51,7 @@ copy /mpython/lib/* /lib/
 pexec/q import neopixel
 rem if not errorlevel 0 echo copy /mpython/lib/optional/ws2812.py /lib/
 rem if not errorlevel 0 copy /mpython/lib/optional/ws2812.py /lib/
-if not errorlevel 0 echo copy /mpython/lib/optional/neopixel.py /lib/
-if not errorlevel 0 copy /mpython/lib/optional/neopixel.py /lib/
+if not errorlevel 0 copy /mpython/lib/optional/neopixel.* /lib/
 pexec envVars["_uname"] = implementation._machine
 if not "%_uname%" == "Sparkfun SAMD51 Thing Plus with SAMD51J20A" goto skip_SAMD51
 if not exist /lib mkdir /lib
@@ -81,6 +76,10 @@ if not "%_boardID%" == "lilygo_tdeck" goto not_lilygo_tdeck
 rename /lib/pydos_ui.py /lib/pydos_ui_uart.py
 echo copy /cpython/lib/optional/pydos_ui_lilygokbd.py /lib/pydos_ui.py
 copy/y /cpython/lib/optional/pydos_ui_lilygokbd.py /lib/pydos_ui.py
+pexec f = open('/settings.toml','a')
+pexec f.write('\nPYDOS_DISPLAYIO_COLORSPACE="BGR565_SWAPPED"\n')
+pexec f.close()
+rename /virtrepl.py /repl.py
 set _ans2 = A
 goto skip_touchmsg
 
@@ -90,6 +89,7 @@ if "%_boardID%" == "espressif_esp32s3_devkitc_1_n8r8_hacktablet" goto tablet
 goto not_tablet
 :tablet
 set _ans2 = A
+rename /virtrepl.py /repl.py
 goto esp32
 
 :not_tablet
@@ -139,10 +139,10 @@ goto other
 
 :esp32MP
 copy /mpython/ESP32/* /
-pexec/q import urequests
-if not errorlevel 0 echo copy /mpython/lib/optional/urequests.py /lib/
+pexec/q import requests
+if not errorlevel 0 pexec/q import urequests
 if not exist /lib mkdir /lib
-if not errorlevel 0 copy /mpython/lib/optional/urequests.py /lib/
+if not errorlevel 0 copy /mpython/lib/optional/urequests.* /lib/
 
 :other
 if %_ans2% == N goto wifienv
@@ -181,6 +181,7 @@ copy /cpython/kbdFeatherWing/lib/* /lib/
 rename /lib/pydos_ui.py /lib/pydos_ui_uart.py
 echo copy /lib/pydos_ui_kfw.py /lib/pydos_ui.py
 copy /lib/pydos_ui_kfw.py /lib/pydos_ui.py
+rename /virtrepl.py /repl.py
 if %_ans2% == O del /lib/kfw_s2_board.py
 if %_ans2% == E del /lib/kfw_pico_board.py
 goto wifienv
@@ -202,6 +203,7 @@ rem Make kfw copy so that ui.bat can be used to switch modes
 copy /cpython/lib/optional/pydos_ui_bbkeybd.py /lib/pydos_ui_kfw.py
 copy /cpython/kbdFeatherWing/*.bat /
 copy /cpython/kbdFeatherWing/lib/bbq10keyboard.* /lib/
+rename /virtrepl.py /repl.py
 
 :tftfeatherwing
 set/p _ans3 = Do you have a TFT FeatherWing Touch connected (Y/N)?:
@@ -217,6 +219,7 @@ echo **********************************************************
 echo ** To complete touchscreen setup follow instructions at **
 echo ** https://github.com/RetiredWizard/PyDOS_virtkeyboard  **
 echo **********************************************************
+rename /virtrepl.py /repl.py
 pause
 
 :Cytron
