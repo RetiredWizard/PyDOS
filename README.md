@@ -1,7 +1,7 @@
 ## PyDOS, PyBASIC, edit... All the functionality of the 1981 IBM PC on a PI Pico?
 
 **MicroPython/CircuitPython DOS-like shell for microcontroller boards:**  
-**(RP2040, ESP32, ESP32 PICO-D4, ESP32-S2/S3, nRF52840, SAMD51, stm32L4+, NXM ARM Cortex-M7)**  
+**(RP2040, ESP32, ESP32 PICO-D4, ESP32-S2/S3, nRF52840, SAMD51, stm32L4+, NXM ARM Cortex-M7, Lilygo T-Deck, M5Stack Cardputer)**  
 
 **Check out the demo video at https://www.youtube.com/watch?v=Az_oiq8GE4Y**
 
