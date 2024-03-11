@@ -67,7 +67,7 @@ def PyDOS():
     global envVars
     if "envVars" not in globals().keys():
         envVars = {}
-    _VER = "1.30"
+    _VER = "1.31"
     prmpVals = ['>','(',')','&','|','\x1b','\b','<','=',' ',_VER,'\n','$','']
 
     print("Starting Py-DOS...")
