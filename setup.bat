@@ -103,6 +103,7 @@ echo Invalid Selection (Y or N)
 goto not_cardputer
 :copy_cyd
 copy/y /cpython/CheapYellowDisplay/lib/*.py /lib/
+copy/y /cpython/kbdFeatherWing/lib/adafruit_ili9341.* /lib/
 goto tablet
 
 :not_huzzah_bo
