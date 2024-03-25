@@ -13,70 +13,10 @@ CircuitPython M5Stack Cardputer Matrix Keyboard driver.
 
 
 import board
-import digitalio
 import keypad
-from adafruit_debouncer import Debouncer
-#import time
+import keypad_demux
+import time
 
-class MultiplexerKeys():
-
-    def __init__(self,multiplexed_row_pins, column_pins, value_when_pressed=False):
-        self.row_pins = multiplexed_row_pins
-        self.column_pins = column_pins
-        self.row_dio_objs = []
-        self.col_dio_objs = []
-        
-        # Initialize the row pins as outputs
-        for row_pin in self.row_pins:
-            _cur_dio = digitalio.DigitalInOut(row_pin)
-            _cur_dio.direction = digitalio.Direction.OUTPUT
-            self.row_dio_objs.append(_cur_dio)
-            
-        # Initialize the colun pins as inputs with pull-ups
-        for column_pin in self.column_pins:
-            _cur_dio = digitalio.DigitalInOut(column_pin)
-            _cur_dio.direction = digitalio.Direction.INPUT
-            _cur_dio.pull = digitalio.Pull.UP
-            self.col_dio_objs.append(Debouncer(_cur_dio,.1))
-#            self.col_dio_objs.append(_cur_dio)
-        
-        self.value_when_pressed = value_when_pressed
-        
-        self._events = []
-        self._last_key = None
-        
-    @property
-    def events(self):
-        self._scan()
-        return self._events
-    
-# Function to scan the key matrix
-    def _scan(self):
-        self._events = []
-        key_num = -1   # Set so held button can be differentiated from no key pressed
-        for i in range(8):
-            self.set_multiplexer_state(i)
-            for col, column_pin in enumerate(self.col_dio_objs):
-                column_pin.update()
-                column_pin.update()
-                while column_pin.state not in [0,3]:
-                    column_pin.update()
-                if column_pin.value == self.value_when_pressed:  # If a key is pressed
-                    key_num = (i * len(self.col_dio_objs)) + col
-                    #print("Key ({}, {:03b}, {}) pressed".format(key_num, i, col))
-                    self._events.append(keypad.Event(key_number=key_num, pressed=True))
-                    self._last_key = key_num
-#                    time.sleep(.1)
-        if key_num == -1:    # No keys pressed
-            if self._last_key is not None:
-                self._events.append(keypad.Event(key_number=self._last_key, pressed=False))
-                self._last_key = None
-#                time.sleep(.1)
-
-    def set_multiplexer_state(self, state_binary):
-        for idx, compare in enumerate((0b100,0b010,0b001)):
-            self.row_dio_objs[idx].value = True if state_binary & compare else False
-    
 class Cardputer():
     def __init__(self):
         row_pins = (board.KB_A_0, board.KB_A_1, board.KB_A_2)
@@ -84,72 +24,152 @@ class Cardputer():
             board.KB_COL_0, board.KB_COL_1, board.KB_COL_2, board.KB_COL_3, board.KB_COL_4, board.KB_COL_5, board.KB_COL_6)
 
         self._KEY_MATRIX_LUT = [
-            # row 4
-            ("OPT","",""), ("z","Z",""), ("c","C",""), ("b","B",""),
-            ("m","M",""), (".",">","DOWN"), (" ","",""), ("CTRL","",""),
-            ("ALT","",""), ("x","X",""), ("v","V",""), ("n","N",""),
-            (",","<","LEFT"), ("/","?","RIGHT"),
-            
-            # row 2
+            ("OPT","OPT","OPT"), ("z","Z",""), ("c","C",""), ("b","B",""),
+            ("m","M",""), (".",">","DOWN"), (" "," "," "),
+            ("SHIFT","SHIFT","SHIFT"), ("s","S",""), ("f","F",""), ("h","H",""),
+            ("k","K",""), (";",":","UP"), ("\n","\n","\n"), 
             ("q","Q",""), ("e","E",""), ("t","T",""), ("u","U",""),
-            ("o","O",""), ("[","{",""), ("\\","|",""), ("\t","",""), 
-            ("w","W",""), ("r","R",""), ("y","Y",""), ("i","I",""),
-            ("p","P",""), ("]","}",""),
-            
-            # row 3
-            ("SHIFT","",""), ("s","S",""), ("f","F",""), ("h","H",""),
-            ("k","K",""), (";",":","UP"), ("\n","",""), ("FN","",""),
+            ("o","O",""), ("[","{",""), ("\\","|",""), 
+            ("1","!",""), ("3","#",""), ("5","%",""), ("7","&",""),
+            ("9","(",""), ("_","-",""), ("\x08","\x08","\x08"), 
+            ("CTRL","CTRL","CTRL"),
+            ("ALT","ALT","ALT"), ("x","X",""), ("v","V",""), ("n","N",""),
+            (",","<","LEFT"), ("/","?","RIGHT"),
+            ("FN","FN","FN"),
             ("a","A",""), ("d","D",""), ("g","G",""), ("j","J",""),
             ("l","L",""), ("'",'"',""),
-            
-            # row 1
-            ("1","!",""), ("3","#",""), ("5","%",""), ("7","&",""),
-            ("9","(",""), ("_","-",""), ("\x08","",""), ("`","~","\x1b"),
+            ("\t","\t","\t"), 
+            ("w","W",""), ("r","R",""), ("y","Y",""), ("i","I",""),
+            ("p","P",""), ("]","}",""),
+            ("`","~","\x1b"),
             ("2","@",""), ("4","$",""), ("6","^",""), ("8","*",""),
             ("0",")",""), ("=","+","")
         ]
         
-        self.keyboard = MultiplexerKeys(row_pins, column_pins)
+        self.keyboard = keypad_demux.DemuxKeyMatrix(row_pins, column_pins)
         
+        self._last_key_number = None
+        self._pressedkey = None
+        self._timestamp = None
+        self._repeat_key = None
+        self._repeat_started = False
+
         self.shift = False
         self.funct = False
         self.ctrl = False
         self.opt = False
         self.alt = False
+        self.shift_lock = False
+        self.funct_lock = False
+        self._hold_modkey = False
         
     def check_keyboard(self):
-        events = self.keyboard.events
+        event = keypad.Event()
         new_char_buffer = ""
-        if events:
-            for event in events:
+
+        while True:
+            if self.keyboard.events.get_into(event):
+                new_char = self._KEY_MATRIX_LUT[event.key_number][0]
+                single_press = False
+                if self._last_key_number == event.key_number:
+                    single_press = True
+                self._last_key_number = event.key_number
+
                 if event.pressed:
-                    new_char = self._KEY_MATRIX_LUT[event.key_number][0]
-                    if new_char in ['SHIFT','FN','CTRL','OPT','ALT']:
-                        new_char = ""
-                    else:
+                    if self._timestamp is None and self._pressedkey is None:
+                        self._pressedkey = event.key_number
+                        self._timestamp = int(time.monotonic_ns()/1000000)
+                    elif event.key_number != self._pressedkey:
+                        # Second key paressed, reset repeat timer
+                        self._repeat_key = None
+                        self._repeat_started = False
+
+                    if new_char not in ['SHIFT','FN','CTRL','OPT','ALT']:
                         if self.shift:
                             new_char = self._KEY_MATRIX_LUT[event.key_number][1]
-                            self.shift = False
+                            if not self._hold_modkey and not self.shift_lock:
+                                self.shift = False
                         elif self.funct:
                             new_char = self._KEY_MATRIX_LUT[event.key_number][2]
-                            self.funct = False
-                        #new_char_buffer += new_char    # Replaced so only last char if multiple events
-                        new_char_buffer = new_char      # (multiple keys simultaneously pressed)
-                        
+                            if not self._hold_modkey and not self.funct_lock:
+                                self.funct = False
+                        elif self.opt:
+                            if not self._hold_modkey:
+                                self.opt = False
+                        new_char_buffer += new_char
+
+                        if self._timestamp is not None and self._repeat_key is None:
+                            self._repeat_key = new_char
+                    else:
+                        self._hold_modkey = True
+                        self._timestamp = None  # Don't repeat modifier keys
+                        self._repeat_started = False
+                        self._repeat_key = None
+                        self._pressedkey = None # Allow next key to repeat
+                        if new_char == "SHIFT":
+                            if self.opt:
+                                self.shift_lock = not self.shift_lock
+                                self.shift = self.shift_lock
+                                self.opt = False
+                            else:
+                                if not self.shift_lock:
+                                    self.shift = not self.shift
+                        elif new_char == "FN":
+                            if self.opt:
+                                self.funct_lock = not self.funct_lock
+                                self.funct = self.funct_lock
+                                self.opt = False
+                            else:
+                                if not self.funct_lock:
+                                    self.funct = not self.funct
+                        elif new_char == "CTRL":
+                            self.ctrl = not self.ctrl
+                        elif new_char == "OPT":
+                            self.opt = not self.opt
+                        elif new_char == "ALT":
+                            self.alt = not self.alt
                 else:
-                # For modifer keys disable auto-repeat by only responding to "RELEASE" events
-                    new_char = self._KEY_MATRIX_LUT[event.key_number][0]
-                    if new_char == "SHIFT":
-                        self.shift = not self.shift
-                    elif new_char == "FN":
-                        self.funct = not self.funct
-                    elif new_char == "CTRL":
-                        self.ctrl = not self.ctrl
-                    elif new_char == "OPT":
-                        self.opt = not self.opt
-                    elif new_char == "ALT":
-                        self.alt = not self.alt
-                    
+                    if event.key_number == self._pressedkey:
+                        self._pressedkey = None
+                        self._timestamp = None
+                        self._repeat_started = False
+                        self._repeat_key = None
+
+                    if new_char in ['SHIFT','FN','CTRL','OPT','ALT']:
+                        #print(f'shifted:{self.shift} hold:{self._hold_modkey} pressed:{self._pressedkey} time:{self._timestamp} repeat_started:{self._repeat_started} repeat_key:{self._repeat_key}')
+                        self._hold_modkey = False
+                        if not single_press:
+                            if new_char == "SHIFT":
+                                if self.opt and self.shift_lock:
+                                    self.shift = False
+                                    self.shift_lock = False
+                                elif not self.shift_lock:
+                                    self.shift = False
+                            elif new_char == "FN":
+                                if self.opt and self.funct_lock:
+                                    self.funct = False
+                                    self.funct_lock = False
+                                elif not self.funct_lock:
+                                    self.funct = False
+                            elif new_char == "CTRL":
+                                self.ctrl = False
+                            elif new_char == "OPT":
+                                self.opt = False
+                            elif new_char == "ALT":
+                                self.alt = False
+            else:
+                if new_char_buffer == "" and self._timestamp is not None:
+                    hold_time = int(time.monotonic_ns()/1000000) - self._timestamp
+                    if hold_time < 0:
+                        self._timestamp = int(time.monotonic_ns()/1000000)
+                        hold_time = int(time.monotonic_ns()/1000000)
+                    if hold_time > 1000 or (hold_time > 100 and self._repeat_started):
+                        if self._repeat_key is not None:
+                            new_char_buffer = self._repeat_key
+                        self._repeat_started = True
+                        self._timestamp = int(time.monotonic_ns()/1000000)
+
+                break
 
         return new_char_buffer
 
@@ -159,4 +179,18 @@ class Cardputer():
 
 #while True:
 #    print(cardputer.check_keyboard(),end="")
+
+#s = None
+#l = None
+#o = None
+#while True:
+#    ol = l
+#    os = s
+#    oo = o
+#    a = cardputer.check_keyboard()
+#    s = cardputer.shift
+#    l = cardputer.shift_lock
+#    o = cardputer.opt
+#    if a != "" or s != os or l != ol or o != oo:
+#        print(("opt" if o else "   "),("lock" if l else "    "),("shift" if s else "     "),a)
 

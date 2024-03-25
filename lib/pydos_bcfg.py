@@ -74,7 +74,7 @@ elif implementation.name.upper() == "CIRCUITPYTHON":
     if 'I2S_BIT_CLOCK' in dir(board):
         Pydos_pins['i2s_BitClock'] = (board.I2S_BIT_CLOCK,"board.I2S_BIT_CLOCK")
         Pydos_pins['i2s_WordSelect'] = (board.I2S_WORD_SELECT,"board.I2S_WORD_SELECT")
-        if 'I2S_DATA' in board:
+        if 'I2S_DATA' in dir(board):
             Pydos_pins['i2s_Data'] = (board.I2S_DATA,"board.I2S_DATA")
         else:
             Pydos_pins['i2s_Data'] = (board.IS2_DATA,"board.IS2_DATA")

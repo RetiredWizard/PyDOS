@@ -107,9 +107,24 @@ copy/y /cpython/kbdFeatherWing/lib/adafruit_ili9341.* /lib/
 goto tablet
 
 :not_huzzah_bo
-if "%_boardID%" == "makerfabs_tft7" goto tablet
+if "%_boardID%" == "makerfabs_tft7" goto makerfabs_tablet
 if "%_boardID%" == "espressif_esp32s3_devkitc_1_n8r8_hacktablet" goto tablet
 goto not_tablet
+
+:makerfabs_tablet
+pexec import os
+pexec envVars["_ts_width"] = os.getenv('PYDOS_TS_WIDTH','')
+if not "%_ts_width%" == "" goto tablet
+set/p _answidth = What is the resolution width of the screen? (1024/800):
+if %_answidth% == 800 goto validwidth
+if %_answidth% == 1024 goto validwidth
+echo Invalid resolution entered (1024/800)
+goto makerfabs_tablet
+:validwidth
+pexec f = open('/settings.toml','a')
+pexec f.write('\nPYDOS_TS_WIDTH=%_answidth%\n')
+pexec f.close()
+
 :tablet
 set _ans2 = A
 rename /virtrepl.py /repl.py
@@ -126,7 +141,7 @@ if %_ans2% == E goto esp32
 if %_ans2% == o goto other
 if %_ans2% == O goto other
 echo Invalid selection (N,E or O)
-goto board
+goto not_tablet
 
 :nanoconnect
 set _ans2 = N

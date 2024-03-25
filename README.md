@@ -1,7 +1,7 @@
 ## PyDOS, PyBASIC, edit... All the functionality of the 1981 IBM PC on a PI Pico?
 
 **MicroPython/CircuitPython DOS-like shell for microcontroller boards:**  
-**(RP2040, ESP32, ESP32 PICO-D4, ESP32-S2/S3, nRF52840, SAMD51, stm32L4+, NXM ARM Cortex-M7, Lilygo T-Deck, M5Stack Cardputer)**  
+**(RP2040, ESP32, ESP32 PICO-D4, ESP32-S2/S3, nRF52840, SAMD51, stm32L4+, NXM ARM Cortex-M7, Lilygo T-Deck, M5Stack Cardputer, Cheap Yellow Display - esp32-2432s028)**  
 
 **Check out the demo video at https://www.youtube.com/watch?v=Az_oiq8GE4Y**
 
@@ -362,10 +362,11 @@ At the REPL prompt type "**import PyDOS*** to start PyDOS and then type **setup*
 ## To Do  
 *Possible updates depending on RAM impact*
 
+- integrate ConnectionManager into PyDOS_wifi
 - investigate porting micropython flash mount to circuitpython
 - investigate date/time stamp issue on seeed nrf52840 files
 - support for connected color displays  
-- support for touch screens  
+- ~~support for touch screens~~  
 - Rename should allow wildcards in filenames, i.e. "rename *.bas *.txt" or "rename code.py *.sav"  
 - Quiet, /Q switches to DEL, RMDIR, COPY, XCOPY commands
 - PgUp/PgDwn support in fileview.py

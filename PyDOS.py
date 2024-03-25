@@ -4,7 +4,7 @@ try:
 except:
     sep = os.getcwd()[0]
 from time import localtime
-from sys import stdin,implementation,path
+from sys import stdin,implementation,path,print_exception
 if not sep+'lib' in path:
     path.insert(1,sep+'lib')
 path.append(sep+'PyBasic')
@@ -67,7 +67,7 @@ def PyDOS():
     global envVars
     if "envVars" not in globals().keys():
         envVars = {}
-    _VER = "1.32"
+    _VER = "1.33"
     prmpVals = ['>','(',')','&','|','\x1b','\b','<','=',' ',_VER,'\n','$','']
 
     print("Starting Py-DOS...")
@@ -134,11 +134,11 @@ def PyDOS():
         try:
             with open(cFile) as cf:
                 if passedIn.find("'") > -1:
-                    exec('passedIn = "'+passedIn+'"\n'+cf.read())
+                    exec(f'passedIn = "{passedIn}"\n{cf.read()}')
                 else:
-                    exec("passedIn = '"+passedIn+"'\n"+cf.read())
+                    exec(f"passedIn = '{passedIn}'\n{cf.read()}")
         except Exception as err:
-            print("*ERROR* Exception:",str(err),"in",cFile)
+            print_exception(err)
         except KeyboardInterrupt:
             print("^C")
 
@@ -199,7 +199,7 @@ def PyDOS():
 
         return(fullPath)
 
-    srtFnc = lambda v,dP: str(os.stat(dP+v)[0]&(32768))[0]+v.lower()+"*"+v
+    srtFnc = lambda v,dP: f"{str(os.stat(dP+v)[0]&(32768))[0]}{v.lower()}*{v}"
 
     def dirLoop(tmpDir,lastDir,isFile,swPause,swWide,swRecur,prSum, \
         nLines=0,nFiles=0,tFSize=0,nDirs=0):
@@ -221,7 +221,7 @@ def PyDOS():
             lastDir = ""
 
         if dirPat is None:
-            (quit,nLines) = scrnPause(swPause,nLines,["","Directory of "+dPath.replace('/',('\\' if envVars.get('DIRSEP','/') == '\\' else '/'))])
+            (quit,nLines) = scrnPause(swPause,nLines,["",f"Directory of {dPath.replace('/',('\\' if envVars.get('DIRSEP','/') == '\\' else '/'))}"])
             dirHeadPrntd = True
             nDirs += 2
             if swWide:
@@ -235,14 +235,14 @@ def PyDOS():
             else:
                 scrAdj1 = 52 - min(scrWdth,52)
                 (quit,nLines) = scrnPause(swPause,nLines, \
-                    ["."+" "*(23-scrAdj1)+"<DIR>",".."+" "*(22-scrAdj1)+"<DIR>"])
+                    [f".{" "*(23-scrAdj1)}<DIR>",f"..{" "*(22-scrAdj1)}<DIR>"])
 
         for _dir in sorted([srtFnc(x,pFmt(dPath)) for x in os.listdir(dPath)]):
             _dir = _dir.split('*')[1]
 
             if (dirPat is None or _match(dirPat,_dir[:wldCLen])) and not quit:
-                dStat = os.stat(pFmt(dPath)+_dir)
-                ForD = aFile(pFmt(dPath)+_dir)
+                dStat = os.stat(f"{pFmt(dPath)}{_dir}")
+                ForD = aFile(f"{pFmt(dPath)}{_dir}")
 
                 if not dirHeadPrntd:
                     (quit,nLines) = scrnPause(swPause,nLines,["","Directory of "+dPath.replace('/',('\\' if envVars.get('DIRSEP','/') == '\\' else '/'))])
@@ -266,7 +266,7 @@ def PyDOS():
                     wideCount += 1
                     if not ForD:
                         (quit,nLines) = scrnPause(swPause,nLines, \
-                            ["["+_dir[:13]+"]"+" "*(14-len(_dir[:13]))],"")
+                            [f"[{_dir[:13]}]{" "*(14-len(_dir[:13]))}"],"")
                     else:
                         (quit,nLines) = scrnPause(swPause,nLines, \
                             [_dir[:15]+" "*(16-len(_dir[:15]))],"")
@@ -277,11 +277,11 @@ def PyDOS():
                         scrAdj1 = 52 - min(scrWdth,52)
                         scrAdj2 = min(13,65-min(scrWdth,65))
                         (quit,nLines) = scrnPause(swPause,nLines, \
-                            [_dir[:max(8,scrWdth-26)]+" "*(24-len(_dir)-scrAdj1)+"<DIR>"+" "*(18-scrAdj2)+"%2.2i-%2.2i-%4.4i %2.2i:%2.2i" % (fTime[1], fTime[2], fTime[0], fTime[3], fTime[4])])
+                            [f"{_dir[:max(8,scrWdth-26)]}{" "*(24-len(_dir)-scrAdj1)}<DIR>{" "*(18-scrAdj2)}{fTime[1]:02}-{fTime[2]:02}-{fTime[0]:04} {fTime[3]:02}:{fTime[4]:02}"])
                     else:
                         scrAdj1 = 65 - min(scrWdth,65)
                         (quit,nLines) = scrnPause(swPause,nLines, \
-                            [_dir[:max(8,scrWdth-20-len(fSize))]+" "*(36-len(_dir)+10-len(fSize)-scrAdj1)+fSize+" %2.2i-%2.2i-%4.4i %2.2i:%2.2i" % (fTime[1], fTime[2], fTime[0], fTime[3], fTime[4])])
+                            [f"{_dir[:max(8,scrWdth-20-len(fSize))]}{" "*(36-len(_dir)+10-len(fSize)-scrAdj1)}{fSize} {fTime[1]:02}-{fTime[2]:02}-{fTime[0]:04} {fTime[3]:02}:{fTime[4]:02}"])
 
                 if quit:
                     break
@@ -315,8 +315,8 @@ def PyDOS():
 
                 scrAdj1 = 65 - min(scrWdth,65)
                 (quit,nLines) = scrnPause(swPause,nLines, \
-                    [(" "*(4-len(str(nFiles)))+" "+str(nFiles)+" File(s)"+" "*(32-len(str(tFSize))-scrAdj1)+" "+str(tFSize)+" Bytes.")[:scrWdth], \
-                    (" "*(4-len(str(nDirs)))+" "+str(nDirs)+" Dir(s)"+" "*(33-len(str(availDisk))-scrAdj1)+" "+str(availDisk)+" Bytes free.")[:scrWdth],""],"")
+                    [(f"{" "*(4-len(str(nFiles)))} {nFiles} File(s){" "*(32-len(str(tFSize))-scrAdj1)} {tFSize} Bytes.")[:scrWdth], \
+                    (f"{" "*(4-len(str(nDirs)))} {nDirs} Dir(s){" "*(33-len(str(availDisk))-scrAdj1)} {availDisk} Bytes free.")[:scrWdth],""],"")
 
         return (nLines,nFiles,tFSize,nDirs,quit)
 
@@ -394,7 +394,7 @@ def PyDOS():
                             os.remove(Dir+_dir)
                             print((Dir+_dir).replace('/',('\\' if envVars.get('DIRSEP','/') == '\\' else '/')),"deleted.")
                         except Exception as err:
-                            print("Unable to delete: "+Dir+_dir+", Exception:",str(err))
+                            print(f"Unable to delete: {Dir}{_dir}, Exception: {err}")
                             break
                     elif Recurs:
                         delFiles(Dir+_dir+sep,'*',Recurs,removDirs)
@@ -404,7 +404,7 @@ def PyDOS():
                             try:
                                 os.rmdir(Dir+_dir)
                             except Exception as err:
-                                print("Unable to remove: "+Dir+_dir+", Exception:",str(err))
+                                print(f"Unable to remove: {Dir}{_dir}, Exception: {err}")
                                 break
                 else:
                     print("Unable to delete: "+Dir+_dir+". Filename too long for wildcard operation.")
@@ -468,7 +468,7 @@ def PyDOS():
                 cmdLine = BATfile.readline()
                 i=1
                 for param in batParams:
-                    cmdLine = cmdLine.replace('%'+str(i),param)
+                    cmdLine = cmdLine.replace(f'%{i}',param)
                     i+=1
                     if i>9:
                         break
@@ -500,9 +500,9 @@ def PyDOS():
                             if 'mem_free' in dir(gc):
                                 prompt += str(gc.mem_free())
                         elif prmpToken == 'D':
-                            prompt += "%2.2i/%2.2i/%4.4i" % (localtime()[1], localtime()[2], localtime()[0])
+                            prompt += f"{localtime()[1]:02}/{localtime()[2]:02}/{localtime()[0]:04}" 
                         elif prmpToken == 'T':
-                            prompt += "%2.2i:%2.2i:%2.2i" % (localtime()[3], localtime()[4], localtime()[5])
+                            prompt += f"{localtime()[3]:02}:{localtime()[4]:02}:{localtime()[5]:02}"
                         elif prmpToken == 'P':
                             prompt += os.getcwd().replace('/',('\\' if envVars.get('DIRSEP','/') == '\\' else '/'))
                         else:
@@ -573,10 +573,10 @@ def PyDOS():
                     if args[i].find('"') > -1 and args[i].find('"') != len(args[i])-1:
                         break
                     elif args[i][-1] == '"':
-                        args[i-1] = args[i-1] + " " + args.pop(i)[:-1]
+                        args[i-1] = f"{args[i-1]} {args.pop(i)[:-1]}"
                         quotedArg = False
                     else:
-                        args[i-1] = args[i-1] + " " + args.pop(i)
+                        args[i-1] = f"{args[i-1]} {args.pop(i)}"
                 elif args[i][0] == '"':
                     if args[i][-1] != '"':
                         args[i] = args[i][1:]
@@ -633,19 +633,18 @@ def PyDOS():
 
         elif cmd == "DATE":
             i = localtime()[6]*3
-            print("The current date is: "+"MonTueWedThuFriSatSun"[i:i+3]+ \
-                " %2.2i/%2.2i/%4.4i" % (localtime()[1], localtime()[2], localtime()[0]))
+            print(f'The current date is: {"MonTueWedThuFriSatSun"[i:i+3]} {localtime()[1]:02}/{localtime()[2]:02}/{localtime()[0]:04}')
 
         elif cmd == "TIME":
-            print("The current time is: %2.2i:%2.2i:%2.2i" % (localtime()[3], localtime()[4], localtime()[5]))
+            print(f"The current time is: {localtime()[3]:02}:{localtime()[4]:02}:{localtime()[5]:02}")
 
         elif cmd == "MEM":
             gc.collect()
-            print("\n%10i Kb free conventional memory" % (int(gc.mem_free()/1000)))
-            print("%10i Kb used conventional memory" % (int(gc.mem_alloc()/1000)))
+            print(f"\n{gc.mem_free()/1024:10.1f} Kb free conventional memory")
+            print(f"{gc.mem_alloc()/1024:10.1f} Kb used conventional memory")
             if imp == "M":
                 if 'threshold' in dir(gc):
-                    print("%10i Kb current threshold value" % (int(gc.threshold()/1000)))
+                    print(f"{gc.threshold()/1024:10.1f} Kb current threshold value")
 
                 if swBits & int('010000',2):
                     print(mem_info(1))
@@ -653,7 +652,7 @@ def PyDOS():
                     print("Illegal switch, Command Format: mem[/d]")
 
         elif cmd == "VER":
-            print("PyDOS [Version "+_VER+"]")
+            print(f"PyDOS [Version {_VER}]")
 
         elif cmd == "ECHO":
             if len(args) == 1:
@@ -787,7 +786,7 @@ def PyDOS():
         elif cmd == "SET":
             if len(args) == 1:
                 for _ in sorted(envVars):
-                    print(_+"=",envVars[_],sep="")
+                    print(f"{_}={envVars[_]}")
             else:
                 args = cmdLine.split(" ")
                 args.pop(0)
@@ -917,11 +916,11 @@ def PyDOS():
                                     if ans == "Y":
                                         delFiles(tmpDir,newdir,True,False)
                                 else:
-                                    print("Unable to delete: "+tmpDir+newdir+". File not found.")
+                                    print(f"Unable to delete: {tmpDir}{newdir}. File not found.")
                     else:
                         print("Illegal switch, Command Format: DEL[/s] [path][file]")
                 else:
-                    print("Unable to delete: "+tmpDir+newdir+". File not found.")
+                    print(f"Unable to delete: {tmpDir}{newdir}. File not found.")
             else:
                 print("Illegal Path.")
 
@@ -958,7 +957,7 @@ def PyDOS():
                     else:
                         print("Illegal switch, Command Format: TYPE[/p] [path][file]")
                 else:
-                    print("Unable to display: "+tmpDir+newdir+". File not found.")
+                    print(f"Unable to display: {tmpDir}{newdir}. File not found.")
             else:
                 print("Illegal Path.")
 
@@ -1007,7 +1006,7 @@ def PyDOS():
                             try:
                                 os.rmdir(tmpDir)
                             except Exception as err:
-                                print("Unable to remove: "+tmpDir+", Exception:",str(err))
+                                print(f"Unable to remove: {tmpDir}, Exception: {err}")
                             try:
                                 os.chdir(savDir)
                             except:
