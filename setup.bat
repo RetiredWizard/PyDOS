@@ -93,21 +93,8 @@ set _ans2 = A
 goto skip_touchmsg
 
 :not_cardputer
-if not "%_boardID%" == "adafruit_huzzah32_breakout" goto not_huzzah_bo
-set/p _cyd = Is this board a Cheap Yellow Display board (Y/N)?:
-if %_cyd% == N goto not_huzzah_bo
-if %_cyd% == n goto not_huzzah_bo
-if %_cyd% == Y goto copy_cyd
-if %_cyd% == y goto copy_cyd
-echo Invalid Selection (Y or N)
-goto not_cardputer
-:copy_cyd
-copy/y /cpython/CheapYellowDisplay/lib/*.py /lib/
-copy/y /cpython/kbdFeatherWing/lib/adafruit_ili9341.* /lib/
-goto tablet
-
-:not_huzzah_bo
 if "%_boardID%" == "makerfabs_tft7" goto makerfabs_tablet
+if "%_boardID%" == "sunton_esp32_2432S028" goto tablet
 if "%_boardID%" == "espressif_esp32s3_devkitc_1_n8r8_hacktablet" goto tablet
 goto not_tablet
 

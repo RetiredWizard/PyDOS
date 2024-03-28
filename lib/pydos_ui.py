@@ -7,6 +7,15 @@ if implementation.name.upper() == "MICROPYTHON":
     import uselect
 elif implementation.name.upper() == "CIRCUITPYTHON":
     from supervisor import runtime
+    import board
+    sizeFrmDisp = False
+    if 'DISPLAY' in dir(board):
+        try:
+            import displayio
+            import terminalio
+            sizeFrmDisp = True
+        except:
+            pass
 
 class PyDOS_UI:
 
@@ -35,30 +44,34 @@ class PyDOS_UI:
         return stdin.read(num)
 
     def get_screensize(self):
-        print("Screen set to 24 rows, 80 col. Press any key to continue...",end="")
-        stdout.write('\x1b[2K')
-        stdout.write('\x1b[999;999H\x1b[6n')
-        pos = ''
-        char = ''
-        try:
-            char = stdin.read(1) ## expect ESC[yyy;xxxR
-        except:
-            return(24,80)
-        if char != '\x1b':
-            return(24,80)
+        if sizeFrmDisp:
+            height = round(board.DISPLAY.height/(terminalio.FONT.bitmap.height*displayio.CIRCUITPYTHON_TERMINAL.scale))-1
+            width = round(board.DISPLAY.width/((terminalio.FONT.bitmap.width/95)*displayio.CIRCUITPYTHON_TERMINAL.scale))-2
+        else:
+            print("Screen set to 24 rows, 80 col. Press any key to continue...",end="")
+            stdout.write('\x1b[2K')
+            stdout.write('\x1b[999;999H\x1b[6n')
+            pos = ''
+            char = ''
+            try:
+                char = stdin.read(1) ## expect ESC[yyy;xxxR
+            except:
+                return(24,80)
+            if char != '\x1b':
+                return(24,80)
 
-        while char != 'R':
-            pos += char
-            char = stdin.read(1)
-        print()
+            while char != 'R':
+                pos += char
+                char = stdin.read(1)
+            print()
 
-        width = int(pos.lstrip("\n\x1b[").split(';')[1],10)
-        height = int(pos.lstrip("\n\x1b[").split(';')[0],10)
+            width = int(pos.lstrip("\n\x1b[").split(';')[1],10)
+            height = int(pos.lstrip("\n\x1b[").split(';')[0],10)
 
-        if width < 1:
-            width = 80
-        if height < 1:
-            height = 24
+            if width < 1:
+                width = 80
+            if height < 1:
+                height = 24
 
         return(height,width)
 

@@ -289,7 +289,11 @@ class PyDOS_wifi:
                 self._esp32_reset.deinit()
                 self._spi.deinit()
             else:
-                self._https._free_sockets()
+                # Temporary until CP 8.x no longer supported
+                try:
+                    self._https._free_sockets()
+                except:
+                    pass
                 self._https = None
                 self._socket = None
                 #self.response.close()  Takes too long, effectivly hangs....

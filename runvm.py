@@ -112,7 +112,8 @@ def runvm(runargv):
             t.write("    print('****ERROR**** running '+'"+tmpDir+newdir+"')\n")
             t.write("os.chdir('/')\n")
             t.write("os.remove('/"+startupfile+".py')\n")
-            t.write("os.rename('/"+startupfile+"._PyD','/"+startupfile+".py')\n")
+            if startupfile+'._PyD' in os.listdir('/'):
+                t.write("os.rename('/"+startupfile+"._PyD','/"+startupfile+".py')\n")
             t.write('print("\\n\\nIf PyDOS doesn'+"'"+'t start, press Ctrl-D at the >>> REPL prompt")\n')
             t.write('print("===========================================================\\n\\n")\n')
             if sys.implementation.name.upper() == "CIRCUITPYTHON":

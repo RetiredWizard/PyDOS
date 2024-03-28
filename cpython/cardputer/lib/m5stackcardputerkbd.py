@@ -173,24 +173,3 @@ class Cardputer():
 
         return new_char_buffer
 
-# Exmple Usage:
-#
-#cardputer = Cardputer()
-
-#while True:
-#    print(cardputer.check_keyboard(),end="")
-
-#s = None
-#l = None
-#o = None
-#while True:
-#    ol = l
-#    os = s
-#    oo = o
-#    a = cardputer.check_keyboard()
-#    s = cardputer.shift
-#    l = cardputer.shift_lock
-#    o = cardputer.opt
-#    if a != "" or s != os or l != ol or o != oo:
-#        print(("opt" if o else "   "),("lock" if l else "    "),("shift" if s else "     "),a)
-

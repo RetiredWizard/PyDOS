@@ -82,6 +82,12 @@ elif implementation.name.upper() == "CIRCUITPYTHON":
         Pydos_pins['i2s_BitClock'] = (board.SPEAKER_SCK,"board.SPEAKER_SCK")
         Pydos_pins['i2s_WordSelect'] = (board.SPEAKER_WS,"board.SPEAKER_WS")
         Pydos_pins['i2s_Data'] = (board.SPEAKER_DOUT,"board.SPEAKER_DOUT")
+    if 'LED_RED' in dir(board):
+        Pydos_pins['LED_RED'] = (board.LED_RED,"LED_RED")
+    if 'LED_GREEN' in dir(board):
+        Pydos_pins['LED_GREEN'] = (board.LED_GREEN,"LED_GREEN")
+    if 'LED_BLUE' in dir(board):
+        Pydos_pins['LED_BLUE'] = (board.LED_BLUE,"LED_BLUE")
     if 'NEOPIXEL' in dir(board):
         Pydos_pins['neoPixel'] = (board.NEOPIXEL,"NEOPIXEL")
     if 'NEOPIXEL_POWER' in dir(board):
