@@ -67,7 +67,7 @@ def PyDOS():
     global envVars
     if "envVars" not in globals().keys():
         envVars = {}
-    _VER = "1.34"
+    _VER = "1.35"
     prmpVals = ['>','(',')','&','|','\x1b','\b','<','=',' ',_VER,'\n','$','']
 
     print("Starting Py-DOS...")
@@ -636,7 +636,7 @@ def PyDOS():
             print(f'The current date is: {"MonTueWedThuFriSatSun"[i:i+3]} {localtime()[1]:02}/{localtime()[2]:02}/{localtime()[0]:04}')
 
         elif cmd == "TIME":
-            print(f"The current time is: {localtime()[3]:02}:{localtime()[4]:02}:{localtime()[5]:02}")
+            print(f"The current time is: {localtime()[3]%12}:{localtime()[4]:02}:{localtime()[5]:02} {["AM","PM"][localtime()[3]//12]}")
 
         elif cmd == "MEM":
             gc.collect()

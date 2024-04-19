@@ -1,4 +1,4 @@
-PyDOS_wifi_VER = "1.21"
+PyDOS_wifi_VER = "1.35"
 
 import os
 import time
@@ -6,32 +6,24 @@ from sys import implementation
 
 if implementation.name.upper() == "CIRCUITPYTHON":
     import board
-    import adafruit_requests as requests
+    import adafruit_requests
+    import adafruit_connection_manager
 
-    if board.board_id in ['arduino_nano_rp2040_connect'] or 'ESP_CS' in dir(board):
+    if board.board_id == 'arduino_nano_rp2040_connect' or hasattr(board,'ESP_CS'):
         import busio
         from digitalio import DigitalInOut
         from adafruit_esp32spi import adafruit_esp32spi
-        import adafruit_esp32spi.adafruit_esp32spi_socket as socket
     else:
-        import ssl
-        import socketpool
         import wifi
 
 elif implementation.name.upper() == 'MICROPYTHON':
-    try:
-        import ussl as ssl
-    except:
-        import ssl
-    try:
-        import usocket as socket
-    except:
-        import socket
+    import ssl
+    import socket
     import network
     try:
-        import urequests as https
+        import requests
     except:
-        print("***NOTE*** urequests library not available, json queries may not complete")
+        print("***NOTE*** requests library not available, json queries may not complete")
         print("https://github.com/micropython/micropython-lib/tree/master/python-ecosys \n")
         import json
     import select
@@ -46,23 +38,20 @@ class PyDOS_wifi:
 
         self.timeout = 15000
         self.wlan = None
-        self.esp = None
+        self.radio = None
         self.ipaddress = None
         self.response = None
         self._spi = None
-        self._socket = None
-        self._https = None
+        self._pool = None
+        self._requests = None
         self._poller = None
 
-        if implementation.name.upper() == "CIRCUITPYTHON":
-            if board.board_id in ['arduino_nano_rp2040_connect'] or 'ESP_CS' in dir(board):
-                self._https = requests
-        elif implementation.name.upper() == 'MICROPYTHON':
-            self._socket = socket
+        if implementation.name.upper() == 'MICROPYTHON':
+            self._pool = socket
             try:
-                self._https = https
+                self._requests = requests
             except:
-                self._https = None
+                self._requests = None
 
     def getenv(self,tomlKey):
         if implementation.name.upper() == "CIRCUITPYTHON":
@@ -91,13 +80,10 @@ class PyDOS_wifi:
     @property
     def is_connected(self):
         if implementation.name.upper() == "CIRCUITPYTHON":
-            if board.board_id in ['arduino_nano_rp2040_connect'] or 'ESP_CS' in dir(board):
-                if self.esp != None:
-                    retVal = self.esp.is_connected
-                else:
-                    retVal = False
+            if self.radio != None:
+                retVal = self.radio.is_connected if hasattr(self.radio,'is_connected') else self.radio.connected
             else:
-                retVal = wifi.radio.ipv4_address is not None
+                retVal = False
         elif implementation.name.upper() == "MICROPYTHON":
             if self.wlan != None:
                 retVal = self.wlan.isconnected()
@@ -125,9 +111,8 @@ class PyDOS_wifi:
                     else:
                         self._spi = busio.SPI(board.SCK, board.MOSI, board.MISO)
 
-                    self.esp = adafruit_esp32spi.ESP_SPIcontrol(self._spi, self._esp32_cs, \
+                    self.radio = adafruit_esp32spi.ESP_SPIcontrol(self._spi, self._esp32_cs, \
                         self._esp32_ready, self._esp32_reset, debug=espspi_debug)
-                    self._https.set_socket(socket, self.esp)
 
                     ntrys = 0
                     while not self.is_connected and ntrys < 3:
@@ -135,38 +120,37 @@ class PyDOS_wifi:
                             print("Connecting to AP...")
                         ntrys += 1
                         try:
-                            self.esp.connect_AP(self.getenv('CIRCUITPY_WIFI_SSID'), self.getenv('CIRCUITPY_WIFI_PASSWORD'))
+                            self.radio.connect_AP(self.getenv('CIRCUITPY_WIFI_SSID'), self.getenv('CIRCUITPY_WIFI_PASSWORD'))
                         except RuntimeError as e:
                             print("could not connect to AP, retrying: ", e)
 
-                    self.ipaddress = self.esp.pretty_ip(self.esp.ip_address)
-                retVal = self.is_connected
+                    self.ipaddress = self.radio.pretty_ip(self.radio.ip_address)
             else:
-                wifi.radio.connect(self.getenv('CIRCUITPY_WIFI_SSID'), self.getenv('CIRCUITPY_WIFI_PASSWORD'))
-                self._socket = socketpool.SocketPool(wifi.radio)
-                self._https = requests.Session(self._socket, ssl.create_default_context())
+                self.radio = wifi.radio
+                self.radio.connect(self.getenv('CIRCUITPY_WIFI_SSID'), self.getenv('CIRCUITPY_WIFI_PASSWORD'))
 
                 self.ipaddress = wifi.radio.ipv4_address
-                retVal = self.is_connected
+
+            self._pool = adafruit_connection_manager.get_radio_socketpool(self.radio)
+            self._requests = adafruit_requests.Session(self._pool, \
+                adafruit_connection_manager.get_radio_ssl_context(self.radio))                    
+            retVal = self.is_connected
 
         elif implementation.name.upper() == "MICROPYTHON":
             self.wlan = network.WLAN(network.STA_IF)
             if not self.wlan.active():
                 # Init wlan module and connect to network
                 print("Setting up Network connection")
-
                 self.wlan.active(True)
-                self.wlan.connect(self.getenv('CIRCUITPY_WIFI_SSID'),self.getenv('CIRCUITPY_WIFI_PASSWORD'))
 
             # Wait until wifi is connected
             tStamp = time.ticks_ms()
             if not self.is_connected:
-                print("Trying to connect. Note this may take a while...")
+                print("Trying to connect. Note this may take a while...",end="")
+                self.wlan.connect(self.getenv('CIRCUITPY_WIFI_SSID'),self.getenv('CIRCUITPY_WIFI_PASSWORD'))
             while not self.is_connected:
-                try:
-                    self.wlan.connect(self.getenv('CIRCUITPY_WIFI_SSID'),self.getenv('CIRCUITPY_WIFI_PASSWORD'))
-                except:
-                    pass
+                time.sleep(.5)
+                print(".",end="")
                 tElapse = time.ticks_ms() - tStamp
                 if tElapse < 0:
                     tStamp = time.ticks_ms()
@@ -174,6 +158,7 @@ class PyDOS_wifi:
                 if tElapse > self.timeout:
                     break
 
+            print("")
             retVal = self.is_connected
             self.ipaddress = self.wlan.ifconfig()[0]
 
@@ -187,9 +172,9 @@ class PyDOS_wifi:
 #      (close,json,iter_content,content,text)|(close,json,iter_content,content,text)
     def get(self,text_url,headers=None,getJSON=False):
         if implementation.name.upper() == 'CIRCUITPYTHON':
-            self.response = self._https.get(text_url,headers=headers,timeout=self.timeout)
+            self.response = self._requests.get(text_url,headers=headers,timeout=self.timeout)
         elif implementation.name.upper() == 'MICROPYTHON':
-            if not getJSON or not self._https:
+            if not getJSON or not self._requests:
                 if len(text_url.split('/',3)) == 4:
                     PROTO, _, HOST, QUERY = text_url.split('/',3)
                     QUERY = "/"+QUERY
@@ -202,9 +187,9 @@ class PyDOS_wifi:
                 else:
                     PORT = 80
                 # Get addr info via DNS
-                addr = self._socket.getaddrinfo(HOST, PORT)[0][4]
+                addr = self._pool.getaddrinfo(HOST, PORT)[0][4]
                 # Create a new socket and connect to addr
-                client = self._socket.socket()
+                client = self._pool.socket()
                 client.connect(addr)
                 if PORT == 443:
                     self.response = ssl.wrap_socket(client)
@@ -213,10 +198,10 @@ class PyDOS_wifi:
                 headStr = ""
                 if headers:
                     for headKey in headers:
-                        headStr += (headKey + ": " + headers[headKey] + "\r\n")
+                        headStr += f'{headKey}: {headers[headKey]}\r\n'
                 # Send HTTP request and recv response
                 #print('GET %s HTTP/1.1\r\nHost: %s\r\n%s\r\n'%(QUERY,HOST,headStr))
-                self.response.write('GET %s HTTP/1.1\r\nHost: %s\r\n%s\r\n'%(QUERY,HOST,headStr))
+                self.response.write(f'GET {QUERY} HTTP/1.1\r\nHost: {HOST}\r\n{headStr}\r\n')
 
                 self._poller = select.poll()
                 self._poller.register(self.response, select.POLLIN)
@@ -224,7 +209,7 @@ class PyDOS_wifi:
                 if not headers:
                     headers = {}
                 # urequests response used for json
-                self.response = self._https.get(text_url,headers=headers,timeout=self.timeout)
+                self.response = self._requests.get(text_url,headers=headers,timeout=self.timeout)
                 self._poller = None
 
         return self.response
@@ -271,32 +256,50 @@ class PyDOS_wifi:
                 retVal = self.response.recv(size)
             else:
                 res = self._poller.poll(self.timeout)
-                if res:
+                retVal = b''
+                if res and res[0][1] == select.POLLIN:
 # socket wrapped in SSL doesn't close at end of data so may be reading single byte
-                    retVal = res[0][0].read(size)
-                else:
-                    retVal = b''
+# ESP32-S2 seems to have WiFi issues, reading single bytes seems to help a little
+                    if 'ESP32S2' in implementation._machine.upper() or \
+                       'ESP32-S2' in implementation._machine.upper():
+                        loopcnt = size
+                        while loopcnt > 0 and res and res[0][1] == select.POLLIN:
+                            loopcnt -= 1
+                            try:
+                                retVal += res[0][0].read(1)
+                            except:
+                                break
+                            res = self._poller.poll(self.timeout)
+                    else:
+                        retVal = res[0][0].read(size)
 
         return retVal
 
     def close(self):
         if implementation.name.upper() == 'CIRCUITPYTHON':
             if board.board_id in ['arduino_nano_rp2040_connect'] or 'ESP_CS' in dir(board):
-                self.esp.disconnect()
-                self.esp = None
+                self.radio.disconnect()
+                self.radio = None
                 self._esp32_cs.deinit()
                 self._esp32_ready.deinit()
                 self._esp32_reset.deinit()
                 self._spi.deinit()
+                self._requests = None
+                self._pool = None
+                if self.response:
+                    self.response.close()
+                adafruit_connection_manager._global_socketpool.clear()
             else:
                 # Temporary until CP 8.x no longer supported
                 try:
-                    self._https._free_sockets()
+                    self._requests._free_sockets()
                 except:
                     pass
-                self._https = None
-                self._socket = None
+                self._requests = None
+                self._pool = None
                 #self.response.close()  Takes too long, effectivly hangs....
+                if self.response:
+                    self.response.close()
                 self.response = None
         else:
             if self.response is not None:

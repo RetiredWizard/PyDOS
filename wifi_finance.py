@@ -17,7 +17,8 @@ def wifi_finance():
 
     print("Connecting to %s" % Pydos_wifi.getenv('CIRCUITPY_WIFI_SSID'))
 
-    Pydos_wifi.connect(Pydos_wifi.getenv('CIRCUITPY_WIFI_SSID'), Pydos_wifi.getenv('CIRCUITPY_WIFI_PASSWORD'))
+    if not Pydos_wifi.connect(Pydos_wifi.getenv('CIRCUITPY_WIFI_SSID'), Pydos_wifi.getenv('CIRCUITPY_WIFI_PASSWORD')):
+        raise Exception("Unable to connect to WiFi!")
 
     print("My IP address is", Pydos_wifi.ipaddress)
 
@@ -32,9 +33,7 @@ def wifi_finance():
     TEXT_URL = "https://www.moneycontrol.com/us-markets"
     search_string = '<!-- -->Nasdaq<!-- -->'
 
-    HOST = "finance.yahoo.com"
-    PORT = 443
-    headers = {"user-agent": "RetiredWizard@"+implementation.name.lower()+uname()[2]}
+    #headers = {"user-agent": "RetiredWizard@"+implementation.name.lower()+uname()[2]}
 
     print("Fetching text from %s" % TEXT_URL)
     response = Pydos_wifi.get(TEXT_URL)

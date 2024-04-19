@@ -3,17 +3,13 @@
 
 """
 from sys import stdin,stdout,implementation
-if implementation.name.upper() == "MICROPYTHON":
-    import uselect
-elif implementation.name.upper() == "CIRCUITPYTHON":
-    from supervisor import runtime
+import select
+if implementation.name.upper() == "CIRCUITPYTHON":
     import board
-    sizeFrmDisp = False
     if 'DISPLAY' in dir(board):
         try:
             import displayio
             import terminalio
-            sizeFrmDisp = True
         except:
             pass
 
@@ -22,20 +18,19 @@ class PyDOS_UI:
     def __init__(self):
         self.scrollable = True
 
-    def serial_bytes_available(self):
-        if implementation.name.upper() == "CIRCUITPYTHON":
-            # Does the same function as supervisor.runtime.serial_bytes_available
-            retval = runtime.serial_bytes_available
+    def serial_bytes_available(self,timeout=1):
+        # Does the same function as supervisor.runtime.serial_bytes_available
+        spoll = select.poll()
+        spoll.register(stdin,select.POLLIN)
 
-        elif implementation.name.upper() == "MICROPYTHON":
-            spoll = uselect.poll()
-            spoll.register(stdin,uselect.POLLIN)
+        retval = spoll.poll(timeout)
+        spoll.unregister(stdin)
 
-            retval = spoll.poll(0)
-            spoll.unregister(stdin)
-
-            if not retval:
-                retval = 0
+        if not retval:
+            retval = 0
+        else:
+            retval = 1
+        retval = 1 if retval else 0
 
         return retval
 
@@ -44,19 +39,20 @@ class PyDOS_UI:
         return stdin.read(num)
 
     def get_screensize(self):
-        if sizeFrmDisp:
+        try:
             height = round(board.DISPLAY.height/(terminalio.FONT.bitmap.height*displayio.CIRCUITPYTHON_TERMINAL.scale))-1
             width = round(board.DISPLAY.width/((terminalio.FONT.bitmap.width/95)*displayio.CIRCUITPYTHON_TERMINAL.scale))-2
-        else:
+        except:
             print("Screen set to 24 rows, 80 col. Press any key to continue...",end="")
             stdout.write('\x1b[2K')
             stdout.write('\x1b[999;999H\x1b[6n')
             pos = ''
             char = ''
-            try:
-                char = stdin.read(1) ## expect ESC[yyy;xxxR
-            except:
-                return(24,80)
+            if self.serial_bytes_available(100):
+                try:
+                    char = stdin.read(1) ## expect ESC[yyy;xxxR
+                except:
+                    return(24,80)
             if char != '\x1b':
                 return(24,80)
 

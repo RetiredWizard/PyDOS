@@ -84,15 +84,6 @@ set _ans2 = A
 goto skip_touchmsg
 
 :not_lilygo_tdeck
-if not "%_boardID%" == "m5stack_cardputer" goto not_cardputer
-rename /lib/pydos_ui.py /lib/pydos_ui_uart.py
-copy/y /cpython/cardputer/lib/*.* /lib/
-rename /lib/pydos_ui_cardputer.py /lib/pydos_ui.py
-rename /virtrepl.py /repl.py
-set _ans2 = A
-goto skip_touchmsg
-
-:not_cardputer
 if "%_boardID%" == "makerfabs_tft7" goto makerfabs_tablet
 if "%_boardID%" == "sunton_esp32_2432S028" goto tablet
 if "%_boardID%" == "espressif_esp32s3_devkitc_1_n8r8_hacktablet" goto tablet
@@ -114,7 +105,7 @@ pexec f.close()
 
 :tablet
 set _ans2 = A
-rename /virtrepl.py /repl.py
+rem rename /virtrepl.py /repl.py
 goto esp32
 
 :not_tablet
@@ -182,7 +173,7 @@ if "%_boardID%" == "matrixportal_m4" goto copy_code
 if %_ans2% == E goto skip_codecopy
 if exist /lib/pydos_wifi.py del /lib/pydos_wifi.py
 if exist /lib/adafruit_connection_manager.mpy del /lib/adafruit_connection_manager.mpy
-if exist /ntpdate.py del /ntpdate.py
+if exist /getdate.py del /getdate.py
 del /wifi_*.py
 goto skip_codecopy
 :copy_code
@@ -285,7 +276,7 @@ goto entercreds
 
 :dotenv
 setenv.py
-ntpdate.py -4
+getdate.py
 
 :done
 set _ans=
