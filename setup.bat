@@ -84,7 +84,13 @@ set _ans2 = A
 goto skip_touchmsg
 
 :not_lilygo_tdeck
+if not "%_boardID%" == "m5stack_cardputer" goto not_cardputer
+set _ans2 = A
+goto skip_touchmsg
+
+:not_cardputer
 if "%_boardID%" == "makerfabs_tft7" goto makerfabs_tablet
+if "%_boardID%" == "sunton_esp32_2432S028" del boot.py
 if "%_boardID%" == "sunton_esp32_2432S028" goto tablet
 if "%_boardID%" == "espressif_esp32s3_devkitc_1_n8r8_hacktablet" goto tablet
 goto not_tablet
@@ -129,7 +135,6 @@ copy /mpython/NanoConnect/lib/* /lib/
 goto esp32MP
 
 :nanoconnectCP
-if exist /wifi_test.py del wifi_test.py
 echo copy /cpython/ESP32/autoexec.bat /
 copy /cpython/ESP32/autoexec.bat /
 if not exist /lib mkdir /lib
@@ -236,7 +241,7 @@ echo **********************************************************
 echo ** To complete touchscreen setup follow instructions at **
 echo ** https://github.com/RetiredWizard/PyDOS_virtkeyboard  **
 echo **********************************************************
-rename /virtrepl.py /repl.py
+rem rename /virtrepl.py /repl.py
 pause
 
 :Cytron

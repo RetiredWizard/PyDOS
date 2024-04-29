@@ -1,4 +1,4 @@
-PyDOS_wifi_VER = "1.35"
+PyDOS_wifi_VER = "1.36"
 
 import os
 import time
@@ -277,6 +277,11 @@ class PyDOS_wifi:
 
     def close(self):
         if implementation.name.upper() == 'CIRCUITPYTHON':
+            if self.response:
+                # Maybe fixed.... self.response.close()  Takes too long, effectivly hangs....
+                self.response.close()
+            self.response = None
+            adafruit_connection_manager.connection_manager_close_all(release_references=True)
             if board.board_id in ['arduino_nano_rp2040_connect'] or 'ESP_CS' in dir(board):
                 self.radio.disconnect()
                 self.radio = None
@@ -286,9 +291,6 @@ class PyDOS_wifi:
                 self._spi.deinit()
                 self._requests = None
                 self._pool = None
-                if self.response:
-                    self.response.close()
-                adafruit_connection_manager._global_socketpool.clear()
             else:
                 # Temporary until CP 8.x no longer supported
                 try:
@@ -297,10 +299,6 @@ class PyDOS_wifi:
                     pass
                 self._requests = None
                 self._pool = None
-                #self.response.close()  Takes too long, effectivly hangs....
-                if self.response:
-                    self.response.close()
-                self.response = None
         else:
             if self.response is not None:
                 if self._poller is not None:

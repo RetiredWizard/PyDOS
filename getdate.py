@@ -28,7 +28,7 @@ def getdate(passedIn=""):
     print("Attempting to set Date/Time",end="")
 
     try:
-        print(" Using http worldtimeapi.org",end="")
+        print(" Using http worldtimeapi.org...",end="")
         response = Pydos_wifi.get("http://worldtimeapi.org/api/ip",None,True)
         time_data = Pydos_wifi.json()
 
@@ -53,7 +53,7 @@ def getdate(passedIn=""):
         envVars['errorlevel'] = '0'
 
     except:
-        print( "using NTP",end="")
+        print( " FAILED. Trying NTP...",end="")
 
         if passedIn == "":
             tz_hour_offset = -4

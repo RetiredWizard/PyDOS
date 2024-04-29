@@ -266,7 +266,7 @@ for specific micro controller boards, you can free up further space by deleting 
 
 Thanks to the great work of **@bill88t**, starting with CircuitPython version 8.0.4, you no longer need to build custom CirucitPython firmware (ESP32 based boards are still being worked on but should have this feature in 8.0.6/8.1.0). PyDOS will run without issue on a standard downloaded CircuitPython image from https://circuitpython.org/downloads. 
 
-When CircuitPython boots on a microcontroller the pystack size can be set by the **CIRCUITPY_PYSTACK_SIZE** value in the settings.toml file. PyDOS comes with this value set to 3600. PyDOS will derive a maximum wildcard length based on this value that should be adequate in most cases, however if you find yourself using particuarly long file names you can increase this parameter value as needed. As you increase the pystack size the memory available for PyDOS to run will decrease slightly.
+When CircuitPython boots on a microcontroller the pystack size can be set by the **CIRCUITPY_PYSTACK_SIZE** value in the settings.toml file. PyDOS comes with this value set to 4000. PyDOS will derive a maximum wildcard length based on this value that should be adequate in most cases, however if you find yourself using particuarly long file names you can increase this parameter value as needed. As you increase the pystack size the memory available for PyDOS to run will decrease slightly.
 
 *By the way, if you like PyDOS you'll probably also enjoy ljinux from https://github.com/bill88t/ljinux.* 
 
@@ -292,18 +292,18 @@ connect to the REPL, remove the boot.py file and then power cycle the microcontr
         import os
         os.remove("boot.py")
 
-To interact with the microcontroller you will need to connect using a terminal program. On a PC you can use putty and on linux minicom works well. To start minicom
-on linux type the command:
+To interact with the microcontroller you will need to connect using a terminal program. On a PC you can use putty and on linux, I would recommend [tio](https://github.com/tio/tio). To start tio on linux type the command:
 
-          Term=linux minicom -b 115200 -o -D /dev/ttyACM0
+          tio /dev/ttyACM0
 	  
-You should be presented with the REPL prompt (>>>), if not, press return or Ctrl-C.
+You should be presented with either the REPL prompt (>>>) or the PyDOS prompt (\>), if not, press return or Ctrl-C. *After using Thonny, you may need to press CTRL-B to exit the raw REPL mode that 
+Thonny uses to transfer and execute files.*
 
-At the REPL prompt type "**import PyDOS**" to start PyDOS and then type **setup** to run the customization script.
+At the REPL prompt type "**import PyDOS**" to start PyDOS. From PyDOS type **setup** to run the customization script.
 
-Once the **setup.bat** script has been run if you have more files to copy to the microcontroller (PyBasic for example), you will need to give the host computer read/write access to the mounted microcontroller drive. This is done by typing **"fs ro"** at the PyDOS prompt and then power cycling the board.
+Once the **setup.bat** script has been run if you have more files to copy to the microcontroller (PyBasic for example) or you want to run **circup**, you will need to give the host computer read/write access to the mounted microcontroller drive. This is done by typing **"fs ro"** at the PyDOS prompt and then power cycling the board.
 
-After deleting and/or copying files using the Host computer, when you want to run PyDOS normally again, edit the **boot.py** file in the root folder of the mounted microcontroller drive (usally CIRCUITPY) and change the line that reads:  
+After running circuip or deleting/copying files using the Host computer, when you want to run PyDOS normally again, edit the **boot.py** file in the root folder of the mounted microcontroller drive (usally CIRCUITPY) and change the line that reads:  
 
             storage.remount("/",True)  
 
@@ -325,7 +325,8 @@ Micropython with this modification can be found in section 2.2 of the Raspberry 
 The second is that PyDOS uses a recursive routine to process wildcard operations and the default stack in Micropython limits the recursion depth that can be obtained **(With more recent versions of Micropython this has become much less of an issue)**.
 This means that PyDOS has to limit wildcard operations, one impact of this is that files with longer file names may not appear
 in directory listings when wildcards are used. To eliminate this issue a custom Micropython image can be built with the the MICROPY_STACKLESS parameter in **py/mpconfig.h**
-changed from **0** to **1**. 
+changed from **0** to **1**.  
+**\*\*Note\*\* I haven't tested a MICROPY_STACKLESS build since ~1.19**
 
 **MicroPython Setup**
 
@@ -362,7 +363,7 @@ At the REPL prompt type "**import PyDOS*** to start PyDOS and then type **setup*
 ## To Do  
 *Possible updates depending on RAM impact*
 
-- integrate ConnectionManager into PyDOS_wifi
+- ~~integrate ConnectionManager into PyDOS_wifi~~
 - investigate porting micropython flash mount to circuitpython
 - investigate date/time stamp issue on seeed nrf52840 files
 - support for connected color displays  

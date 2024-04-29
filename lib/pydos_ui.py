@@ -16,7 +16,10 @@ if implementation.name.upper() == "CIRCUITPYTHON":
 class PyDOS_UI:
 
     def __init__(self):
-        self.scrollable = True
+        if implementation.name.upper() == "CIRCUITPYTHON" and 'DISPLAY' in dir(board):
+            self.scrollable = False
+        else:
+            self.scrollable = True
 
     def serial_bytes_available(self,timeout=1):
         # Does the same function as supervisor.runtime.serial_bytes_available
