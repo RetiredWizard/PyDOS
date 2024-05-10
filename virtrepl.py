@@ -8,6 +8,8 @@ try:
 except:
     pass
 
+print("REPL in (Circuit-)Python (type exit to close)")
+
 __cmd = ""
 while True:
     if 'compile_command' in dir():

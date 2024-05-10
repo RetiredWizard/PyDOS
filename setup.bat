@@ -203,7 +203,7 @@ copy /cpython/kbdFeatherWing/lib/* /lib/
 rename /lib/pydos_ui.py /lib/pydos_ui_uart.py
 echo copy /lib/pydos_ui_kfw.py /lib/pydos_ui.py
 copy /lib/pydos_ui_kfw.py /lib/pydos_ui.py
-rename /virtrepl.py /repl.py
+rem rename /virtrepl.py /repl.py
 if %_ans2% == O del /lib/kfw_s2_board.py
 if %_ans2% == E del /lib/kfw_pico_board.py
 goto wifienv
@@ -225,7 +225,7 @@ rem Make kfw copy so that ui.bat can be used to switch modes
 copy /cpython/lib/optional/pydos_ui_bbkeybd.py /lib/pydos_ui_kfw.py
 copy /cpython/kbdFeatherWing/*.bat /
 copy /cpython/kbdFeatherWing/lib/bbq10keyboard.* /lib/
-rename /virtrepl.py /repl.py
+rem rename /virtrepl.py /repl.py
 
 :tftfeatherwing
 set/p _ans3 = Do you have a TFT FeatherWing Touch connected (Y/N)?:

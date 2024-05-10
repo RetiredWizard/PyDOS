@@ -6,7 +6,7 @@
 **Check out the demo video at https://www.youtube.com/watch?v=Az_oiq8GE4Y**
 
 *Related Repositories:*  
-[PyDOS_virtkey](https://github.com/RetiredWizard/PyDOS_virtkeyboard) - The modules needed to add virtual keybaord support to PyDOS  
+[PyDOS_virtkey](https://github.com/RetiredWizard/PyDOS_virtkeyboard) - The modules needed to add virtual keyboard support to PyDOS  
 [PyDOS_wifi](https://github.com/RetiredWizard/PyDOS_wifi) - Generalized Python based microcontroller WiFi API
 
 See the Installation section below to install all the external commands and customize the install for the particular microcontroller you are using. However, **if you just want to launch the shell or have limited flash space, the PyDOS.py program will run standadlone** so you can simply copy **PyDOS.py** to your microcontroller to begin.
@@ -143,10 +143,14 @@ environment variables to the newly booted environment as well as code that resto
 original **code.py**/**main.py** files and causes a second soft reboot returning control to
 PyDOS.
 
+**virtrepl.py** - Launches a python REPL that can be run from PyDOS. Type "exit" to close and return to PyDOS.
+
 **edlin.py [[path]filename]** - line editor inspired by DOS edlin. Intial program structure of line editor by Joesph Long
     https://github.com/j-osephlong/Python-Text-Editor
     
 **edit.py [[path]filename]** - shell to load full screen editor from https://github.com/robert-hh/Micropython-Editor
+
+**bounce.py** - Terminal User Interface demo of a bouncing ball. Modified version of bounce by [DuckyPolice](https://github.com/DuckyPolice)
 
 **xcopy.py[/S][/Y][/V] [path]filename [path][filename]** - a more robust version of the copy command  
 - /S Copies specified files from directories and subdirectories, except for empty ones  
@@ -160,7 +164,7 @@ PyDOS.
 
 **setdate.py [mm-dd-yy]** - initalizes the real time clock to an entered date  
 **settime.py [hh:mm:ss]** - initalizes the real time clock to an entered time  
-**ntpdate.py [timzone offset]** (WiFi enabled boards) - sets the time and date using the Internet NTP protocol
+**getdate.py [timzone offset]** (WiFi enabled boards) - sets the time and date from worldtimeapi.org and failing that, uses the Internet NTP protocol
 
 **diff.py [filename1,filename2]** - performs a file comparison
 
@@ -183,6 +187,8 @@ CircuitPython LCD libraries from https://github.com/dhylands/python_lcd
 **rgbblink.py [rgb led pin number]** - program to blink an onboard neopixel or dotstar  
 **rgbrainbow.py [rgb led pin number]** - program to color cycle an onboard neopixel or dotstar  
 
+**matrix.py** - program to initalize connected HUB75 RGB Matrix Panels as a CircuitPython display. The display object is stored as a PyDOS environment variable (_display)  
+
 **reboot.py** - performs a soft reboot (Micropython requires a Ctrl-D to complete)
 
 **keys.bat** - (Keyboard Featherwing/BBQ Keyboard only) Displays keyboard mappings for hidden keys and functions  
@@ -197,6 +203,8 @@ replaced or modified from the host computer so that it contains the following in
     storage.remount("/",False)
     
 and then power cycled or hard reset.
+
+**setenv.py** - Helper program for adding the WiFi SSID and Password to settings.toml (used by setup.bat).
 
 *WiFi enabled boards only*  
 **wifi_finance** - Displays the current Nasdaq prices by connecting to a financial website and scraping the information.  
@@ -303,7 +311,7 @@ At the REPL prompt type "**import PyDOS**" to start PyDOS. From PyDOS type **set
 
 Once the **setup.bat** script has been run if you have more files to copy to the microcontroller (PyBasic for example) or you want to run **circup**, you will need to give the host computer read/write access to the mounted microcontroller drive. This is done by typing **"fs ro"** at the PyDOS prompt and then power cycling the board.
 
-After running circuip or deleting/copying files using the Host computer, when you want to run PyDOS normally again, edit the **boot.py** file in the root folder of the mounted microcontroller drive (usally CIRCUITPY) and change the line that reads:  
+After running circuip or deleting/copying files using the Host computer, when you want to run PyDOS normally again, edit the **boot.py** file in the root folder of the mounted microcontroller drive (usually CIRCUITPY) and change the line that reads:  
 
             storage.remount("/",True)  
 

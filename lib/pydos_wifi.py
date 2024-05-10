@@ -1,4 +1,4 @@
-PyDOS_wifi_VER = "1.36"
+PyDOS_wifi_VER = "1.37"
 
 import os
 import time
@@ -9,7 +9,7 @@ if implementation.name.upper() == "CIRCUITPYTHON":
     import adafruit_requests
     import adafruit_connection_manager
 
-    if board.board_id == 'arduino_nano_rp2040_connect' or hasattr(board,'ESP_CS'):
+    if hasattr(board,'ESP_CS'):
         import busio
         from digitalio import DigitalInOut
         from adafruit_esp32spi import adafruit_esp32spi
@@ -95,7 +95,7 @@ class PyDOS_wifi:
 
     def connect(self,ssid,passwd,espspi_debug=False):
         if implementation.name.upper() == "CIRCUITPYTHON":
-            if board.board_id in ['arduino_nano_rp2040_connect'] or 'ESP_CS' in dir(board):
+            if 'ESP_CS' in dir(board):
                 if not self.is_connected:
                     #  ESP32 pins
                     if 'ESP_CS' in dir(board):
@@ -282,7 +282,7 @@ class PyDOS_wifi:
                 self.response.close()
             self.response = None
             adafruit_connection_manager.connection_manager_close_all(release_references=True)
-            if board.board_id in ['arduino_nano_rp2040_connect'] or 'ESP_CS' in dir(board):
+            if 'ESP_CS' in dir(board):
                 self.radio.disconnect()
                 self.radio = None
                 self._esp32_cs.deinit()
