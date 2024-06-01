@@ -14,6 +14,10 @@ echo              _#               ^
 echo              _/               \
 echo              -/               %%
 echo Speaker Key (left of enter)   $
+echo Track ball up                 up arrow
+echo Track ball down               down arrow
+echo Track ball left               left arrow
+echo Track ball right              right arrow
 echo .
 goto done
 

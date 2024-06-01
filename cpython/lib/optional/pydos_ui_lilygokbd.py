@@ -203,16 +203,22 @@ def input(disp_text=None):
             # Convert two character sequences into missing keyboard keys
             # '_-' -> '='     '(+' -> '['       '+)' -> ']'
             bld_done = False
-            bcindx = bld_chr2.find(keys[editCol-1:editCol])
-            if bld_chr1.find(keys[editCol-1:editCol]) != -1 and not bld_started and arrow == "":
-                bld_started = True
-            elif keys[editCol-2:editCol] ==  bld_chr1[bcindx]+bld_chr2[bcindx] and bld_started:
-                bld_started = False
-                keys = keys[:editCol-2]+bld_chr[bcindx]+keys[editCol:]
-                print('\x08'+keys[editCol-2:]+' '+('\x08'*(len(keys[editCol:])+(1 if onLast else 2))),end="")
-                editCol -= 1
-                bld_done = True
-            elif bld_chr1.find(keys[editCol-1:editCol]) != -1 and arrow == "":
+            if bld_started:
+
+                bcindx = bld_chr2.find(keys[editCol-1:editCol])
+                nextbc = 0
+                while nextbc != -1 and bld_started:
+                    if keys[editCol-2:editCol] ==  bld_chr1[bcindx]+bld_chr2[bcindx]:
+                        bld_started = False
+                        bld_done = True
+                        keys = keys[:editCol-2]+bld_chr[bcindx]+keys[editCol:]
+                        print('\x08'+keys[editCol-2:]+' '+('\x08'*(len(keys[editCol:])+(1 if onLast else 2))),end="")
+                        editCol -= 1
+                    else:
+                        nextbc = bld_chr2[bcindx+1:].find(keys[editCol-1:editCol])
+                        bcindx = bcindx + nextbc + 1
+
+            if bld_chr1.find(keys[editCol-1:editCol]) != -1 and arrow == "" and not bld_done:
                 bld_started = True
             else:
                 bld_started = False
