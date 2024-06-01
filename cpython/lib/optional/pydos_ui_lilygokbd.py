@@ -56,7 +56,7 @@ class PyDOS_UI:
                 with self._i2c as i2c:
                     try:
                         i2c.readinto(self._key)
-                    except:
+                    except Exception as err:
                         self._key=bytearray(1)
                 if self._key[0] != 0:
                     retval = 1

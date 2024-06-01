@@ -183,15 +183,16 @@ CircuitPython LCD libraries from https://github.com/dhylands/python_lcd
 
 **blink.py [led pin number]** - program to blink onboard LED
 
-**rgbset.py [rgb led pin number]** - program to set the rgb color of an onboard neopixel or dotstar  
-**rgbblink.py [rgb led pin number]** - program to blink an onboard neopixel or dotstar  
-**rgbrainbow.py [rgb led pin number]** - program to color cycle an onboard neopixel or dotstar  
+**rgbset.py [pin number,[size,[pixel]]]** - program to set the rgb color of an onboard neopixel or dotstar. The *size* and *pixel* arguments can be used to identify individual pixel in pixel array of more than 1 neopixel/dotstar.  
 
-**matrix.py** - program to initalize connected HUB75 RGB Matrix Panels as a CircuitPython display. The display object is stored as a PyDOS environment variable (_display)  
+**rgbblink.py [pin number]** - program to blink an onboard neopixel or dotstar  
+**rgbrainbow.py [pin number]** - program to color cycle an onboard neopixel or dotstar  
+
+**matrix.py [1|4]** - program to initalize connected HUB75 RGB Matrix Panels as a CircuitPython display. The display object is stored as a PyDOS environment variable (_display). If a 1 in passed as an argument, the matrix is configured as a single 64x32 panel, a 4 configures the matrix as a 2x2 matrix of 64x32 panels.  
 
 **reboot.py** - performs a soft reboot (Micropython requires a Ctrl-D to complete)
 
-**keys.bat** - (Keyboard Featherwing/BBQ Keyboard only) Displays keyboard mappings for hidden keys and functions  
+**keys.bat** - (Keyboard Featherwing/BBQ Keyboard/LilyGo T-Deck only) Displays keyboard mappings for hidden keys and functions  
 **ui.bat [u/k]** - (Keyboard Featherwing/BBQ Keyboard only) Switches between using the Keyboard Featherwing and USB Serial port for PyDOS I/O
 
 **fs.py [ro/rw]** - (Circuitpython only) By selecting the "RO" option the flash mode is set such that when the microcontroller

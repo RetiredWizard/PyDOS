@@ -76,6 +76,8 @@ if not "%_boardID%" == "lilygo_tdeck" goto not_lilygo_tdeck
 rename /lib/pydos_ui.py /lib/pydos_ui_uart.py
 echo copy /cpython/lib/optional/pydos_ui_lilygokbd.py /lib/pydos_ui.py
 copy/y /cpython/lib/optional/pydos_ui_lilygokbd.py /lib/pydos_ui.py
+echo copy /cpython/kbdFeatherWing/keys.bat /keys.bat
+copy/y /cpython/kbdFeatherWing/keys.bat /keys.bat
 pexec f = open('/settings.toml','a')
 pexec f.write('\nPYDOS_DISPLAYIO_COLORSPACE="BGR565_SWAPPED"\n')
 pexec f.close()

@@ -67,7 +67,7 @@ def PyDOS():
     global envVars
     if "envVars" not in globals().keys():
         envVars = {}
-    _VER = "1.37"
+    _VER = "1.38"
     prmpVals = ['>','(',')','&','|','\x1b','\b','<','=',' ',_VER,'\n','$','']
 
     print("Starting Py-DOS...")
@@ -139,6 +139,7 @@ def PyDOS():
                     exec(f"passedIn = '{passedIn}'\n{cf.read()}")
         except Exception as err:
             print_exception(err)
+            envVars['lasterror'] = err
         except KeyboardInterrupt:
             print("^C")
 

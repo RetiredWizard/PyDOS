@@ -15,13 +15,13 @@ except:
 if passedIn == '1':
     base_width = 64
     base_height = 32
-    bit_depth = 1
+    bit_depth = 2
     chain_across = 1
     tile_down = 1
 elif passedIn == '4':
     base_width = 64
     base_height = 32
-    bit_depth = 1
+    bit_depth = 2
     chain_across = 2
     tile_down = 2
 else:
@@ -34,9 +34,9 @@ else:
     except:
         base_height = 32
     try:
-        bit_depth = int(input('Bit Depth (1): '))
+        bit_depth = int(input('Bit Depth (2): '))
     except:
-        bit_depth = 1
+        bit_depth = 2
     try:
         chain_across = int(input('Number of panels across (1): '))
     except:
