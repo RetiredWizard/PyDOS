@@ -23,15 +23,15 @@ def wifi_finance():
     print("My IP address is", Pydos_wifi.ipaddress)
 
     #TEXT_URL = "https://money.cnn.com/data/markets"
-
     #TEXT_URL = "https://finance.yahoo.com/quote/%5EIXIC"
     #search_string = 'data-symbol="^IXIC" data-field="regularMarketChangePercent"'
-
     #TEXT_URL = "https://finance.yahoo.com/lookup"
     #search_string = 'data-symbol="^IXIC" data-field="regularMarketChangePercent"'
+    #TEXT_URL = "https://www.moneycontrol.com/us-markets"
+    #search_string = '<!-- -->Nasdaq<!-- -->'
 
-    TEXT_URL = "https://www.moneycontrol.com/us-markets"
-    search_string = '<!-- -->Nasdaq<!-- -->'
+    TEXT_URL = "https://www.google.com/search?q=nasdaq+price&oq=nasdaq+price++"
+    search_string = 'Nasdaq Inc'
 
     #headers = {"user-agent": "RetiredWizard@"+implementation.name.lower()+uname()[2]}
 
@@ -39,7 +39,10 @@ def wifi_finance():
     response = Pydos_wifi.get(TEXT_URL)
     response_window = []
     for _ in range(4):
-        response_window.append(Pydos_wifi.next(256))
+        tmp = Pydos_wifi.next(256)
+        response_window.append(tmp)
+        if len(tmp) != 256:
+            break
 
     try:
         sample_resp = (b''.join(response_window))[0:800].decode().replace('\n','').replace('\r','')
@@ -76,12 +79,12 @@ def wifi_finance():
     nasdaq = found_window.find(search_string)
 
     pct = found_window[nasdaq:].find('%)')
-    pctst = found_window[nasdaq+pct-17:].find('->')+2
+    pctst = found_window[nasdaq+pct-17:].find('">')+2
     pctend = found_window[nasdaq+pct:].find('<')
     #print("Debug: %s\n" % found_window[nasdaq:nasdaq+pct+pctend])
 
     if nasdaq != -1:
-        print("Nasdaq: %s\n" % found_window[nasdaq+pct-17+pctst:nasdaq+pct+pctend-1].replace("<!-- -->",""))
+        print(f'Nasdaq: {found_window[nasdaq+pct-17+pctst:nasdaq+pct+pctend].replace("<","")}\n')
     else:
         print("Nasdaq symbol not found\n")
 

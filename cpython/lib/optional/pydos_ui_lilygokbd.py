@@ -204,7 +204,6 @@ def input(disp_text=None):
             # '_-' -> '='     '(+' -> '['       '+)' -> ']'
             bld_done = False
             if bld_started:
-
                 bcindx = bld_chr2.find(keys[editCol-1:editCol])
                 nextbc = 0
                 while nextbc != -1 and bld_started:
