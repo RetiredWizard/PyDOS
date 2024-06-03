@@ -30,8 +30,8 @@ def wifi_finance():
     #TEXT_URL = "https://www.moneycontrol.com/us-markets"
     #search_string = '<!-- -->Nasdaq<!-- -->'
 
-    TEXT_URL = "https://www.google.com/search?q=nasdaq+price&oq=nasdaq+price++"
-    search_string = 'Nasdaq Inc'
+    TEXT_URL = "https://www.google.com/search?q=nasdaq+index+price"
+    search_string = 'Nasdaq Composite'
 
     #headers = {"user-agent": "RetiredWizard@"+implementation.name.lower()+uname()[2]}
 
