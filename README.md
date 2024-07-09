@@ -159,7 +159,8 @@ PyDOS.
 
 **fileview.py [[path]filename]** - scrollable text file viewer
 
-**sdmount.py [[mount path][,pydos spi bus#]]** - mounts an sd card to the file system  
+**sdmount.py [[mount path][,pydos spi bus#]]** - mounts an sd card to the file system. If no SD card CS pins are defined or -1 is passed as the spi bus# the sd
+card will be mounted using an SDIO bus rather than an SPI bus.    
 **sdumount.py [mount path]** - dismounts an sd card from the file system
 
 **setdate.py [mm-dd-yy]** - initalizes the real time clock to an entered date  
@@ -208,7 +209,7 @@ and then power cycled or hard reset.
 **setenv.py** - Helper program for adding the WiFi SSID and Password to settings.toml (used by setup.bat).
 
 *WiFi enabled boards only*  
-**wifi_finance** - Displays the current Nasdaq prices by connecting to a financial website and scraping the information.  
+**wifi_finance [symbol]** - Displays the current Nasdaq prices by connecting to a financial website and scraping the information. If an optional symbol is supplied, the program will attempt to identify the symbol and scrap the corresponding price information.  
 **wifi_weather** - Displays the 7 day forcast from api.weather.gov
 
 ## Hardware (Pin) customization file (pydos_bcfg.py)
@@ -235,6 +236,9 @@ example: `'led' : (25, "GP25")`
 **I2C_NUM** - MicroPython hardware I2C number  
 **SCL**  
 **SDA**  
+**SDIO_CLK**  
+**SDIO_CMD**  
+**SDIO_DPINS** - the "pin number" element for SDIO_DPINS is a list of pins  
 
 **LIST OF TUPLES**  
 *First tuple in list used for machine/board SD dedicated SPI (board.SD_SPI)*  

@@ -1,4 +1,4 @@
-PyDOS_wifi_VER = "1.37"
+PyDOS_wifi_VER = "1.40"
 
 import os
 import time
@@ -217,10 +217,16 @@ class PyDOS_wifi:
     def json(self):
         retVal = None
         if implementation.name.upper() == 'CIRCUITPYTHON':
-            retVal = self.response.json()
+            try:
+                retVal = self.response.json()
+            except ValueError:
+                retVal = {'ValueError':'Possibly caused by syntax error in JSON'}
         elif implementation.name.upper() == 'MICROPYTHON':
             if 'json' in dir(self.response):
-                retVal = self.response.json()
+                try:
+                    retVal = self.response.json()
+                except ValueError:
+                    retVal = {'ValueError':'Possibly caused by syntax error in JSON'}
             else:
                 foundStart = False
                 retVal = ''

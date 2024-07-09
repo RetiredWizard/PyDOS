@@ -112,9 +112,9 @@ def input(disp_text=None):
     if disp_text != None:
         print(disp_text,end="")
 
-    bld_chr1 = '_(+(-__-'
-    bld_chr2 = '-+)-)/#/'
-    bld_chr =  '=[]<>\^%'
+    bld_chr1 = '_(+(-__-_'
+    bld_chr2 = '-+)-)/#/!'
+    bld_chr =  '=[]<>\^%&'
     bld_started = False
 
     histPntr = len(Pydos_ui.commandHistory)

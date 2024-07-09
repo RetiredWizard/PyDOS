@@ -116,6 +116,13 @@ class PyDOS_HW:
             self.SD.append(None)
             self._SPI.append(None)
 
+        self.SDIO_CLK=Pydos_pins.get('SDIO_CLK',(None,None))[0]
+        self.SDIO_CMD=Pydos_pins.get('SDIO_CMD',(None,None))[0]
+        self.SDIO_DPINS=Pydos_pins.get('SDIO_DPINS',([None],None))[0]
+        if self.SDIO_CLK:
+            self.SDdrive.append(None)
+            self.SD.append(None)        
+
             if implementation.name.upper() == 'CIRCUITPYTHON':
                 try:
                     if i == 0:

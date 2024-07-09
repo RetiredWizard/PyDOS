@@ -57,7 +57,8 @@ def printPinAssignments():
             print("PyDOS Sound Pin:         ",Pydos_pins['sndPin'][1],end="")
         elif entry in ['led','SCL','SDA','neoPixel','neoPixel_Pow','dotStar_Clock', \
             'dotStar_Data','dotStar_Extra','dotStar_Pow','LED_RED','LED_GREEN', \
-            'LED_BLUE','i2s_BitClock','i2s_WordSelect','i2s_Data']:
+            'LED_BLUE','i2s_BitClock','i2s_WordSelect','i2s_Data','SDIO_CLK', \
+            'SDIO_CMD','SDIO_DPINS']:
 
             print(entry+" Pin:"+(20-len(entry))*" ",Pydos_pins[entry][1],end="")
         elif entry in ['I2C_NUM']:

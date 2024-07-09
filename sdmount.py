@@ -17,8 +17,11 @@ elif implementation.name.upper() == "CIRCUITPYTHON":
         import adafruit_sdcard
     except:
         import sdcardio as adafruit_sdcard
+    try:
+        import sdioio
+    except:
+        pass
     import storage
-
 
 def sdMount(drive,spiNo):
 
@@ -129,7 +132,25 @@ def sdMount(drive,spiNo):
 
         elif implementation.name.upper() == "CIRCUITPYTHON":
 
-            if spiNo+1 > len(Pydos_hw.CS):
+            if Pydos_hw.SDIO_CLK and (spiNo == -1 or len(Pydos_hw.CS) == 0):
+                sdioNo = len(Pydos_hw.CS)
+                if Pydos_hw.SDdrive[sdioNo] != None:
+                    print("SD card on SDIO interface already mounted as",Pydos_hw.SDdrive[sdioNo])
+                else:
+                    try:
+                        if not Pydos_hw.SD[sdioNo]:
+                            Pydos_hw.SD[sdioNo] = sdioio.SDCard(
+                                clock=Pydos_hw.SDIO_CLK,
+                                command=Pydos_hw.SDIO_CMD,
+                                data=Pydos_hw.SDIO_DPINS,
+                                frequency=25000000)
+                        vfs = storage.VfsFat(Pydos_hw.SD[sdioNo])
+                        storage.mount(vfs, drive)
+                        Pydos_hw.SDdrive[sdioNo] = drive
+                        sdMounted = True
+                    except Exception as e:
+                        print('SD-Card: Fail,', e)
+            elif spiNo+1 > len(Pydos_hw.CS):
                 print("CS Pin not allocated for Pydos_bcfg SPI interface #",spiNo)
             elif Pydos_hw.SDdrive[spiNo] != None:
                 print("SD card on Pydos_bcfg SPI interface #",spiNo,"already mounted as",Pydos_hw.SDdrive[spiNo])

@@ -151,3 +151,10 @@ elif implementation.name.upper() == "CIRCUITPYTHON":
         else:
             Pydos_pins["CS"].append((None,"None"))
 
+    if 'SDIO_CLK' in dir(board) and 'SDIO_CMD' in dir(board):
+        Pydos_pins['SDIO_CLK'] = (board.SDIO_CLK,"board.SDIO_CLK")
+        Pydos_pins['SDIO_CMD'] = (board.SDIO_CMD,"board.SDIO_CMD")
+        datapins = [getattr(board,attr) for attr in dir(board) if 'SDIO_D' in attr]
+        if len(datapins) > 0:
+            Pydos_pins['SDIO_DPINS'] = (datapins,"[board.SDIO_D*]")
+
