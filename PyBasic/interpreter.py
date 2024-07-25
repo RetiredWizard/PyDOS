@@ -27,15 +27,17 @@ from basictoken import BASICToken as Token
 from lexer import Lexer
 from program import Program
 from sys import stderr,implementation
+try:
+    from traceback import print_exception
+except:
+    from sys import print_exception as sysprexcept
+    print_exception = lambda err,value=None,tb=None: sysprexcept(err)
 from os import listdir,rename,remove
 import gc
 try:
     from pydos_ui import input
 except:
     pass
-
-if implementation.name.upper() == 'MICROPYTHON':
-    from sys import print_exception
 
 gc.collect()
 if 'threshold' in dir(gc):
@@ -239,7 +241,5 @@ uuuu P        Y    BBBB   A   A  SSSS    I    CCC
 
         # Trap all exceptions so that interpreter keeps running
         except Exception as e:
-            if implementation.name.upper() == 'MICROPYTHON':
-                print_exception(e)
-            else:
-                print(e)
+            print_exception(e,e, \
+                e.__traceback__ if hasattr(e,'__traceback__') else None)

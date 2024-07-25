@@ -12,12 +12,16 @@ elif sys.implementation.name.upper() == 'CIRCUITPYTHON':
 
 def blink(ledPin=None):
     cmnd = ""
+    minus = False
 
     if ledPin == None or ledPin == "":
         ledPin = Pydos_hw.led
     elif sys.implementation.name.upper() == 'CIRCUITPYTHON':
         ledPin = getattr(board,str(ledPin).upper().replace("'","").replace('"',''))
     else:
+        if type(ledPin) == str:
+            if ledPin[:1] == '-':
+                minus = True
         try:
             ledPin = int(ledPin)
         except:
@@ -26,8 +30,8 @@ def blink(ledPin=None):
 
 
     # Micropython: pass a negative pin value if the led turns off with a value of 1
-    if type(ledPin) == int and ledPin < 0:
-        ledPin = -ledPin
+    if (type(ledPin) == int and ledPin < 0) or minus:
+        ledPin = abs(ledPin)
         ledOff = True
     else:
         ledOff = False
@@ -111,4 +115,3 @@ if __name__ == "PyDOS":
     blink(passedIn)
 else:
     print("Enter 'blink.blink(pinNo=Default)' in the REPL to run.")
-

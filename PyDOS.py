@@ -4,7 +4,13 @@ try:
 except:
     sep = os.getcwd()[0]
 from time import localtime
-from sys import stdin,implementation,path,print_exception
+from sys import stdin,implementation,path
+try:
+    from traceback import print_exception,format_exception
+except:
+    from sys import print_exception as sysprexcept
+    print_exception = lambda err,value=None,tb=None: sysprexcept(err)
+    format_exception = lambda err,value=None,tb=None: [err]
 if not sep+'lib' in path:
     path.insert(1,sep+'lib')
 path.append(sep+'PyBasic')
@@ -67,7 +73,7 @@ def PyDOS():
     global envVars
     if "envVars" not in globals().keys():
         envVars = {}
-    _VER = "1.40"
+    _VER = "1.41"
     prmpVals = ['>','(',')','&','|','\x1b','\b','<','=',' ',_VER,'\n','$','']
 
     print("Starting Py-DOS...")
@@ -138,8 +144,10 @@ def PyDOS():
                 else:
                     exec(f"passedIn = '{passedIn}'\n{cf.read()}")
         except Exception as err:
-            print_exception(err)
-            envVars['lasterror'] = err
+            print_exception(err,err, \
+                err.__traceback__ if hasattr(err,'__traceback__') else None)
+            envVars['lasterror'] = format_exception(err,err, \
+                err.__traceback__ if hasattr(err,'__traceback__') else None)
         except KeyboardInterrupt:
             print("^C")
 
@@ -222,7 +230,7 @@ def PyDOS():
             lastDir = ""
 
         if dirPat is None:
-            (quit,nLines) = scrnPause(swPause,nLines,["",f"Directory of {dPath.replace('/',('\\' if envVars.get('DIRSEP','/') == '\\' else '/'))}"])
+            (quit,nLines) = scrnPause(swPause,nLines,["","Directory of "+dPath.replace('/',('\\' if envVars.get('DIRSEP','/') == '\\' else '/'))])
             dirHeadPrntd = True
             nDirs += 2
             if swWide:
@@ -236,7 +244,7 @@ def PyDOS():
             else:
                 scrAdj1 = 52 - min(scrWdth,52)
                 (quit,nLines) = scrnPause(swPause,nLines, \
-                    [f".{" "*(23-scrAdj1)}<DIR>",f"..{" "*(22-scrAdj1)}<DIR>"])
+                    [f'.{" "*(23-scrAdj1)}<DIR>',f'..{" "*(22-scrAdj1)}<DIR>'])
 
         for _dir in sorted([srtFnc(x,pFmt(dPath)) for x in os.listdir(dPath)]):
             _dir = _dir.split('*')[1]
@@ -267,7 +275,7 @@ def PyDOS():
                     wideCount += 1
                     if not ForD:
                         (quit,nLines) = scrnPause(swPause,nLines, \
-                            [f"[{_dir[:13]}]{" "*(14-len(_dir[:13]))}"],"")
+                            [f'[{_dir[:13]}]{" "*(14-len(_dir[:13]))}'],"")
                     else:
                         (quit,nLines) = scrnPause(swPause,nLines, \
                             [_dir[:15]+" "*(16-len(_dir[:15]))],"")
@@ -278,11 +286,11 @@ def PyDOS():
                         scrAdj1 = 52 - min(scrWdth,52)
                         scrAdj2 = min(13,65-min(scrWdth,65))
                         (quit,nLines) = scrnPause(swPause,nLines, \
-                            [f"{_dir[:max(8,scrWdth-26)]}{" "*(24-len(_dir)-scrAdj1)}<DIR>{" "*(18-scrAdj2)}{fTime[1]:02}-{fTime[2]:02}-{fTime[0]:04} {fTime[3]:02}:{fTime[4]:02}"])
+                            [f'{_dir[:max(8,scrWdth-26)]}{" "*(24-len(_dir)-scrAdj1)}<DIR>{" "*(18-scrAdj2)}{fTime[1]:02}-{fTime[2]:02}-{fTime[0]:04} {fTime[3]:02}:{fTime[4]:02}'])
                     else:
                         scrAdj1 = 65 - min(scrWdth,65)
                         (quit,nLines) = scrnPause(swPause,nLines, \
-                            [f"{_dir[:max(8,scrWdth-20-len(fSize))]}{" "*(36-len(_dir)+10-len(fSize)-scrAdj1)}{fSize} {fTime[1]:02}-{fTime[2]:02}-{fTime[0]:04} {fTime[3]:02}:{fTime[4]:02}"])
+                            [f'{_dir[:max(8,scrWdth-20-len(fSize))]}{" "*(36-len(_dir)+10-len(fSize)-scrAdj1)}{fSize} {fTime[1]:02}-{fTime[2]:02}-{fTime[0]:04} {fTime[3]:02}:{fTime[4]:02}'])
 
                 if quit:
                     break
@@ -316,8 +324,8 @@ def PyDOS():
 
                 scrAdj1 = 65 - min(scrWdth,65)
                 (quit,nLines) = scrnPause(swPause,nLines, \
-                    [(f"{" "*(4-len(str(nFiles)))} {nFiles} File(s){" "*(32-len(str(tFSize))-scrAdj1)} {tFSize} Bytes.")[:scrWdth], \
-                    (f"{" "*(4-len(str(nDirs)))} {nDirs} Dir(s){" "*(33-len(str(availDisk))-scrAdj1)} {availDisk} Bytes free.")[:scrWdth],""],"")
+                    [(f'{" "*(4-len(str(nFiles)))} {nFiles} File(s){" "*(32-len(str(tFSize))-scrAdj1)} {tFSize} Bytes.')[:scrWdth], \
+                    (f'{" "*(4-len(str(nDirs)))} {nDirs} Dir(s){" "*(33-len(str(availDisk))-scrAdj1)} {availDisk} Bytes free.')[:scrWdth],""],"")
 
         return (nLines,nFiles,tFSize,nDirs,quit)
 
@@ -637,7 +645,7 @@ def PyDOS():
             print(f'The current date is: {"MonTueWedThuFriSatSun"[i:i+3]} {localtime()[1]:02}/{localtime()[2]:02}/{localtime()[0]:04}')
 
         elif cmd == "TIME":
-            print(f"The current time is: {localtime()[3]%12}:{localtime()[4]:02}:{localtime()[5]:02} {["AM","PM"][localtime()[3]//12]}")
+            print(f'The current time is: {localtime()[3]%12}:{localtime()[4]:02}:{localtime()[5]:02} {["AM","PM"][localtime()[3]//12]}')
 
         elif cmd == "MEM":
             gc.collect()

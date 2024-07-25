@@ -1,9 +1,13 @@
 from sys import implementation
 from pydos_hw import Pydos_hw
 import os
+try:
+    from traceback import print_exception
+except:
+    from sys import print_exception as sysprexcept
+    print_exception = lambda err,value=None,tb=None: sysprexcept(err)
 
 if implementation.name.upper() == "MICROPYTHON":
-    from sys import print_exception
     from machine import Pin
     try:
         from machine import SDCard
@@ -128,7 +132,8 @@ def sdMount(drive,spiNo):
                         Pydos_hw.SDdrive[spiNo] = drive
                         sdMounted = True
                     except Exception as e:
-                        print_exception(e)
+                        print_exception(e,e, \
+                            e.__traceback__ if hasattr(e,'__traceback__') else None)
 
         elif implementation.name.upper() == "CIRCUITPYTHON":
 
@@ -149,7 +154,8 @@ def sdMount(drive,spiNo):
                         Pydos_hw.SDdrive[sdioNo] = drive
                         sdMounted = True
                     except Exception as e:
-                        print('SD-Card: Fail,', e)
+                        print_exception(e,e, \
+                            e.__traceback__ if hasattr(e,'__traceback__') else None)
             elif spiNo+1 > len(Pydos_hw.CS):
                 print("CS Pin not allocated for Pydos_bcfg SPI interface #",spiNo)
             elif Pydos_hw.SDdrive[spiNo] != None:
@@ -165,7 +171,8 @@ def sdMount(drive,spiNo):
                     Pydos_hw.SDdrive[spiNo] = drive
                     sdMounted = True
                 except Exception as e:
-                    print('SD-Card: Fail,', e)
+                    print_exception(e,e, \
+                        e.__traceback__ if hasattr(e,'__traceback__') else None)
 
         if sdMounted:
             print(drive+" mounted")
