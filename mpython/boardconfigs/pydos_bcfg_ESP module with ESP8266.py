@@ -1,4 +1,4 @@
-# PyDOS Board Configuration for 'Adafruit Feather HUZZAH ESP32'
+# PyDOS Board Configuration for 'Adafruit Feather HUZZAH ESP8266'
 
 Pydos_pins = {
     'sndPin' : (16,"D16 GPIO16"),

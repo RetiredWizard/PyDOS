@@ -66,42 +66,49 @@ if implementation.name.upper() == "MICROPYTHON":
 
 elif implementation.name.upper() == "CIRCUITPYTHON":
     Pydos_pins = {}
+    bdir = dir(board)
 
-    if 'BUZZER' in dir(board):
+    if 'BUZZER' in bdir:
         Pydos_pins['sndPin'] = (board.BUZZER,"board.BUZZER")
-    elif 'D12' in dir(board):
+    elif 'D12' in bdir:
         Pydos_pins['sndPin'] = (board.D12,"D12 GPIO12")
-    if 'I2S_BIT_CLOCK' in dir(board):
+    if 'I2S_BIT_CLOCK' in bdir:
         Pydos_pins['i2s_BitClock'] = (board.I2S_BIT_CLOCK,"board.I2S_BIT_CLOCK")
         Pydos_pins['i2s_WordSelect'] = (board.I2S_WORD_SELECT,"board.I2S_WORD_SELECT")
-        if 'I2S_DATA' in dir(board):
+        if 'I2S_DATA' in bdir:
             Pydos_pins['i2s_Data'] = (board.I2S_DATA,"board.I2S_DATA")
         else:
             Pydos_pins['i2s_Data'] = (board.IS2_DATA,"board.IS2_DATA")
-    elif 'SPEAKER_SCK' in dir(board):
+    elif 'SPEAKER_SCK' in bdir:
         Pydos_pins['i2s_BitClock'] = (board.SPEAKER_SCK,"board.SPEAKER_SCK")
         Pydos_pins['i2s_WordSelect'] = (board.SPEAKER_WS,"board.SPEAKER_WS")
         Pydos_pins['i2s_Data'] = (board.SPEAKER_DOUT,"board.SPEAKER_DOUT")
-    if 'LED_RED' in dir(board):
+    if 'LED_RED' in bdir:
         Pydos_pins['LED_RED'] = (board.LED_RED,"LED_RED")
-    if 'LED_GREEN' in dir(board):
+    elif 'LED_R' in bdir:
+        Pydos_pins['LED_RED'] = (board.LED_R,"LED_R")
+    if 'LED_GREEN' in bdir:
         Pydos_pins['LED_GREEN'] = (board.LED_GREEN,"LED_GREEN")
-    if 'LED_BLUE' in dir(board):
+    elif 'LED_G' in bdir:
+        Pydos_pins['LED_GREEN'] = (board.LED_G,"LED_G")
+    if 'LED_BLUE' in bdir:        
         Pydos_pins['LED_BLUE'] = (board.LED_BLUE,"LED_BLUE")
-    if 'NEOPIXEL' in dir(board):
+    elif 'LED_B' in bdir:
+        Pydos_pins['LED_BLUE'] = (board.LED_B,"LED_B")
+    if 'NEOPIXEL' in bdir:
         Pydos_pins['neoPixel'] = (board.NEOPIXEL,"NEOPIXEL")
-    if 'NEOPIXEL_POWER' in dir(board):
+    if 'NEOPIXEL_POWER' in bdir:
         Pydos_pins['neoPixel_Pow'] = (board.NEOPIXEL_POWER,"NEOPIXEL_POWER")
-    if 'DOTSTAR_CLOCK' in dir(board):
+    if 'DOTSTAR_CLOCK' in bdir:
         Pydos_pins['dotStar_Clock'] = (board.DOTSTAR_CLOCK,"DOTSTAR_CLOCK")
-    if 'DOTSTAR_DATA' in dir(board):
+    if 'DOTSTAR_DATA' in bdir:
         Pydos_pins['dotStar_Data'] = (board.DOTSTAR_DATA,"DOTSTAR_DATA")
-    if 'DOTSTAR_POWER' in dir(board):
+    if 'DOTSTAR_POWER' in bdir:
         Pydos_pins['dotStar_Pow'] = (board.DOTSTAR_POWER,"DOTSTAR_POWER")
-    if 'SCL' in dir(board):
+    if 'SCL' in bdir:
         Pydos_pins['SCL'] = (board.SCL,"SCL")
         Pydos_pins['SDA'] = (board.SDA,"SDA")
-    elif 'D3' in dir(board) and 'D2' in dir(board):
+    elif 'D3' in bdir and 'D2' in bdir:
         Pydos_pins['SCL'] = (board.D3,"SCL D3")
         Pydos_pins['SDA'] = (board.D2,"SDA D2")
 
@@ -111,50 +118,50 @@ elif implementation.name.upper() == "CIRCUITPYTHON":
     Pydos_pins["CS"] = []
 
     _SCK = False
-    if 'SD_SCK' in dir(board):
+    if 'SD_SCK' in bdir:
         _SCK = board.SD_SCK
-    elif 'SD_CLK' in dir(board):
+    elif 'SD_CLK' in bdir:
         _SCK = board.SD_CLK
     if _SCK:
         
-        if 'SD_MOSI' in dir(board):
+        if 'SD_MOSI' in bdir:
             Pydos_pins["SCK"].append((_SCK,"SD_SCK"))
             Pydos_pins["MOSI"].append((board.SD_MOSI,"SD_MOSI"))
             Pydos_pins["MISO"].append((board.SD_MISO,"SD_MISO"))
-        elif 'SD_COPI' in dir(board):
+        elif 'SD_COPI' in bdir:
             Pydos_pins["SCK"].append((_SCK,"SD_SCK"))
             Pydos_pins["MOSI"].append((board.SD_COPI,"SD_COPI"))
             Pydos_pins["MISO"].append((board.SD_CIPO,"SD_CIPO"))
-        if 'SD_CS' in dir(board):
+        if 'SD_CS' in bdir:
             Pydos_pins["CS"].append((board.SD_CS,"SD_CS"))
         else:
             Pydos_pins["CS"].append((None,"None"))
 
     _SCK = False
-    if 'SCK' in dir(board):
+    if 'SCK' in bdir:
         _SCK = board.SCK
-    elif 'CLK' in dir(board):
+    elif 'CLK' in bdir:
         _SCK = board.CLK
     if _SCK:
-        if 'MOSI' in dir(board):
+        if 'MOSI' in bdir:
             Pydos_pins["SCK"].append((_SCK,"SCK"))
             Pydos_pins["MOSI"].append((board.MOSI,"MOSI"))
             Pydos_pins["MISO"].append((board.MISO,"MISO"))
-        elif 'COPI' in dir(board):
+        elif 'COPI' in bdir:
             Pydos_pins["SCK"].append((_SCK,"SCK"))
             Pydos_pins["MOSI"].append((board.SD_COPI,"COPI"))
             Pydos_pins["MISO"].append((board.SD_CIPO,"CIPO"))
-        if "CS" in dir(board):
+        if "CS" in bdir:
             Pydos_pins["CS"].append((board.CS,"CS"))
-        elif "SS" in dir(board):
+        elif "SS" in bdir:
             Pydos_pins["CS"].append((board.SS,"SS"))
         else:
             Pydos_pins["CS"].append((None,"None"))
 
-    if 'SDIO_CLK' in dir(board) and 'SDIO_CMD' in dir(board):
+    if 'SDIO_CLK' in bdir and 'SDIO_CMD' in bdir:
         Pydos_pins['SDIO_CLK'] = (board.SDIO_CLK,"board.SDIO_CLK")
         Pydos_pins['SDIO_CMD'] = (board.SDIO_CMD,"board.SDIO_CMD")
-        datapins = [getattr(board,attr) for attr in dir(board) if 'SDIO_D' in attr]
+        datapins = [getattr(board,attr) for attr in bdir if 'SDIO_D' in attr]
         if len(datapins) > 0:
             Pydos_pins['SDIO_DPINS'] = (datapins,"[board.SDIO_D*]")
 

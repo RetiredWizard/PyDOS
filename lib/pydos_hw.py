@@ -85,7 +85,7 @@ class PyDOS_HW:
         self.dotStar_Data = Pydos_pins.get('dotStar_Data',(None,None))[0]
         self.dotStar_Pow = Pydos_pins.get('dotStar_Pow',(None,None))[0]
         self.dotStar_Extra = Pydos_pins.get('dotStar_Extra',(None,None))[0]
-        self.led = Pydos_pins.get('led',(None,None))[0]
+        self.led = Pydos_pins.get('led',Pydos_pins.get('LED_RED',(None,None)))[0]
         self.LED_RED = Pydos_pins.get('LED_RED',(None,None))[0]
         self.LED_GREEN = Pydos_pins.get('LED_GREEN',(None,None))[0]
         self.LED_BLUE = Pydos_pins.get('LED_BLUE',(None,None))[0]
