@@ -195,11 +195,11 @@ Parameters:
 1 - single 64x32 panel  
 2 - 2x1 matrix of 64x32 panels  
 4 - 2x2 matrix of 64x32 panels   
-4w - 4x1 matrix of 64x32 panels
-64x1 - singel 64x64 panel
-64x2 - 2x1 matrix of 64x64 panels
-64x4 - 2x2 matrix of 64x64 panels
-64x4w - 4x1 matrix of 64x64 panels
+4w - 4x1 matrix of 64x32 panels  
+64x1 - singel 64x64 panel  
+64x2 - 2x1 matrix of 64x64 panels  
+64x4 - 2x2 matrix of 64x64 panels  
+64x4w - 4x1 matrix of 64x64 panels  
 
 **Playimage.py [filename]** - program to display .bmp, .jpg, .gif or .png image files. If the program is loaded from PyDOS it attempts to determine the appropriate display configuration from the PyDOS environment, otherwise several display options are supported and selected depending on the existence of BOARD.Display or locally installed display libraries.
 
