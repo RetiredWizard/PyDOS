@@ -16,8 +16,6 @@ The PyDOS version of PyBasic still has the following difference from the richpl 
 * PyDOS version runs Basic program in place on flash rather than loading into memory
 * added a saved index source code option when saving or loading using the .PGM extension on a program filename, this vastly speeds up subsequent program load times
 
-* pre-allocation of memory on startup, this seems to reduce the memory allocation errors when attempting to run large basic programs
-
 * added SOUND freq,duration[,volume] command. The Windows code uses the winsound library and the Micropython/Circuit Python implementations
          assumes the appropriate speaker circuit is connected to the GPIO pin defined in pydos_bcfg.py
 
