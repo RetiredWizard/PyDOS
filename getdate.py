@@ -83,7 +83,7 @@ def getdate(passedIn=""):
         elif sys.implementation.name.upper() == "CIRCUITPYTHON":
             ntp = None
             if not hasattr(Pydos_wifi.radio,'get_time'):
-                ntp = adafruit_ntp.NTP(Pydos_wifi._socket, server='pool.ntp.org', tz_offset=tz_hour_offset)
+                ntp = adafruit_ntp.NTP(Pydos_wifi._pool, server='pool.ntp.org', tz_offset=tz_hour_offset)
 
             success = False
             for i in range(5):

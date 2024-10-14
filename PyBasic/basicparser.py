@@ -1153,6 +1153,8 @@ class BASICParser:
             if saveval:
                 # Set up and return the flow signal
                 return FlowSignal(ftarget=self.__operand_stack.pop())
+            else:
+                self.__operand_stack.pop()
 
         # advance to ELSE
         while self.__tokenindex < len(self.__tokenlist) and self.__token.category != Token.ELSE:

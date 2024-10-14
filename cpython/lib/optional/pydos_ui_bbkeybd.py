@@ -6,6 +6,11 @@
 from bbq10keyboard import BBQ10Keyboard, STATE_PRESS, STATE_RELEASE, STATE_LONG_PRESS
 import board
 from pydos_hw import Pydos_hw
+try:
+    from displayio import CIRCUITPYTHON_TERMINAL as TERM
+    from terminalio import FONT
+except:
+    pass
 
 class PyDOS_UI:
 
@@ -101,8 +106,22 @@ class PyDOS_UI:
 
         return input_text
 
-    def get_screensize(self):
-        return(19,54)
+    def get_screensize(self,disp=None):
+        try:
+            if disp is not None:
+                dhigh = disp.height
+                dwide = disp.width
+            else:
+                dhigh = board.DISPLAY.height
+                dwide = board.DISPLAY.width
+
+            height = round(dhigh/(FONT.bitmap.height*TERM.scale))-1
+            width = round(dwide/((FONT.bitmap.width/95)*TERM.scale))-2
+        except:
+            height = 19
+            width = 54
+
+        return(height,width)
 
 Pydos_ui = PyDOS_UI()
 

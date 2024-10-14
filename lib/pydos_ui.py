@@ -6,12 +6,11 @@ from sys import stdin,stdout,implementation
 import select
 if implementation.name.upper() == "CIRCUITPYTHON":
     import board
-    if 'DISPLAY' in dir(board):
-        try:
-            import displayio
-            import terminalio
-        except:
-            pass
+    try:
+        from displayio import CIRCUITPYTHON_TERMINAL as TERM
+        from terminalio import FONT
+    except:
+        pass
 
 class PyDOS_UI:
 
@@ -41,10 +40,17 @@ class PyDOS_UI:
         # Does the same function as sys.stdin.read(num), blocking read
         return stdin.read(num)
 
-    def get_screensize(self):
+    def get_screensize(self,disp=None):
         try:
-            height = round(board.DISPLAY.height/(terminalio.FONT.bitmap.height*displayio.CIRCUITPYTHON_TERMINAL.scale))-1
-            width = round(board.DISPLAY.width/((terminalio.FONT.bitmap.width/95)*displayio.CIRCUITPYTHON_TERMINAL.scale))-2
+            if disp is not None:
+                dhigh = disp.height
+                dwide = disp.width
+            else:
+                dhigh = board.DISPLAY.height
+                dwide = board.DISPLAY.width
+
+            height = round(dhigh/(FONT.bitmap.height*TERM.scale))-1
+            width = round(dwide/((FONT.bitmap.width/95)*TERM.scale))-2
         except:
             print("Screen set to 24 rows, 80 col. Press any key to continue...",end="")
             stdout.write('\x1b[2K')

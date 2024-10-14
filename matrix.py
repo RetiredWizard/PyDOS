@@ -15,15 +15,51 @@ except:
 if passedIn == '1':
     base_width = 64
     base_height = 32
-    bit_depth = 2
+    bit_depth = 4
     chain_across = 1
+    tile_down = 1
+elif passedIn == '2':
+    base_width = 64
+    base_height = 32
+    bit_depth = 4
+    chain_across = 2
     tile_down = 1
 elif passedIn == '4':
     base_width = 64
     base_height = 32
-    bit_depth = 2
+    bit_depth = 4
     chain_across = 2
     tile_down = 2
+elif passedIn == '4w':
+    base_width = 64
+    base_height = 32
+    bit_depth = 4
+    chain_across = 4
+    tile_down = 1
+elif passedIn == '64x1':
+    base_width = 64
+    base_height = 64
+    bit_depth = 4
+    chain_across = 1
+    tile_down = 1
+elif passedIn == '64x2':
+    base_width = 64
+    base_height = 64
+    bit_depth = 4
+    chain_across = 2
+    tile_down = 1
+elif passedIn == '64x4':
+    base_width = 64
+    base_height = 64
+    bit_depth = 4
+    chain_across = 2
+    tile_down = 2
+elif passedIn == '64x4w'
+    base_width = 64
+    base_height = 64
+    bit_depth = 4
+    chain_across = 4
+    tile_down = 1
 else:
     try:
         base_width = int(input('Panel pixel width (64): '))
@@ -53,6 +89,15 @@ height = base_height * tile_down
 
 displayio.release_displays()
 
+addrPins = [
+        board.MTX_ADDRA,
+        board.MTX_ADDRB,
+        board.MTX_ADDRC,
+        board.MTX_ADDRD
+]
+if base_height == 64:
+    addrPins.append(board.MTX_ADDRE)
+
 matrix = rgbmatrix.RGBMatrix(
     width=width,height=height, bit_depth=bit_depth,
     rgb_pins=[
@@ -63,12 +108,7 @@ matrix = rgbmatrix.RGBMatrix(
         board.MTX_G2,
         board.MTX_B2
     ],
-    addr_pins=[
-        board.MTX_ADDRA,
-        board.MTX_ADDRB,
-        board.MTX_ADDRC,
-        board.MTX_ADDRD
-    ],
+    addr_pins=addrPins,
     clock_pin=board.MTX_CLK,
     latch_pin=board.MTX_LAT,
     output_enable_pin=board.MTX_OE,
@@ -87,10 +127,10 @@ envVars["_display"] = framebufferio.FramebufferDisplay(matrix)
 envVars["_display"].root_group[0].hidden = False
 envVars["_display"].root_group[1].hidden = True # logo
 envVars["_display"].root_group[2].hidden = True # status bar
-supervisor.reset_terminal(envVars["_display"].width, 75)
+supervisor.reset_terminal(envVars["_display"].width, height+11)
 envVars["_display"].root_group[0].y=-2
 envVars["_display"].root_group[0].x=0
 
-envVars["_scrWidth"]=round(envVars["_display"].width/((terminalio.FONT.bitmap.width/95)*displayio.CIRCUITPYTHON_TERMINAL.scale))-1
-envVars["_scrHeight"]=round(envVars["_display"].height/(terminalio.FONT.bitmap.height*displayio.CIRCUITPYTHON_TERMINAL.scale))
+envVars["_scrWidth"]=round(envVars["_display"].width/((terminalio.FONT.bitmap.width/95)*displayio.CIRCUITPYTHON_TERMINAL.scale))-2
+envVars["_scrHeight"]=round(envVars["_display"].height/(terminalio.FONT.bitmap.height*displayio.CIRCUITPYTHON_TERMINAL.scale))-1
 

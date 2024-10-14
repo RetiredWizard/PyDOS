@@ -73,7 +73,7 @@ def PyDOS():
     global envVars
     if "envVars" not in globals().keys():
         envVars = {}
-    _VER = "1.42"
+    _VER = "1.43"
     prmpVals = ['>','(',')','&','|','\x1b','\b','<','=',' ',_VER,'\n','$','']
 
     print("Starting Py-DOS...")
@@ -509,7 +509,7 @@ def PyDOS():
                             if 'mem_free' in dir(gc):
                                 prompt += str(gc.mem_free())
                         elif prmpToken == 'D':
-                            prompt += f"{localtime()[1]:02}/{localtime()[2]:02}/{localtime()[0]:04}" 
+                            prompt += f"{localtime()[1]:02}/{localtime()[2]:02}/{localtime()[0]:04}"
                         elif prmpToken == 'T':
                             prompt += f"{localtime()[3]:02}:{localtime()[4]:02}:{localtime()[5]:02}"
                         elif prmpToken == 'P':
@@ -835,7 +835,7 @@ def PyDOS():
                             envVars[envCmdVar] = tmp
                         elif envCmdVar == "_scrHeight" or envCmdVar == "_scrWidth":
                             if Pydos_ui:
-                                (tHeight,tWidth) = Pydos_ui.get_screensize()
+                                (tHeight,tWidth) = Pydos_ui.get_screensize(envVars.get('_display'))
                             else:
                                 tHeight = 24
                                 tWidth = 80

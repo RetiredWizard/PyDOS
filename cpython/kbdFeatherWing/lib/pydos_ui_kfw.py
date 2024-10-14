@@ -133,7 +133,7 @@ class PyDOS_UI:
 
         return input_text
 
-    def get_screensize(self):
+    def get_screensize(self,disp=None):
         if int(uname().release.split('.')[0]) >=8:
             return(19,52)
         else:

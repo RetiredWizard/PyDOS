@@ -66,10 +66,13 @@ def viewFile(args):
         scrLines = 24
         scrWidth = 80
 
-    try:
-        scrollable = Pydos_ui.scrollable
-    except:
-        scrollable = False
+    if "_scrollable" in envVars.keys():
+        scrollable = (envVars["_scrollable"] == True)
+    else:
+        try:
+            scrollable = Pydos_ui.scrollable
+        except:
+            scrollable = False
 
     savDir = os.getcwd()
     args = absolutePath(args,savDir)

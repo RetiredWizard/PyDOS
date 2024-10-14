@@ -33,7 +33,7 @@ class PyDOS_UI:
             value_when_pressed=False
         )
 
-    def get_screensize(self):
+    def get_screensize(self,disp=None):
         return (19,51)
 
     def serial_bytes_available(self):

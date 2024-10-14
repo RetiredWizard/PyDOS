@@ -99,8 +99,8 @@ goto not_tablet
 
 :makerfabs_tablet
 pexec import os
-pexec envVars["_ts_width"] = os.getenv('PYDOS_TS_WIDTH','')
-if not "%_ts_width%" == "" goto tablet
+pexec envVars["_disp_width"] = os.getenv('CIRCUITPY_DISPLAY_WIDTH','')
+if not "%_disp_width%" == "" goto tabletdone
 set/p _answidth = What is the resolution width of the screen? (1024/800):
 if %_answidth% == 800 goto validwidth
 if %_answidth% == 1024 goto validwidth
@@ -108,12 +108,36 @@ echo Invalid resolution entered (1024/800)
 goto makerfabs_tablet
 :validwidth
 pexec f = open('/settings.toml','a')
-pexec f.write('\nPYDOS_TS_WIDTH=%_answidth%\n')
+pexec f.write('\nCIRCUITPY_DISPLAY_WIDTH=%_answidth%\n')
 pexec f.close()
 
+if %_answidth% == 800 goto tabletdone
+echo ***
+echo *** If the display doesn't look correct, you may need to powercycle ***
+echo *** the board after setup completes.                                 ***
+echo ***
+pause
+goto tabletdone
+
 :tablet
+set/p _ansrotate = Is the display screen rotated incorrectly? (Y/N):
+if %_ansrotate% == Y goto rotateScreen
+if %_ansrotate% == y goto rotateScreen
+if %_ansrotate% == N goto tabletdone
+if %_ansrotate% == n goto tabletdone
+goto tablet
+
+:rotateScreen
+pexec f = open('/settings.toml','a')
+pexec f.write('\nCIRCUITPY_DISPLAY_ROTATION=270\n')
+pexec f.close()
+echo ***
+echo *** If the display isn't rotated properly, you may need to powercycle ***
+echo *** the board after setup completes.                                  ***
+echo ***
+pause
+:tabletdone
 set _ans2 = A
-rem rename /virtrepl.py /repl.py
 goto esp32
 
 :not_tablet
