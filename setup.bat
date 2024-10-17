@@ -229,6 +229,9 @@ copy /cpython/kbdFeatherWing/lib/* /lib/
 rename /lib/pydos_ui.py /lib/pydos_ui_uart.py
 echo copy /lib/pydos_ui_kfw.py /lib/pydos_ui.py
 copy /lib/pydos_ui_kfw.py /lib/pydos_ui.py
+pexec f = open('/autoexec.bat','a')
+pexec f.write('\n@rgbset\n')
+pexec f.close()
 rem rename /virtrepl.py /repl.py
 if %_ans2% == O del /lib/kfw_s2_board.py
 if %_ans2% == E del /lib/kfw_pico_board.py
