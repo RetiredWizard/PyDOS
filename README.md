@@ -343,7 +343,7 @@ Instructions on installing and using **circup** can be found [here](https://lear
 
 On your host PC, you should run:  
 **circup update**  (if you are conected to the board via a USB cable)  
-**circup --host ip-address --password CIRCUITPY_WEB_API_PASSWORD update** (for wifi enabled boards)  
+**circup --host *ip-address* --password *CIRCUITPY_WEB_API_PASSWORD* update** (for wifi enabled boards)  
   
 On your microcontroller, you can use the **setenv.py** PyDOS program to set or see your current CIRCUITPY_WEB_API_PASSWORD.  
 
