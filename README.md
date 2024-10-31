@@ -189,19 +189,18 @@ CircuitPython LCD libraries from https://github.com/dhylands/python_lcd
 **rgbblink.py [pin number]** - program to blink an onboard neopixel or dotstar  
 **rgbrainbow.py [pin number]** - program to color cycle an onboard neopixel or dotstar  
 
-**matrix.py [1|2|4|4w|64x1|64x2|64x4|64x4w]** - program to initalize connected HUB75 RGB Matrix Panels as a CircuitPython display. The display object is stored as a PyDOS environment variable (_display).  
+**matrix.py [width,height,depth,across,down]** - program to initalize connected HUB75 RGB Matrix Panels as a CircuitPython display. The display object is stored as a PyDOS environment variable (_display).  
   
 Parameters:  
-1 - single 64x32 panel  
-2 - 2x1 matrix of 64x32 panels  
-4 - 2x2 matrix of 64x32 panels   
-4w - 4x1 matrix of 64x32 panels  
-64x1 - singel 64x64 panel  
-64x2 - 2x1 matrix of 64x64 panels  
-64x4 - 2x2 matrix of 64x64 panels  
-64x4w - 4x1 matrix of 64x64 panels  
+width - base width of a single RGB matrix tile  
+height - base height of a single RGB matrix tile  
+depth - the color depth of the matrix  
+across - the number of tiles connected across the matrix display  
+down - the number of tiles connected down the matrix display
 
-**Playimage.py [filename]** - program to display .bmp, .jpg, .gif or .png image files. If the program is loaded from PyDOS it attempts to determine the appropriate display configuration from the PyDOS environment, otherwise several display options are supported and selected depending on the existence of BOARD.Display or locally installed display libraries.
+If the parameters are omitted or not properly formatted, the program will prompt for each of the values.  
+
+**Playimage.py [filename]** - (requires the adafruit_imageload library installed in the /lib folder) program to display .bmp, .jpg, .gif or .png image files. If the program is loaded from PyDOS it attempts to determine the appropriate display configuration from the PyDOS environment, otherwise several display options are supported and selected depending on the existence of BOARD.Display or locally installed display libraries.
 
 **reboot.py** - performs a soft reboot (Micropython requires a Ctrl-D to complete)
 

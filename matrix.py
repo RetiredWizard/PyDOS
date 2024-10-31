@@ -9,58 +9,12 @@ import supervisor
 
 try:
     type(passedIn)
+    args = passedIn.split(',')
+    [base_width,base_height,bit_depth,chain_across,tile_down] = [int(p) for p in args]
 except:
     passedIn = ""
 
-if passedIn == '1':
-    base_width = 64
-    base_height = 32
-    bit_depth = 4
-    chain_across = 1
-    tile_down = 1
-elif passedIn == '2':
-    base_width = 64
-    base_height = 32
-    bit_depth = 4
-    chain_across = 2
-    tile_down = 1
-elif passedIn == '4':
-    base_width = 64
-    base_height = 32
-    bit_depth = 4
-    chain_across = 2
-    tile_down = 2
-elif passedIn == '4w':
-    base_width = 64
-    base_height = 32
-    bit_depth = 4
-    chain_across = 4
-    tile_down = 1
-elif passedIn == '64x1':
-    base_width = 64
-    base_height = 64
-    bit_depth = 4
-    chain_across = 1
-    tile_down = 1
-elif passedIn == '64x2':
-    base_width = 64
-    base_height = 64
-    bit_depth = 4
-    chain_across = 2
-    tile_down = 1
-elif passedIn == '64x4':
-    base_width = 64
-    base_height = 64
-    bit_depth = 4
-    chain_across = 2
-    tile_down = 2
-elif passedIn == '64x4w':
-    base_width = 64
-    base_height = 64
-    bit_depth = 4
-    chain_across = 4
-    tile_down = 1
-else:
+if len(args) != 5 or args[0] not in ['32','64'] or args[1] not in ['32','64'] or bit_depth < 1 or bit_depth > 8:
     try:
         base_width = int(input('Panel pixel width (64): '))
     except:
