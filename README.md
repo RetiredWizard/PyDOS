@@ -189,7 +189,7 @@ CircuitPython LCD libraries from https://github.com/dhylands/python_lcd
 **rgbblink.py [pin number]** - program to blink an onboard neopixel or dotstar  
 **rgbrainbow.py [pin number]** - program to color cycle an onboard neopixel or dotstar  
 
-**matrix.py [width,height,depth,across,down]** - program to initalize connected HUB75 RGB Matrix Panels as a CircuitPython display. The display object is stored as a PyDOS environment variable (_display).  
+**matrix.py [width,height,depth,across,down]** - (Circuitpython only) program to initalize connected HUB75 RGB Matrix Panels as a CircuitPython display. The display object is stored as a PyDOS environment variable (_display).  
   
 Parameters:  
 width - base width of a single RGB matrix tile  
@@ -200,7 +200,7 @@ down - the number of tiles connected down the matrix display
 
 If the parameters are omitted or not properly formatted, the program will prompt for each of the values.  
 
-**Playimage.py [filename]** - (requires the adafruit_imageload library installed in the /lib folder) program to display .bmp, .jpg, .gif or .png image files. If the program is loaded from PyDOS it attempts to determine the appropriate display configuration from the PyDOS environment, otherwise several display options are supported and selected depending on the existence of BOARD.Display or locally installed display libraries.
+**Playimage.py [filename]** - (Circuitpython only, requires the adafruit_imageload library installed in the /lib folder) program to display .bmp, .jpg, .gif or .png image files. If the program is loaded from PyDOS it attempts to determine the appropriate display configuration from the PyDOS environment, otherwise several display options are supported and selected depending on the existence of BOARD.Display or locally installed display libraries.
 
 **reboot.py** - performs a soft reboot (Micropython requires a Ctrl-D to complete)
 
@@ -327,7 +327,7 @@ At the REPL prompt type "**import PyDOS**" to start PyDOS. From PyDOS type **set
 
 Once the **setup.bat** script has been run if you have more files to copy to the microcontroller (PyBasic for example) or you want to run **circup**, you will need to give the host computer read/write access to the mounted microcontroller drive. This is done by typing **"fs ro"** at the PyDOS prompt and then power cycling the board.
 
-After running circuip or deleting/copying files using the Host computer, when you want to run PyDOS normally again, edit the **boot.py** file in the root folder of the mounted microcontroller drive (usually CIRCUITPY) and change the line that reads:  
+After running **circup** or deleting/copying files using the Host computer, when you want to run PyDOS normally again, edit the **boot.py** file in the root folder of the mounted microcontroller drive (usually CIRCUITPY) and change the line that reads:  
 
             storage.remount("/",True)  
 
@@ -336,6 +336,18 @@ to:
             storage.remount("/",False)  
 
 and then powercycle the board once again.
+
+It is recommended that once the **setup.bat** script has been run, **circup** be run on your host computer, in order to make sure the libraries are updated and in sync with the version of CircuitPython on your microcontroller board.
+
+Instructions on installing and using **circup** can be found [here](https://learn.adafruit.com/keep-your-circuitpython-libraries-on-devices-up-to-date-with-circup/overview)  
+
+On your host PC, you should run:  
+**circup update**  (if you are conected to the board via a USB cable)
+**circup --host ip-address --password CIRCUITPY_WEB_API_PASSWORD update** (for wifi enabled boards)  
+On your microcontroller, you can use the **setenv.py** PyDOS program to set or see your current CIRCUITPY_WEB_API_PASSWORD.  
+
+You can also run commands like:
+**circup install adafruit_imageload** to install any adafruit libraries you need  
 
 --------------------------------------------------------------------------------------------------------------------
 **Building custom Micropython firmware**

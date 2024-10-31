@@ -30,7 +30,7 @@ while True:
             print("*ERROR* Exception:",str(__err))
             __cmd = ""
     else:
-# Pre 9.0.0 alpha 7 code (single line statments only)
+# Pre 9.0.0 alpha 7 code or Micropython (single line statments only)
         __line = input("=>> ")
         if __line.lower() == 'exit':
             break
