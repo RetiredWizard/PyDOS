@@ -342,8 +342,9 @@ It is recommended that once the **setup.bat** script has been run, **circup** be
 Instructions on installing and using **circup** can be found [here](https://learn.adafruit.com/keep-your-circuitpython-libraries-on-devices-up-to-date-with-circup/overview)  
 
 On your host PC, you should run:  
-**circup update**  (if you are conected to the board via a USB cable)
+**circup update**  (if you are conected to the board via a USB cable)  
 **circup --host ip-address --password CIRCUITPY_WEB_API_PASSWORD update** (for wifi enabled boards)  
+  
 On your microcontroller, you can use the **setenv.py** PyDOS program to set or see your current CIRCUITPY_WEB_API_PASSWORD.  
 
 You can also run commands like:
