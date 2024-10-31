@@ -62,7 +62,9 @@ elif implementation.name.upper() == "MICROPYTHON":
         'Sparkfun SAMD51 Thing Plus with SAMD51J20A', 
         'XIAO nRF52840 Sense with NRF52840']
 
-    if implementation._machine in spcBoards:
+    if '_machine' in dir(implementation) and \
+       implementation._machine in spcBoards:
+
         boardNo = spcBoards.index(implementation._machine)
     else:
         boardNo = -1

@@ -53,6 +53,10 @@ rem if not errorlevel 0 echo copy /mpython/lib/optional/ws2812.py /lib/
 rem if not errorlevel 0 copy /mpython/lib/optional/ws2812.py /lib/
 if not errorlevel 0 copy /mpython/lib/optional/neopixel.* /lib/
 pexec envVars["_uname"] = implementation._machine
+if errorlevel 0 goto uname_set
+pexec import os
+pexec envVars["_uname"] = os.uname().machine
+:uname_set
 if not "%_uname%" == "Sparkfun SAMD51 Thing Plus with SAMD51J20A" goto skip_SAMD51
 if not exist /lib mkdir /lib
 copy /mpython/extFlash/lib/* /lib/

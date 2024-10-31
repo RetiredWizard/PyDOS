@@ -54,7 +54,7 @@ elif passedIn == '64x4':
     bit_depth = 4
     chain_across = 2
     tile_down = 2
-elif passedIn == '64x4w'
+elif passedIn == '64x4w':
     base_width = 64
     base_height = 64
     bit_depth = 4

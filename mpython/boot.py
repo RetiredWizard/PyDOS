@@ -4,7 +4,9 @@ spcBoards = ['Teensy 4.1 with MIMXRT1062DVJ6A', \
     'Sparkfun SAMD51 Thing Plus with SAMD51J20A', 
     'XIAO nRF52840 Sense with NRF52840']
 
-if implementation._machine in spcBoards:
+if '_machine' in dir(implementation) and \
+    implementation._machine in spcBoards:
+
     boardNo = spcBoards.index(implementation._machine)
 else:
     import os
