@@ -37,6 +37,8 @@ if "calcWildCardLen" not in dir():
         return (wildcardLen,recursiveFail)
 
 def xcopy():
+    
+    global passedIn,envVars
 
     def chkPath(tstPath,makeDirs=False):
         validPath = True

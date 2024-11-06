@@ -348,7 +348,7 @@ On your host PC, you should run:
 On your microcontroller, you can use the **setenv.py** PyDOS program to set or see your current CIRCUITPY_WEB_API_PASSWORD.  
 
 You can also run commands like:
-**circup install adafruit_imageload** to install any adafruit libraries you need  
+**circup install adafruit_imageload** to install any adafruit libraries you need.  
 
 --------------------------------------------------------------------------------------------------------------------
 **Building custom Micropython firmware**
