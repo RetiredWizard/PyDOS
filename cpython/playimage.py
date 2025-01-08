@@ -3,10 +3,10 @@ try:
     import gifio
 except:
     pass
+import adafruit_ticks
 import adafruit_imageload
 import bitmaptools
 import displayio
-import time
 from os import getenv
 try:
     from pydos_ui import Pydos_ui
@@ -79,88 +79,78 @@ else:
 def playimage(passedIn=""):
 
     if passedIn != "":
-        fname = passedIn
+        flist = passedIn
     else:
-        fname = ""
+        flist = ""
         
-    if fname == "":
-        fname = input("Enter filename: ")
+    if flist == "":
+        flist = input("Enter filename: ")
     try:
         while Pydos_ui.virt_touched():
             pass
     except:
         pass
 
-    if fname==passedIn:
+    if flist==passedIn:
         print('Press "q" to quit')
     else:
         input('Press "Enter" to continue, press "q" to quit')
 
-    if fname[-4:].upper() in [".BMP",".PNG",".JPG",".RLE"]:
+    files = flist.split(',')
+    try:
+        dispseconds = int(files[-1])
+        files = files[:-1]
+    except:
+        dispseconds = 15
 
-        bitmap, palette = adafruit_imageload.load( \
-            fname, bitmap=displayio.Bitmap, palette=displayio.Palette)
-        
-        scalefactor = display.width / bitmap.width
-        if display.height/bitmap.height < scalefactor:
-            scalefactor = display.height/bitmap.height
+    singleimage = False
+    if len(files) == 1 and files[0][0] != '*':
+        singleimage = True
 
-        if scalefactor < 1:
-            print(f'scalefactor: {scalefactor}')
-            bitframe = displayio.Bitmap(display.width,display.height,2**bitmap.bits_per_value)
-            bitmaptools.rotozoom(bitframe,bitmap,scale=scalefactor)
-            facecc = displayio.TileGrid(bitframe,pixel_shader=palette)
-                # pixel_shader=displayio.ColorConverter(input_colorspace=colorspace))
-            pwidth = bitframe.width
-            pheight = bitframe.height
+    fileindx = 0
+    wildindx = 0
+    while True:
+        fname = files[fileindx]
+
+        if fname[0] == '*':
+            wildlist = [f for f in os.listdir() if f[fname.find('.')-len(fname):] == fname[fname.find('.')-len(fname):]]
+            fname = wildlist[wildindx]
+            wildindx = (wildindx +1) % len(wildlist)
+            if wildindx == 0:
+                fileindx = (fileindx + 1) % len(files)
         else:
-            facecc = displayio.TileGrid(bitmap,pixel_shader=palette)
-                # pixel_shader=displayio.ColorConverter(input_colorspace=colorspace))
-            pwidth = bitmap.width
-            pheight = bitmap.height
+            fileindx = (fileindx + 1) % len(files)
+
+
+        if fname[-4:].upper() in [".BMP",".PNG",".JPG",".RLE"]:
+
+            bitmap, palette = adafruit_imageload.load( \
+                fname, bitmap=displayio.Bitmap, palette=displayio.Palette)
             
-        print("bitmap (w,h): ",bitmap.width,bitmap.height)
-        print("scaled bitmap (w,h): ",pwidth,pheight)
-        print("facecc (w,h): ",facecc.width,facecc.height)
-        
-        if pwidth < display.width:
-            facecc.x = (display.width-pwidth)//2
-        if pheight < display.height:
-            facecc.y = (display.height-pheight)//2
-        splash = displayio.Group()
-        splash.append(facecc)
-        display.root_group = splash
-
-        input('Press Enter to close')
-
-    elif fname[-4:].upper() in [".GIF"]:
-
-        odgcc = gifio.OnDiskGif(fname)
-        with odgcc as odg:
-
-            if getenv('PYDOS_DISPLAYIO_COLORSPACE',"").upper() == 'BGR565_SWAPPED':
-                colorspace = displayio.Colorspace.BGR565_SWAPPED
-            else:
-                colorspace = displayio.Colorspace.RGB565_SWAPPED
-
-            scalefactor = display.width / odg.width
-            if display.height/odg.height < scalefactor:
-                scalefactor = display.height/odg.height
+            scalefactor = display.width / bitmap.width
+            if display.height/bitmap.height < scalefactor:
+                scalefactor = display.height/bitmap.height
 
             if scalefactor < 1:
-                print(f'scalefactor: {scalefactor}')
-                bitframe = displayio.Bitmap(display.width,display.height,2**odg.bitmap.bits_per_value)
-                bitmaptools.rotozoom(bitframe,odg.bitmap,scale=scalefactor)
-                facecc = displayio.TileGrid(bitframe, \
-                    pixel_shader=displayio.ColorConverter(input_colorspace=colorspace))
+                if singleimage:
+                    print(f'scalefactor: {scalefactor}')
+                bitframe = displayio.Bitmap(display.width,display.height,2**bitmap.bits_per_value)
+                bitmaptools.rotozoom(bitframe,bitmap,scale=scalefactor)
+                facecc = displayio.TileGrid(bitframe,pixel_shader=palette)
+                    # pixel_shader=displayio.ColorConverter(input_colorspace=colorspace))
                 pwidth = bitframe.width
                 pheight = bitframe.height
             else:
-                facecc = displayio.TileGrid(odg.bitmap, \
-                    pixel_shader=displayio.ColorConverter(input_colorspace=colorspace))
-                pwidth = odg.bitmap.width
-                pheight = odg.bitmap.height
+                facecc = displayio.TileGrid(bitmap,pixel_shader=palette)
+                    # pixel_shader=displayio.ColorConverter(input_colorspace=colorspace))
+                pwidth = bitmap.width
+                pheight = bitmap.height
 
+            if singleimage:                
+                print("bitmap (w,h): ",bitmap.width,bitmap.height)
+                print("scaled bitmap (w,h): ",pwidth,pheight)
+                print("facecc (w,h): ",facecc.width,facecc.height)
+            
             if pwidth < display.width:
                 facecc.x = (display.width-pwidth)//2
             if pheight < display.height:
@@ -169,27 +159,104 @@ def playimage(passedIn=""):
             splash.append(facecc)
             display.root_group = splash
 
-            start = 0
-            next_delay = -1
-            cmnd = ""
-            # Display repeatedly.
-            while cmnd.upper() != "Q":
+            if singleimage:
+                input('Press Enter to close')
+                break
+            else:
+                cmnd = ""
+                stop = adafruit_ticks.ticks_add(adafruit_ticks.ticks_ms(),int(dispseconds*1000))
+                while adafruit_ticks.ticks_less(adafruit_ticks.ticks_ms(),stop):
+                    if Pydos_ui.serial_bytes_available():
+                        cmnd = Pydos_ui.read_keyboard(1)
+                        print(cmnd, end="", sep="")
+                        if cmnd.upper() == "Q":
+                            break
+                if cmnd.upper() == "Q":
+                    break
 
-                if Pydos_ui.serial_bytes_available():
-                    cmnd = Pydos_ui.read_keyboard(1)
-                    print(cmnd, end="", sep="")
-                    if cmnd in "qQ":
-                        break
-                while time.monotonic() > start and next_delay > time.monotonic()-start:
-                    pass
-                next_delay = odg.next_frame()
-                start = time.monotonic()
-                if next_delay > 0:
-                    if scalefactor < 1:
-                        bitmaptools.rotozoom(bitframe,odg.bitmap,scale=scalefactor)
+            try:
+                splash.pop()
+                bitmap.deinit()
+                bitmap = None
+                facecc.bitmap.deinit()
+                facecc = None
+                if scalefactor < 1:
+                    bitframe.deinit()
+                    bitframe = None
+            except:
+                pass
 
-    else:
-        print('Unknown filetype')
+        elif fname[-4:].upper() in [".GIF"]:
+
+            odgcc = gifio.OnDiskGif(fname)
+            with odgcc as odg:
+
+                if getenv('PYDOS_DISPLAYIO_COLORSPACE',"").upper() == 'BGR565_SWAPPED':
+                    colorspace = displayio.Colorspace.BGR565_SWAPPED
+                else:
+                    colorspace = displayio.Colorspace.RGB565_SWAPPED
+
+                scalefactor = display.width / odg.width
+                if display.height/odg.height < scalefactor:
+                    scalefactor = display.height/odg.height
+
+                if scalefactor < 1:
+                    if singleimage:
+                        print(f'scalefactor: {scalefactor}')
+                    bitframe = displayio.Bitmap(display.width,display.height,2**odg.bitmap.bits_per_value)
+                    bitmaptools.rotozoom(bitframe,odg.bitmap,scale=scalefactor)
+                    facecc = displayio.TileGrid(bitframe, \
+                        pixel_shader=displayio.ColorConverter(input_colorspace=colorspace))
+                    pwidth = bitframe.width
+                    pheight = bitframe.height
+                else:
+                    facecc = displayio.TileGrid(odg.bitmap, \
+                        pixel_shader=displayio.ColorConverter(input_colorspace=colorspace))
+                    pwidth = odg.bitmap.width
+                    pheight = odg.bitmap.height
+
+                if pwidth < display.width:
+                    facecc.x = (display.width-pwidth)//2
+                if pheight < display.height:
+                    facecc.y = (display.height-pheight)//2
+                splash = displayio.Group()
+                splash.append(facecc)
+                display.root_group = splash
+
+                cmnd = ""
+                # Display repeatedly.
+                stop = adafruit_ticks.ticks_add(adafruit_ticks.ticks_ms(),int(dispseconds*1000))
+                while adafruit_ticks.ticks_less(adafruit_ticks.ticks_ms(),stop) or dispseconds==-1:
+
+                    if Pydos_ui.serial_bytes_available():
+                        cmnd = Pydos_ui.read_keyboard(1)
+                        print(cmnd, end="", sep="")
+                        if cmnd.upper() == "Q":
+                            break
+                    start = adafruit_ticks.ticks_ms()
+                    next_delay = odg.next_frame()
+                    start = adafruit_ticks.ticks_add(start,int(next_delay*1000))
+                    if next_delay > 0:
+                        if scalefactor < 1:
+                            bitmaptools.rotozoom(bitframe,odg.bitmap,scale=scalefactor)
+                    while adafruit_ticks.ticks_less(adafruit_ticks.ticks_ms(),start):
+                        pass
+                if cmnd.upper() == "Q":
+                    break
+
+            try:
+                splash.pop()
+                odgcc = None
+                facecc.bitmap.deinit()
+                facecc = None
+                if scalefactor < 1:
+                    bitframe.deinit()
+                    bitframe = None
+            except:
+                pass
+
+        else:
+            print('Unknown filetype')
 
     try:
         splash.pop()

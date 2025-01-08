@@ -13,6 +13,7 @@ try:
     [base_width,base_height,bit_depth,chain_across,tile_down] = [int(p) for p in args]
 except:
     passedIn = ""
+    args = ""
 
 if len(args) != 5 or args[0] not in ['32','64'] or args[1] not in ['32','64'] or bit_depth < 1 or bit_depth > 8:
     try:
