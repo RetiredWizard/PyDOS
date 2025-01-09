@@ -226,7 +226,7 @@ def playimage(passedIn=""):
                 cmnd = ""
                 # Display repeatedly.
                 stop = adafruit_ticks.ticks_add(adafruit_ticks.ticks_ms(),int(dispseconds*1000))
-                while adafruit_ticks.ticks_less(adafruit_ticks.ticks_ms(),stop) or dispseconds==-1:
+                while adafruit_ticks.ticks_less(adafruit_ticks.ticks_ms(),stop) or singleimage:
 
                     if Pydos_ui.serial_bytes_available():
                         cmnd = Pydos_ui.read_keyboard(1)
