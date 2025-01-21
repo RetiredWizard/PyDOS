@@ -680,12 +680,12 @@ class BASICParser:
                 raise RuntimeError('File '+filename+' could not be opened in line ' + str(self.__line_number))
 
         if accessMode == "r+":
-            if hasattr(self.__file_handles,'newlines'):
+            if hasattr(self.__file_handles[filenum],'newlines'):
                 try:
                     self.__file_handles[filenum].readline()
                 except:
                     pass
-                newlines = self.__file_handles.newlines
+                newlines = self.__file_handles[filenum].newlines
             else:
                 newlines = None
             self.__file_handles[filenum].seek(0)
