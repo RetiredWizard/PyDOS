@@ -32,7 +32,6 @@ class PyDOS_UI:
             retval = 0
         else:
             retval = 1
-        retval = 1 if retval else 0
 
         return retval
 

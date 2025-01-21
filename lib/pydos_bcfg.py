@@ -47,7 +47,7 @@ if implementation.name.upper() == "MICROPYTHON":
     from machine import Pin
     try:
         led = "LED"
-        test = machine.Pin(led,Pin.OUT)
+        test = Pin(led,Pin.OUT)
     except:
         led = "D13"
 

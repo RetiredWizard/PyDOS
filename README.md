@@ -200,10 +200,10 @@ down - the number of tiles connected down the matrix display
 
 If the parameters are omitted or not properly formatted, the program will prompt for each of the values.  
 
-**Playimage.py [filename[,filename2,filename3,etc,[seconds_to_display]]]** - (Circuitpython only, requires the adafruit_imageload library installed in the /lib folder) program to display .bmp, .jpg, .gif (incl animaged) or .png image files. If multiple comma 
+**Playimage.py [filename[,filename2,filename3,etc[],seconds_to_display]]]** - (Circuitpython only, requires the adafruit_imageload library installed in the /lib folder) program to display .bmp, .jpg, .gif (incl animated) or .png image files. If multiple comma 
 seperated files are entered a continous slide show is displayed with each image being 
 displayed for `seconds_to_display` seconds. Wildcard's in the format of *.xxx can be used
-as an input filename. If the program is loaded from PyDOS it attempts to determine the appropriate display configuration from the PyDOS environment, otherwise several display options are supported and selected depending on the existence of BOARD.Display or locally installed display libraries.
+as an input filename. If the program is loaded from PyDOS it attempts to determine the appropriate display configuration from the PyDOS environment, otherwise several display options are supported and selected depending on the existence of BOARD.DISPLAY or locally installed display libraries.
 
 **reboot.py** - performs a soft reboot (Micropython requires a Ctrl-D to complete)
 

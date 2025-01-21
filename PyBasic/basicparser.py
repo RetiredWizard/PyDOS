@@ -680,11 +680,23 @@ class BASICParser:
                 raise RuntimeError('File '+filename+' could not be opened in line ' + str(self.__line_number))
 
         if accessMode == "r+":
+            if hasattr(self.__file_handles,'newlines'):
+                try:
+                    self.__file_handles[filenum].readline()
+                except:
+                    pass
+                newlines = self.__file_handles.newlines
+            else:
+                newlines = None
             self.__file_handles[filenum].seek(0)
             filelen = 0
             for lines in self.__file_handles[filenum]:
-                filelen += (len(lines)+(0 if uname()[0].upper() == 'LINUX' or \
-                    implementation.name.upper() in ['MICROPYTHON','CIRCUITPYTHON'] else 1))
+                filelen += len(lines)
+                if newlines != None:
+                    filelen += len(newlines)-1
+                else:
+                    filelen += (0 if uname()[0].upper() == 'LINUX' or \
+                        implementation.name.upper() in ['MICROPYTHON','CIRCUITPYTHON'] else 1)
 
             self.__file_handles[filenum].seek(filelen)
 

@@ -146,13 +146,26 @@ class Program:
 
         try:
             infile = open(file, 'r')
+            if hasattr(infile,'newlines'):
+                try:
+                    infile.readline()
+                except:
+                    pass
+                newlines = infile.newlines
+                infile.seek(0)
+            else:
+                newlines = None
             fIndex = 0
             fOffset = 0
             pgmLoad = False
             if file.split(".")[-1].upper() == "PGM":
                 pgmLoad = True
                 for fileLine in infile:
-                    fOffset += (len(fileLine) + (0 if self.__imp == 'X' else 1))
+                    fOffset += len(fileLine)
+                    if newlines != None:
+                        fOffset += len(newlines)-1
+                    elif self.__imp != 'X':
+                        fOffset += 1
                     if len(fileLine) >= 9 and fileLine[0:9] == "-999,-999":
                         break
 
@@ -173,8 +186,11 @@ class Program:
                         if fileLine.strip().upper()[fileLine.strip().find(' '):].strip()[:4] == "DATA":
                             self.__data.addData(line_number,fIndex)
                         #self.add_stmt(Lexer().tokenize((fileLine.replace("\n","")).replace("\r","")),fIndex+fOffset,tmpfile)
-                    fIndex += (len(fileLine) + (0 if self.__imp == 'X' else 1))
-
+                    fIndex += len(fileLine)
+                    if newlines != None:
+                        fIndex += len(newlines)-1
+                    elif self.__imp != 'X':
+                        fIndex += 1
 
         except OSError:
             print("Could not read file")
@@ -204,10 +220,22 @@ class Program:
                 if tokenlist[1].lexeme == "DATA":
                     self.__data.addData(line_number,fIndex)
             else:
+                if hasattr(tmpfile,'newlines'):
+                    try:
+                        tmpfile.readline()
+                    except:
+                        pass
+                    newlines = tmpfile.newlines
+                else:
+                    newlines = None
                 tmpfile.seek(0)
                 filelen = 0
                 for lines in tmpfile:
-                    filelen += (len(lines)+(0 if self.__imp == 'X' else 1))
+                    filelen += len(lines)
+                    if newlines != None:
+                        filelen += len(newlines) - 1
+                    elif self.__imp != 'X':
+                        filelen += 1
 
                 self.__program[line_number] = -(filelen+1)
                 if tokenlist[1].lexeme == "DATA":
