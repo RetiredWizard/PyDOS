@@ -29,6 +29,7 @@ def getdate(passedIn=""):
 
     try:
         print(" Using http worldtimeapi.org...",end="")
+        Pydos_wifi.timeout = 1000
         response = Pydos_wifi.get("http://worldtimeapi.org/api/ip",None,True)
         time_data = Pydos_wifi.json()
 

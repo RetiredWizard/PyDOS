@@ -1,4 +1,4 @@
-PyDOS_wifi_VER = "1.40"
+PyDOS_wifi_VER = "1.47"
 
 import os
 import time
@@ -212,6 +212,10 @@ class PyDOS_wifi:
                 self.response = self._requests.get(text_url,headers=headers,timeout=self.timeout)
                 self._poller = None
 
+        return self.response
+
+    def post(self,text_url,data):
+        self.response = self._requests.post(text_url,data=data)
         return self.response
 
     def json(self):
