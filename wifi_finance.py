@@ -210,12 +210,6 @@ def wifi_finance(symbol):
     del response_window
     del found_window
 
-if __name__ == "PyDOS":
-    wifi_finance(passedIn)
-else:
-    print('Enter "wifi_finance.wifi_finance("symbol")" in the REPL or PEXEC command to run.')
-    print('    A null symbol ("") will default to the Nasdaq Index')
-
 print('\nDemonstration Web "scraping" program. The web sites being used in the')
 print('demonstration will often change and break the algorithm used to locate a')
 print('stock price. When that happens this program needs to be updated to work')
@@ -229,4 +223,10 @@ print('.IXIC:INDEXNASDAQ, Dow Jones: .DJI:INDEXDJX, S&P 500: .INX:INDEXSP. The')
 print('index symbols can be retrieved by going to the www.google.com/finance page')
 print("and selecting the index you're inerested in. The formatted symbol will be")
 print('updated at the end of the URL (not the symbol displayed in the search box.')
+
+if __name__ == "PyDOS":
+    wifi_finance(passedIn)
+else:
+    print('Enter "wifi_finance.wifi_finance("symbol")" in the REPL or PEXEC command to run.')
+    print('    A null symbol ("") will default to the Nasdaq Index')
 
