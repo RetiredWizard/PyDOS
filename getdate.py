@@ -28,33 +28,7 @@ def getdate(passedIn=""):
     print("Attempting to set Date/Time",end="")
 
     try:
-        print(" Using http worldtimeapi.org...",end="")
-        Pydos_wifi.timeout = 1000
-        response = Pydos_wifi.get("http://worldtimeapi.org/api/ip",None,True)
-        time_data = Pydos_wifi.json()
-
-        if passedIn == "":
-            tz_hour_offset = int(time_data['utc_offset'][0:3])
-            tz_min_offset = int(time_data['utc_offset'][4:6])
-            if (tz_hour_offset < 0):
-                tz_min_offset *= -1
-        else:
-            tz_hour_offset = int(passedIn)
-            tz_min_offset = 0
-
-        unixtime = int(time_data['unixtime'] + (tz_hour_offset * 60 * 60)) + (tz_min_offset * 60)
-        ltime = time.localtime(unixtime)
-
-        if sys.implementation.name.upper() == "MICROPYTHON":
-            machine.RTC().datetime(tuple([ltime[0]-(time.localtime(0)[0]-1970)]+[ltime[i] for i in [1,2,6,3,4,5,7]]))
-        else:
-            rtc.RTC().datetime = ltime
-
-        print("\nTime and Date successfully set",end="")
-        envVars['errorlevel'] = '0'
-
-    except:
-        print( " FAILED. Trying NTP...",end="")
+        print( "Trying NTP...",end="")
 
         if passedIn == "":
             tz_hour_offset = -4
@@ -116,6 +90,33 @@ def getdate(passedIn=""):
 
             print("\nTime and Date successfully set",end="")
             envVars['errorlevel'] = '0'
+
+    except:
+
+        print("FAILED. Trying http worldtimeapi.org...",end="")
+        Pydos_wifi.timeout = 1000
+        response = Pydos_wifi.get("http://worldtimeapi.org/api/ip",None,True)
+        time_data = Pydos_wifi.json()
+
+        if passedIn == "":
+            tz_hour_offset = int(time_data['utc_offset'][0:3])
+            tz_min_offset = int(time_data['utc_offset'][4:6])
+            if (tz_hour_offset < 0):
+                tz_min_offset *= -1
+        else:
+            tz_hour_offset = int(passedIn)
+            tz_min_offset = 0
+
+        unixtime = int(time_data['unixtime'] + (tz_hour_offset * 60 * 60)) + (tz_min_offset * 60)
+        ltime = time.localtime(unixtime)
+
+        if sys.implementation.name.upper() == "MICROPYTHON":
+            machine.RTC().datetime(tuple([ltime[0]-(time.localtime(0)[0]-1970)]+[ltime[i] for i in [1,2,6,3,4,5,7]]))
+        else:
+            rtc.RTC().datetime = ltime
+
+        print("\nTime and Date successfully set",end="")
+        envVars['errorlevel'] = '0'
 
     print()
     Pydos_wifi.close()
