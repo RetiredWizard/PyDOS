@@ -67,7 +67,7 @@ def viewFile(args):
         scrWidth = 80
 
     if "_scrollable" in envVars.keys():
-        scrollable = (envVars["_scrollable"] == True)
+        scrollable = (envVars["_scrollable"] == True) or (envVars["_scrollable"] == "True")
     else:
         try:
             scrollable = Pydos_ui.scrollable

@@ -6,6 +6,7 @@ from sys import stdin,stdout,implementation
 import select
 if implementation.name.upper() == "CIRCUITPYTHON":
     import board
+    from supervisor import runtime
     try:
         from displayio import CIRCUITPYTHON_TERMINAL as TERM
         from terminalio import FONT
@@ -15,8 +16,15 @@ if implementation.name.upper() == "CIRCUITPYTHON":
 class PyDOS_UI:
 
     def __init__(self):
-        if implementation.name.upper() == "CIRCUITPYTHON" and 'DISPLAY' in dir(board):
+        if implementation.name.upper() == "CIRCUITPYTHON":
+            
             self.scrollable = False
+            if bool(getattr(board,'DISPLAY',False)):
+                self.display = board.DISPLAY
+            elif bool(getattr(runtime,'display',False)):
+                self.display = runtime.display
+            else:
+                self.scrollable = True                
         else:
             self.scrollable = True
 
@@ -45,8 +53,8 @@ class PyDOS_UI:
                 dhigh = disp.height
                 dwide = disp.width
             else:
-                dhigh = board.DISPLAY.height
-                dwide = board.DISPLAY.width
+                dhigh = self.display.height
+                dwide = self.display.width
 
             height = round(dhigh/(FONT.bitmap.height*TERM.scale))-1
             width = round(dwide/((FONT.bitmap.width/95)*TERM.scale))-2

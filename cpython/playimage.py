@@ -8,6 +8,7 @@ import adafruit_imageload
 import bitmaptools
 import displayio
 from os import getenv
+from supervisor import runtime
 try:
     from pydos_ui import Pydos_ui
     from pydos_ui import input
@@ -19,28 +20,32 @@ try:
     type(envVars)
 except:
     envVars = {}
-    
+
+display = None    
 if '_display' in envVars.keys():
     display = envVars['_display']
 elif Pydos_display:
     display = Pydos_ui.display
-elif 'DISPLAY' in dir(board):
+elif bool(getattr(board,'DISPLAY',False)):
     display = board.DISPLAY
+elif bool(getattr(runtime,'display',False)):
+    display = runtime.display
 else:
     try:
-        import matrix
-        display = matrix.envVars['_display']
+        import framebufferio
+        import dotclockframebuffer
     except:
         try:
-            import framebufferio
-            import dotclockframebuffer
+            import adafruit_ili9341
         except:
             try:
-                import adafruit_ili9341
-            except:
-                import framebufferio
+                # import framebufferio
                 import picodvi
+            except:
+                import matrix
+                display = matrix.envVars['_display']
 
+    if display == None:
         displayio.release_displays()
 
         if 'TFT_PINS' in dir(board):
