@@ -24,7 +24,7 @@ class PyDOS_UI:
             elif bool(getattr(runtime,'display',False)):
                 self.display = runtime.display
             else:
-                self.scrollable = True                
+                self.scrollable = True
         else:
             self.scrollable = True
 

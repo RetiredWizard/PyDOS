@@ -6,9 +6,14 @@ import terminalio
 import framebufferio
 import rgbmatrix
 import supervisor
+from os import getenv
 
 try:
     type(passedIn)
+except:
+    passedIn = getenv('PYDOS_MATRIX_CONFIG')
+
+try:    
     args = passedIn.split(',')
     [base_width,base_height,bit_depth,chain_across,tile_down] = [int(p) for p in args]
 except:

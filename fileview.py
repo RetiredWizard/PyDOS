@@ -1,12 +1,21 @@
 import os
-from pydos_ui import Pydos_ui
+import supervisor
+from sys import implementation
+try:
+    from pydos_ui import Pydos_ui
+except:
+    Pydos_ui = None
+    from sys import stdin
 try:
     from pydos_ui import input
 except:
     pass
 #import uselect
 
-def viewFile(args):
+def viewFile(args,scrsiz=()):
+    # scrsiz can be used if running program from REPL to specify the screen dimensions
+    # first import launches with defaults but subsequent launches can use:
+    # fileview.viewFile("filename.txt",(height,width))
 
     def chkPath(tstPath):
         validPath = True
@@ -60,11 +69,22 @@ def viewFile(args):
 
         scrLines = int(envVars["_scrHeight"])
         scrWidth = int(envVars["_scrWidth"])
+    elif scrsiz:
+        (scrLines,scrWidth) = scrsiz
     elif 'get_screensize' in dir(Pydos_ui):
         (scrLines,scrWidth) = Pydos_ui.get_screensize()
     else:
-        scrLines = 24
-        scrWidth = 80
+        if 'height' in dir(supervisor.runtime.display):
+            scrLines = supervisor.runtime.display.height
+            scrWidth = supervisor.runtime.display.width
+        else:
+            scrLines = 24
+            scrWidth = 80
+
+    try:
+        type(envVars)
+    except:
+        envVars={}
 
     if "_scrollable" in envVars.keys():
         scrollable = (envVars["_scrollable"] == True) or (envVars["_scrollable"] == "True")
@@ -72,7 +92,11 @@ def viewFile(args):
         try:
             scrollable = Pydos_ui.scrollable
         except:
-            scrollable = False
+            if implementation.name.upper() == 'CIRCUITPYTHON':
+                # Once CircuitPython 9.2.4 is stable this can be change to True
+                scrollable = False
+            else:
+                scrollable = False
 
     savDir = os.getcwd()
     args = absolutePath(args,savDir)
@@ -108,7 +132,10 @@ def viewFile(args):
         strtCol = 0
         while cmnd.upper() != "Q":
             #cmnd = kbdInterrupt()
-            cmnd = Pydos_ui.read_keyboard(1)
+            if Pydos_ui:
+                cmnd = Pydos_ui.read_keyboard(1)
+            else:
+                cmnd = stdin.read(1)
 
             if ord(cmnd) == 27 and seqCnt == 0:
                 seqCnt = 1

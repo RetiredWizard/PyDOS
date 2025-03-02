@@ -8,7 +8,8 @@ except:
     Pydos_ui = None
 
 x = 10; y = 10; d = 1; e = 1
-m='⬤'
+#m='⬤'
+m='O'
 try:
     width = int(envVars.get('_scrWidth',80))
     height = int(envVars.get('_scrHeight',24))

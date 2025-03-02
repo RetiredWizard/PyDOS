@@ -11,6 +11,14 @@ from os import getenv
 from supervisor import runtime
 try:
     from pydos_ui import Pydos_ui
+    readkbd = Pydos_ui.read_keyboard
+    sba = Pydos_ui.serial_bytes_available
+except:
+    Pydos_ui = []
+    from sys import stdin
+    readkbd = stdin.read
+    sba = lambda : runtime.serial_bytes_available
+try:
     from pydos_ui import input
     Pydos_display = ('display' in dir(Pydos_ui))
 except:
@@ -171,8 +179,8 @@ def playimage(passedIn=""):
                 cmnd = ""
                 stop = adafruit_ticks.ticks_add(adafruit_ticks.ticks_ms(),int(dispseconds*1000))
                 while adafruit_ticks.ticks_less(adafruit_ticks.ticks_ms(),stop):
-                    if Pydos_ui.serial_bytes_available():
-                        cmnd = Pydos_ui.read_keyboard(1)
+                    if sba():
+                        cmnd = readkbd(1)
                         print(cmnd, end="", sep="")
                         if cmnd.upper() == "Q":
                             break
@@ -233,8 +241,8 @@ def playimage(passedIn=""):
                 stop = adafruit_ticks.ticks_add(adafruit_ticks.ticks_ms(),int(dispseconds*1000))
                 while adafruit_ticks.ticks_less(adafruit_ticks.ticks_ms(),stop) or singleimage:
 
-                    if Pydos_ui.serial_bytes_available():
-                        cmnd = Pydos_ui.read_keyboard(1)
+                    if sba():
+                        cmnd = readkbd(1)
                         print(cmnd, end="", sep="")
                         if cmnd.upper() == "Q":
                             break
