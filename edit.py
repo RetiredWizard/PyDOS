@@ -1,4 +1,4 @@
-from pye_gen import pye
+from pye_pydos import pye
 
 if __name__ != "PyDOS":
     passedIn = ""

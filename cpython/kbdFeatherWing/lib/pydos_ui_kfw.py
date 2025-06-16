@@ -29,6 +29,7 @@ elif board.board_id == 'unexpectedmaker_feathers2':
 
 import adafruit_ili9341
 import displayio
+import fourwire
 
 class PyDOS_UI:
 
@@ -42,7 +43,7 @@ class PyDOS_UI:
 
         _tft_cs = board.D9
         _tft_dc = board.D10
-        _display_bus = displayio.FourWire(Pydos_hw.SPI(), command=_tft_dc, chip_select=_tft_cs)
+        _display_bus = fourwire.FourWire(Pydos_hw.SPI(), command=_tft_dc, chip_select=_tft_cs)
         _display = adafruit_ili9341.ILI9341(_display_bus, width=320, height=240)
 
         self.kbd = BBQ10Keyboard(Pydos_hw.I2C(),BBQI2CDevice=Pydos_hw.I2CbbqDevice)

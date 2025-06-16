@@ -7,6 +7,10 @@ import adafruit_ticks
 import adafruit_imageload
 import bitmaptools
 import displayio
+try:
+    import fourwire 
+except
+    pass    
 from os import getenv
 from supervisor import runtime
 try:
@@ -79,7 +83,7 @@ else:
                     spi = board.SPI()
                 else:
                     spi = busio.SPI(clock=board.SCK,MOSI=board.MOSI,MISO=board.MISO)
-                disp_bus=displayio.FourWire(spi,command=board.D10,chip_select=board.D9, \
+                disp_bus=fourwire.FourWire(spi,command=board.D10,chip_select=board.D9, \
                     reset=board.D6)
                 display=adafruit_ili9341.ILI9341(disp_bus,width=320,height=240)
             except:

@@ -3,9 +3,11 @@ import supervisor
 from sys import implementation
 try:
     from pydos_ui import Pydos_ui
+    readkbd = Pydos_ui.read_keyboard
 except:
     Pydos_ui = None
     from sys import stdin
+    readkbd = stdin.read
 try:
     from pydos_ui import input
 except:
@@ -131,11 +133,7 @@ def viewFile(args,scrsiz=()):
         seqCnt = 0
         strtCol = 0
         while cmnd.upper() != "Q":
-            #cmnd = kbdInterrupt()
-            if Pydos_ui:
-                cmnd = Pydos_ui.read_keyboard(1)
-            else:
-                cmnd = stdin.read(1)
+            cmnd = readkbd(1)
 
             if ord(cmnd) == 27 and seqCnt == 0:
                 seqCnt = 1

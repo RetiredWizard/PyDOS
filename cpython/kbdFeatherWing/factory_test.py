@@ -4,6 +4,7 @@ import adafruit_ili9341
 import adafruit_sdcard
 import digitalio
 import displayio
+import fourwire
 import neopixel
 import storage
 import board
@@ -28,7 +29,7 @@ touch_cs = board.D6
 sd_cs = board.D5
 neopix_pin = board.D11
 
-display_bus = displayio.FourWire(spi, command=tft_dc, chip_select=tft_cs)
+display_bus = fourwire.FourWire(spi, command=tft_dc, chip_select=tft_cs)
 display = adafruit_ili9341.ILI9341(display_bus, width=320, height=240)
 
 print('Display: Pass? (you tell me)')

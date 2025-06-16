@@ -6,6 +6,11 @@ try:
 except:
     import sys
 
+try:
+    from pydos_ui import Pydos_ui
+except:
+    Pydos_ui = False
+
 class IO_DEVICE:
     def __init__(self):
         try:
@@ -22,10 +27,13 @@ class IO_DEVICE:
         sys.stdout.write(s)
 
     def rd(self):
-        return sys.stdin.read(1)
+        if Pydos_ui:
+            return Pydos_ui.read_keyboard(1)
+        else:
+            return sys.stdin.read(1)
 
     def rd_raw(self):
-        return self.rd_raw_fct(1)
+        return self.rd(1)
 
     def deinit_tty(self):
         try:
@@ -35,13 +43,16 @@ class IO_DEVICE:
             pass
 
     def get_screen_size(self):
-        self.wr('\x1b[999;999H\x1b[6n')
-        pos = ''
-        char = self.rd() ## expect ESC[yyy;xxxR
-        while char != 'R':
-            pos += char
-            char = self.rd()
-        return [int(i, 10) for i in pos.lstrip("\n\x1b[").split(';')]
+        if Pydos_ui:
+            return [i for i in Pydos_ui.get_screensize()]
+        else:
+            self.wr('\x1b[999;999H\x1b[6n')
+            pos = ''
+            char = self.rd() ## expect ESC[yyy;xxxR
+            while char != 'R':
+                pos += char
+                char = self.rd()
+            return [int(i, 10) for i in pos.lstrip("\n\x1b[").split(';')]
 
 ## test, if the Editor class is already present
 if "pye_edit" not in globals().keys():
