@@ -73,7 +73,7 @@ def PyDOS():
     global envVars
     if "envVars" not in globals().keys():
         envVars = {}
-    _VER = "1.50"
+    _VER = "1.51"
     prmpVals = ['>','(',')','&','|','\x1b','\b','<','=',' ',_VER,'\n','$','']
 
     print("Starting Py-DOS...")
@@ -629,6 +629,8 @@ def PyDOS():
                 (validPath,tmpDir) = chkPath(aPath)
                 if cmd in ["DELETE","DEL","TYPE","MORE","MKDIR","MD"]:
                     tmpDir = pFmt(tmpDir)
+                else:
+                    tmpDir = pFmt(tmpDir,False)
 
         if cmd == "" or cmd == "REM":
             continue
