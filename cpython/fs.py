@@ -1,7 +1,12 @@
 from sys import implementation
+try:
+    from microcontroller import reset
+except ImportError:
+    pass
 
 print("This program will set the CircuitPython filesystem access mode AFTER the next")
-print("Powercycle. A Control-D softboot will NOT reset the filesystem access mode.\n")
+print("reset or Powercycle. A Control-D softboot will NOT reset the filesystem")
+print("access mode.\n")
 
 if implementation.name.upper() != "CIRCUITPYTHON":
     print("This program only works under CircuitPython.")
@@ -27,6 +32,10 @@ else:
             f.write('import storage'+"\n")
             f.write('storage.remount("/",'+readOnly+")\n")
             f.close()
+
+            print("\nDo you want to perform a microcontroller reset now?")
+            if input("This will cause the microcontroller to restart, reset (y/n)? ").lower() == 'y':
+                reset()
         except:
             print("The filesystem currently appears to be readonly, you should be able to access")
             print("the flash storage as a mounted USB drive on your host system. To switch the")

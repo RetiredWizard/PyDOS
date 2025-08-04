@@ -64,7 +64,11 @@ uuuu P        Y    BBBB   A   A  SSSS    I    CCC
 
     fOpened = False
     #initialize and open temporary file
-    tmpfile = open('_pybTmp.tmp','w+')
+    try:
+        tmpfile = open('_pybTmp.tmp','w+')
+    except:
+        tmpfile = open('/saves/_pybTmp.tmp','w+')
+    
     infile = tmpfile
 
     if passedIn != "":
@@ -102,7 +106,10 @@ uuuu P        Y    BBBB   A   A  SSSS    I    CCC
                     if fOpened:
                         infile.close()
                     tmpfile.close()
-                    remove('_pybTmp.tmp')
+                    try:
+                        remove('_pybTmp.tmp')
+                    except:
+                        remove('/saves/_pybTmp.tmp')
                     break
 
                 # Add a new program statement
@@ -170,7 +177,10 @@ uuuu P        Y    BBBB   A   A  SSSS    I    CCC
                             rename(filename+".pYb",filename)
 
                             tmpfile.close()
-                            tmpfile = open('_pybTmp.tmp','w+')
+                            try:
+                                tmpfile = open('_pybTmp.tmp','w+')
+                            except:
+                                tmpfile = open('/saves/_pybTmp.tmp','w+')
                             infile = program.load(filename,tmpfile)
                             if infile != None:
 
@@ -219,7 +229,10 @@ uuuu P        Y    BBBB   A   A  SSSS    I    CCC
                     fOpened = False
 
                     tmpfile.close()
-                    tmpfile = open('_pybTmp.tmp','w+')
+                    try:
+                        tmpfile = open('_pybTmp.tmp','w+')
+                    except:
+                        tmpfile = open('/saves/_pybTmp.tmp','w+')
 
                     if tokenlist[0].category == Token.LOAD:
 

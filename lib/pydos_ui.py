@@ -48,42 +48,47 @@ class PyDOS_UI:
         return stdin.read(num)
 
     def get_screensize(self,disp=None):
-        try:
-            if disp is not None:
-                dhigh = disp.height
-                dwide = disp.width
-            else:
-                dhigh = self.display.height
-                dwide = self.display.width
+        if bool(getattr(runtime,'display',False)):
+            height = runtime.display.root_group[0].height
+            width = runtime.display.root_group[0].width - 1
 
-            height = round(dhigh/(FONT.bitmap.height*TERM.scale))-1
-            width = round(dwide/((FONT.bitmap.width/95)*TERM.scale))-2
-        except:
-            print("Screen set to 24 rows, 80 col. Press any key to continue...",end="")
-            stdout.write('\x1b[2K')
-            stdout.write('\x1b[999;999H\x1b[6n')
-            pos = ''
-            char = ''
-            if self.serial_bytes_available(100):
-                try:
-                    char = stdin.read(1) ## expect ESC[yyy;xxxR
-                except:
+        else:
+            try:
+                if disp is not None:
+                    dhigh = disp.height
+                    dwide = disp.width
+                else:
+                    dhigh = self.display.height
+                    dwide = self.display.width
+
+                height = round(dhigh/(FONT.bitmap.height*TERM.scale))-1
+                width = round(dwide/((FONT.bitmap.width/95)*TERM.scale))-2
+            except:
+                print("Screen set to 24 rows, 80 col. Press any key to continue...",end="")
+                stdout.write('\x1b[2K')
+                stdout.write('\x1b[999;999H\x1b[6n')
+                pos = ''
+                char = ''
+                if self.serial_bytes_available(100):
+                    try:
+                        char = stdin.read(1) ## expect ESC[yyy;xxxR
+                    except:
+                        return(24,80)
+                if char != '\x1b':
                     return(24,80)
-            if char != '\x1b':
-                return(24,80)
 
-            while char != 'R':
-                pos += char
-                char = stdin.read(1)
-            print()
+                while char != 'R':
+                    pos += char
+                    char = stdin.read(1)
+                print()
 
-            width = int(pos.lstrip("\n\x1b[").split(';')[1],10)
-            height = int(pos.lstrip("\n\x1b[").split(';')[0],10)
+                width = int(pos.lstrip("\n\x1b[").split(';')[1],10)
+                height = int(pos.lstrip("\n\x1b[").split(';')[0],10)
 
-            if width < 1:
-                width = 80
-            if height < 1:
-                height = 24
+                if width < 1:
+                    width = 80
+                if height < 1:
+                    height = 24
 
         return(height,width)
 

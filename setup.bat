@@ -147,6 +147,7 @@ goto esp32
 :not_tablet
 echo .
 echo (N)anoConnect, (E) ESP32[C3/D4/S2/S3...] or (E) Pico-W board,
+echo (N) Adafruit Fruit Jam,
 set/p _ans2 = (O)ther RP2040/STM32/Atmel SAMD/nRF/ARM Cortex-M board:
 if %_ans2% == N goto nanoconnect
 if %_ans2% == n goto nanoconnect

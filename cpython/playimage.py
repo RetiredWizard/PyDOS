@@ -9,7 +9,7 @@ import bitmaptools
 import displayio
 try:
     import fourwire 
-except
+except:
     pass    
 from os import getenv
 from supervisor import runtime
