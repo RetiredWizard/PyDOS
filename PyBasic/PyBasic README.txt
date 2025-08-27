@@ -55,7 +55,7 @@ but this can be changed with parentheses.
 
 Additional numerical operations may be performed using numeric functions (see below).
 
-Not also that + does extra duty as a string concatenation operator.
+Not also that '+' does extra duty as a string concatenation operator, while '*' can be used to repeat strings.
 
 ## Commands
 
@@ -70,17 +70,16 @@ Programs may be listed using the **LIST** command:
 
 The list command can take arguments to refine the line selection listed
 
-`LIST 50` Lists only line 50
+`LIST 50` Lists only line 50.
 
-`LIST 50-100` Lists lines 50 through 100 inclusive
+`LIST 50-100` Lists lines 50 through 100 inclusive.
 
 `LIST 50 100` Also Lists lines 50 through 100 inclusive, almost any delimiter
-works here
+works here.
 
-`LIST -100` Lists from the start of the program through line 100 inclusive
+`LIST -100` Lists from the start of the program through line 100 inclusive.
 
-`LIST 50-` Lists from line 50 to the end of the program
-
+`LIST 50-` Lists from line 50 to the end of the program.
 
 A program is executed using the **RUN** command:
 
@@ -105,12 +104,12 @@ The program may be re-loaded from disk using the **LOAD** command, again specify
 Program read from file
 >
 ```
-
 When loading or saving, the .bas extension is assumed if not provided.  If you are loading a simple name (alpha/numbers only) and in the working dir, quotes can be omitted:
+
 ```
 > LOAD regression
 ```
-Will load regression.bas from the current working directory.
+will load regression.bas from the current working directory.
 
 Individual program statements may be deleted by entering their line number only:
 
@@ -125,7 +124,6 @@ Individual program statements may be deleted by entering their line number only:
 20 PRINT "Goodbye"
 >
 ```
-
 The program may be erased entirely from memory using the **NEW** command:
 
 ```
@@ -192,7 +190,7 @@ Multiple statements may appear on one line separated by a colon:
 ```
 10 FOR I = 1 to 10: PRINT I: NEXT
 ```
-Will need to be decomposed to individual lines
+will need to be decomposed to individual lines.
 
 ### Variables
 
@@ -222,7 +220,7 @@ are all invalid.
 
 Numeric variables have no suffix, whereas string variables are always suffixed by '$'. Note that 'I' and 'I$' are
 considered to be separate variables. Note that string literals must always be enclosed within double quotes (not single quotes).
-Using no quotes will result in a syntax error.
+Using no quotes will result in a syntax error. 
 
 Array variables are defined using the **DIM** statement, which explicitly lists how
 many dimensions the array has, and the sizes of those dimensions:
@@ -234,9 +232,11 @@ many dimensions the array has, and the sizes of those dimensions:
 
 Note that the index of each dimension always starts at *zero*, but for
 compatibility with some basic dialects the bounds of each dimension will be
-expanded by one to enable element access inlcuding the len. So in the above example, 
+expanded by one to enable element access including the len. So in the above example, 
 valid index values for array *A* will be *0, 1*, *2* or *3*
-for each dimension. Arrays may have a maximum of three dimensions.
+for each dimension. Arrays may have a maximum of three dimensions. Numeric arrays will
+be initialised with each element set to zero, while string arrays will be initialised
+with each element set to the empty string "".
 
 As for simple variables, a string array has its name suffixed by a '$' character, while a numeric array does not carry
 a suffix. An attempt to assign a string value to a numeric array or vice versa will generate an error.
@@ -284,7 +284,7 @@ statements before the end of the program an error will be displayed. This is to 
 in a state where a variable has not been assigned a value, but nevertheless an attempt to use that variable is
 made later on in the program.
 
-Normally each **DATA** statement is consumed sequently by **READ** statements however, the **RESTORE** statment can
+Normally each **DATA** statement is consumed sequently by **READ** statements however, the **RESTORE** statement can
 be used to override this order and set the line number of the **DATA** statement that will be used by the next 
 **READ** statement. If the *line-number* used in a **RESTORE** statement does not refer to a **DATA** statement an
 error will be displayed.
@@ -450,6 +450,20 @@ Subroutines may be nested, that is, a subroutine call may be made within another
 A subroutine may also be called using the **ON-GOSUB** statement (see Conditional branching
 below).
 
+Further note that **RETURN** passes control back to the next line numbered statement after the call. Subsequent statements after
+the call in the same line will not be executed. For example:
+
+```
+> 10 PRINT "Print this":GOSUB 100:PRINT "This won't be printed"
+> 20 STOP
+> 100 PRINT "Print this too"
+> 110 RETURN
+> RUN
+Print this
+Print this too
+>
+```
+
 ### Loops
 
 Bounded loops are achieved through the use of **FOR-NEXT** statements. The loop is controlled by a numeric
@@ -493,10 +507,16 @@ be replaced by the start value, it will not be evaluated.
 After the completion of the loop, the loop variable value will be the end value + step value (unless
 the loop is exited using a **GOTO** statement).
 
-### Conditional branching
+### Conditionals
 
-Conditional branches are implemented using the **IF-THEN-ELSE** statement. The expression is evaluated and the appropriate jump
-made depending upon the result of the evaluation.
+Conditionals are implemented using the **IF-THEN-ELSE** statement. The expression is evaluated and the appropriate 
+statements executed depending upon the result of the evaluation. If a positive integer is supplied as 
+the **THEN** or the **ELSE** statement, a branch will be performed to the indicated line number.
+
+Note that the **ELSE** clause is optional and may be omitted. In this case, the **THEN** branch is taken if the
+expression evaluates to true, otherwise the next statement is executed.
+
+**Conditional branching example:**
 
 ```
 > 10 REM PRINT THE GREATEST NUMBER
@@ -512,52 +532,48 @@ made depending upon the result of the evaluation.
 >
 ```
 
-Note that the **ELSE** clause is optional and may be omitted. In this case, the **THEN** branch is taken if the
-expression evaluates to true, otherwise the following statement is executed.
-
-You can optionally give the **GOTO** keyword before your line numbers. This is for compatibility with other BASIC dialects. e.g. `40 IF I > J THEN GOTO 50 ELSE GOTO 70`
-
-The **ON GOTO|GOSUB** *expr* *line1,line2,...* statement will call a subroutine or branch to a line number in the list of line numbers corresponding to the ordinal
-value of the evaluated *expr*. The first line number corresponds with an *expr* value of 1.  *expr* must evaluate to an integer value.
- If *expr* evaluates to less than 1 or greater than the number of provided line numbers execution continues on the next 
-statement without making a subroutine call or branch:
+The following code segment is equivalent to the segment above:
 
 ```
-> 20 LET J = 2
-> 30 ON J GOSUB 100,200,300
-> 40 STOP
-> 100 REM THE 1ST SUBROUTINE
-> 110 PRINT "J is ONE"
-> 120 RETURN
-> 200 REM THE 2ND SUBROUTINE
-> 210 PRINT "J is TWO"
-> 220 RETURN
-> 300 REM THE 3RD SUBROUTINE
-> 310 PRINT "J is THREE"
-> 320 RETURN
+> 10 REM PRINT THE GREATEST NUMBER
+> 20 LET I = 10
+> 30 LET J = 20
+> 40 IF I > J THEN PRINT I ELSE PRINT J
+> 80 REM FINISHED
 > RUN
-J is TWO
+20
 >
 ```
 
-It is also possible to call a subroutine depending upon the result of a conditional expression using the **IFF** function (see Ternary Functions below). In
-the example below, if the expression evaluates to true, **IFF** returns a 1 and the subroutine is called, otherwise **IFF** returns a 0 and execution
-continues to the next statement without making the call:
+A **THEN** or **ELSE** can be supplied multiple statements if they are separated by a colon "**:**".
 
 ```
-> 10 LET I = 10
-> 20 LET J = 5
-> 30 ON IFF (I > J, 1, 0) GOSUB 100
-> 40 STOP
-> 100 REM THE SUBROUTINE
-> 110 PRINT "I is greater than J"
-> 120 RETURN
+> 10 REM PRINT THE GREATEST NUMBER
+> 20 LET I = 10
+> 30 LET J = 20
+> 40 IF I > J THEN LET L = I:PRINT I ELSE LET L = J:PRINT J
+> 50 PRINT L
+> 80 REM FINISHED
 > RUN
-I is greater than J
+20
+20
 >
 ```
 
+Note that should an **IF-THEN-ELSE** stmt be used in a **THEN** code block or multiple **IF-THEN-ELSE** statements
+are used in either a single **THEN** or **ELSE** code block, the block grouping is ambiguous and logical processing
+may not function as expected. There is no ambiguity when single **IF-THEN-ELSE** statements are placed within **ELSE**
+blocks.
 
+Ambiguous:
+```
+> 100 IF I > J THEN IF J >= 100 THEN PRINT "I > 100" else PRINT "Not clear which **IF** this belongs to"
+```
+
+Not Ambiguous:
+```
+> 100 IF I < J THEN PRINT "I is less than J" ELSE IF J > 100 THEN PRINT "I > 100" ELSE PRINT "J <= 100"
+```
 
 Allowable relational operators are:
 
@@ -602,6 +618,48 @@ Expressions can be inside brackets to change the order of evaluation. Compare th
 > 30 IF NOT a > b AND (b = 20 OR a >= 5) THEN 60
 > RUN
 Test failed!
+```
+
+### ON GOTO, ON GOSUB
+
+The **ON GOTO|GOSUB** *expr* *line1,line2,...* statement will call a subroutine or branch to a line number in the list of line numbers corresponding to the ordinal
+value of the evaluated *expr*. The first line number corresponds with an *expr* value of 1.  *expr* must evaluate to an integer value.
+ If *expr* evaluates to less than 1 or greater than the number of provided line numbers execution continues on the next 
+statement without making a subroutine call or branch:
+
+```
+> 20 LET J = 2
+> 30 ON J GOSUB 100,200,300
+> 40 STOP
+> 100 REM THE 1ST SUBROUTINE
+> 110 PRINT "J is ONE"
+> 120 RETURN
+> 200 REM THE 2ND SUBROUTINE
+> 210 PRINT "J is TWO"
+> 220 RETURN
+> 300 REM THE 3RD SUBROUTINE
+> 310 PRINT "J is THREE"
+> 320 RETURN
+> RUN
+J is TWO
+>
+```
+
+It is also possible to call a subroutine depending upon the result of a conditional expression using the **IFF** function (see Ternary Functions below). In
+the example below, if the expression evaluates to true, **IFF** returns a 1 and the subroutine is called, otherwise **IFF** returns a 0 and execution
+continues to the next statement without making the call:
+
+```
+> 10 LET I = 10
+> 20 LET J = 5
+> 30 ON IFF (I > J, 1, 0) GOSUB 100
+> 40 STOP
+> 100 REM THE SUBROUTINE
+> 110 PRINT "I is greater than J"
+> 120 RETURN
+> RUN
+I is greater than J
+>
 ```
 
 ### Ternary Functions
@@ -671,26 +729,26 @@ within an **INPUT** statement, only simple variables.
 
 ### File Input/Output
 
-Data can be read from or written to files using the **OPEN**, **FSEEK**, **INPUT**, **PRINT** and **CLOSE** statments.
+Data can be read from or written to files using the **OPEN**, **FSEEK**, **INPUT**, **PRINT** and **CLOSE** statements.
 
 When a file is opened using the syntax **OPEN** "*filename*" **FOR INPUT|OUTPUT|APPEND AS** *#filenum* [**ELSE** *linenum*] a
-file number (*#filenum*) is assigned to the file, which if specfied as the first argument of an **INPUT** or **PRINT**
-statment, will direct the input or output to the file. 
+file number (*#filenum*) is assigned to the file, which if specified as the first argument of an **INPUT** or **PRINT**
+statement, will direct the input or output to the file. 
 
 If there is an error opening a file and the optional **ELSE** option has been specified, program control
 will branch to the specified line number, if the **ELSE** has not been provided an error message will be displayed.
 
 If a file is opened for **OUTPUT** which does not exist, the file will be created, if the file does exist, its contents will
 be erased and any new **PRINT** output will replace it. If a file is opened for **APPEND** an error will occur if the file
-doesn't exist (or the **ELSE** branch will occur if specified). If the file does exist, any **PRINT** statments will add to the end
+doesn't exist (or the **ELSE** branch will occur if specified). If the file does exist, any **PRINT** statements will add to the end
 of the file.
 
-If an input prompt is specfied on an **INPUT** statement being used for file I/O (i.e. *#filenum* is specified) an error
+If an input prompt is specified on an **INPUT** statement being used for file I/O (i.e. *#filenum* is specified) an error
 will be displayed.
 
 The **FSEEK** *#filenum*,*filepos* statement will position the file pointer for the next **INPUT** statement.
 
-The **CLOSE** *#filenum* statment will close the file.
+The **CLOSE** *#filenum* statement will close the file.
 
 ```
 > 10 OPEN "FILE.TXT" FOR OUTPUT AS #1
@@ -704,7 +762,6 @@ The **CLOSE** *#filenum* statment will close the file.
 Hello World!
 >
 ```
-
 
 ### Numeric functions
 
@@ -788,7 +845,7 @@ Seeds may not produce the same result on another platform.
 Some functions are provided to help you manipulate strings. Functions that return a string
 have a '$' suffix like string variables.
 
-Note that unlike some other BASIC variants, string positions start at *0*.
+**NOTE** For compatibility with older basic dialetcs, all string indexes are 1 based.
 
 The functions are:
 
@@ -806,9 +863,9 @@ at position *start* and end at *end*. Returns 0 if no match found.
 
 * **MID$**(x$, y[, z]) - Returns part of *x$* starting at position *y*.  If z is provided, that number of characters is returned, if omitted the entire rest of the string is returned
 
-* **LEFT$**(x$, y) - Returns the left most r characters from string x$. If y * exceeds the length of x$, the entire string will be returned.
+* **LEFT$**(x$, y) - Returns the left most y characters from string x$. If y * exceeds the length of x$, the entire string will be returned.
 
-* **RIGHT$**(x$, y) - Returns the right most r characters from string x$. If y * exceeds the length of x$, the entire string will be returned.
+* **RIGHT$**(x$, y) - Returns the right most y characters from string x$. If y * exceeds the length of x$, the entire string will be returned.
 
 * **STR$**(x) - Returns a string representation of numeric value *x*.
 
@@ -816,9 +873,7 @@ at position *start* and end at *end*. Returns 0 if no match found.
 
 * **VAL**(x$) - Attempts to convert *x$* to a numeric value. If *x$* is not numeric, returns 0.
 
-* **TAB**(x) - Generates a string containing x spaces with no CR/LF
-
-**NOTE** For compatibility with older basic dialetcs, all string indexes are 1 based.
+* **TAB**(x) -  When included in a **PRINT** statement *print-list*, specifies the position *x* on the line where the next text will be printed. If the specified position *x* is less than the current print position a newline is printed and the print location is set to the specified column. If the **TAB** function is used anywhere other than on a **PRINT** statement, it will return a string containing *x* spaces with no CR/LF
 
 Examples for **ASC**, **CHR$** and **STR$**
 ```
@@ -838,6 +893,13 @@ Strings may also be concatenated using the '+' operator:
 > RUN
 Hello there
 ```
+Strings may be repeated using the '*' operator:
+
+```
+> 10 PRINT "Hello " * 5
+> RUN
+Hello Hello Hello Hello Hello
+```
 
 ## Example programs
 
@@ -853,11 +915,18 @@ calculate the corresponding factorial *N!*.
 
 * *PyBStartrek.bas* - A port of the 1971 Star Trek text based strategy game.
 
-* *adventure-fast.bas* - A port of a 1979 text based adventure game.
+* *adventure.bas* - A port of the original 1976 text based adventure game, originally developed for the PDP-10 by Will Crowther,
+and expanded by Don Woods.
 
-* *bagels.bas* - A guessing game.
+* *bagels.bas* - A guessing game, which made its first appearance in the book 'BASIC Computer Games' in 1978.
 
-* *eliza.bas* - A port of the early chatbot, posing as a therapist, originally created by Joseph Weizenbaum in 1964.
+* *eliza.bas* - A port of the early chatbot, posing as a therapist, originally created by Joseph Weizenbaum in 1964. This BASIC version can trace its lineage back to an implementation originally developed by Jeff Shrager in 1973.
+
+* *oregon.bas* - A port (of a port by the looks of it) of The Oregon Trail. This is a text based adventure game, originally developed by Don Rawitsch, Bill Heinemann, and Paul Dillenberger in 1971. This could still be a bit buggy, the listing I found wasn't the greatest. 
+
+* *life.bas* - An implementation of Conway's Game of Life. This version is a port of the BASIC program which appeared in 'BASIC Computer Games' in 1978.
+
+* *Pneuma.bas* - A brief 21st century take on the venerable text adventure.
 
 ## Informal grammar definition
 
@@ -890,15 +959,17 @@ will read starting at file position *filepos*
 
 **GOTO** *line-number* - Unconditional branch
 
-**IF** *expression* **THEN** *line-number* [**ELSE** *line-number*] - Conditional branch
+**IF** *expression* **THEN** *line-number*|*basic-statement(s)* [**ELSE** *line-number*|*basic-statement(s)*] - Conditional
 
 **IFF**(*expression*, *numeric-expression*, *numeric-expression*) - Evaluates *expression* and returns the value of the result of the first *numeric-expression* if true, or the second if false.
 
 **IF$**(*expression*, *string-expression*, *string-expression*) - Evaluates *expression* and returns the value of the result of the first *string-expression* if true, or the second if false.
 
-**INPUT** [*#filenum*,|*input-prompt*:] *simple-variable-list* - Processes user or file input presented as a comma separated list
+**INPUT** [*#filenum*,|*input-prompt*;] *simple-variable-list* - Processes user or file input presented as a comma separated list
 
 **INSTR**(*hackstack-string-expression*, *needle-string-expression*[, *start-numeric-expression*[, *end-numeric-expression*]]) - Returns position of first *needle-string-expression* inside first *hackstack-string-expression*, optionally start searching at position given by *start-numeric-expression* and optionally ending at position given by *end-numeric-expression*. Returns -1 if no match found.
+
+**LEFT$**(*string-expression*, *char-count*) - Takes the result of *string-expression* and returns the left-most *char-count* characters.  If *char-count* exceeds string length the entire string is returned.
 
 **LEN**(*string-expression*) - Returns the length of the result of *string-expression*
 
@@ -932,7 +1003,7 @@ on the next line.
 
 **POW**(*base*, *exponent*) - Calculates the result of raising the base to the power of the exponent
 
-**PRINT** [*#filenum*,]*print-list* - Prints a comma separated list of literals or variables to the screen or to a file
+**PRINT** [*#filenum*,]*print-list* - Prints a semicolon separated list of literals or variables to the screen or to a file.  Included CR/LF by default, but this can be suppressed by ending the statement with a semicolon.
 
 **RANDOMIZE** [*numeric-expression*] - Resets random number generator to an unpredictable sequence. With
 optional seed (*numeric expression*), the sequence is predictable.
@@ -945,7 +1016,9 @@ optional seed (*numeric expression*), the sequence is predictable.
 
 **RESTORE** *line-number* - sets the line number that the next **READ** will start loading constants from. *line-number* must refer to a **DATA** statement
 
-**RND** - Generates a pseudo random number N, where 0 <= N < 1
+**RIGHT$**(*string-expression*, *char-count*) - Takes the result of *string-expression* and returns the right-most *char-count* characters. If *char-count* exceeds string length, the entire string is returned.
+
+**RND**(*mode*) - For mode values >= 0 generates a pseudo random number N, where 0 <= N < 1.  For values < 0 reseeds the PRNG
 
 **RNDINT**(*lo-numerical-expression*, *hi-numerical-expression*) - Generates a pseudo random integer N, where *lo-numerical-expression* <= N <= *hi-numerical-expression*
 

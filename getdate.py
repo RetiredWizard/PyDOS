@@ -1,5 +1,7 @@
 import sys
+import os
 import time
+import json
 from pydos_wifi import Pydos_wifi
 
 if sys.implementation.name.upper() == 'MICROPYTHON':
@@ -33,7 +35,7 @@ def getdate(passedIn=""):
         if passedIn == "":
             tz_hour_offset = -4
         else:
-            tz_hour_offset = int(passedIn)
+            tz_hour_offset = eval(passedIn)
 
         if sys.implementation.name.upper() == "MICROPYTHON":
             success = False
@@ -57,8 +59,11 @@ def getdate(passedIn=""):
 
         elif sys.implementation.name.upper() == "CIRCUITPYTHON":
             ntp = None
-            if not hasattr(Pydos_wifi.radio,'get_time'):
+            #if not hasattr(Pydos_wifi.radio,'get_time'):
+            try:
                 ntp = adafruit_ntp.NTP(Pydos_wifi._pool, server='pool.ntp.org', tz_offset=tz_hour_offset)
+            except:
+                pass
 
             success = False
             for i in range(5):
@@ -70,22 +75,27 @@ def getdate(passedIn=""):
                         break
                     except:
                         pass
-                else:
-                    strtTime = time.time()
-                    while time.time() < strtTime+5 and not success:
-                        try:
-                            rtc.RTC().datetime = time.localtime(Pydos_wifi.radio.get_time()[0] + tz_hour_offset*3600)
-                            success = True
-                        except:
-                            time.sleep(.5)
-                    if success:
+                #else:
+                strtTime = time.time()
+                while time.time() < strtTime+5 and not success:
+                    try:
+                        rtc.RTC().datetime = time.localtime(Pydos_wifi.radio.get_time()[0] + tz_hour_offset*3600)
+                        success = True
                         break
+                    except:
+                        time.sleep(.5)
+
     # One more try, this time display the exception if we fail
             if not success:
                 print(".")
                 if ntp:
-                    rtc.RTC().datetime = ntp.datetime
-                else:
+                    try:
+                        rtc.RTC().datetime = ntp.datetime
+                        success = True
+                    except:
+                        pass
+                #else:
+                if not success:
                     rtc.RTC().datetime = time.localtime(Pydos_wifi.radio.get_time()[0] + tz_hour_offset*3600)
 
             print("\nTime and Date successfully set",end="")
@@ -121,8 +131,27 @@ def getdate(passedIn=""):
     print()
     Pydos_wifi.close()
 
+# ----------------------------------------------------------------------------------
+# This is the main entry point for the getdate.py script.
+
+
+# optional configuration file for speaker/headphone setting, check current and root directory
 if __name__ != "PyDOS":
-    passedIn = input("Enter your current timezone offset (enter for default): ")
+    launcher_config = {}
+    if "launcher.conf.json" in os.listdir("/"):
+        with open("/launcher.conf.json", "r") as f:
+            launcher_config = json.load(f)
+    if 'inetclock' in launcher_config:
+        launcher_config = launcher_config['inetclock']
+
+    if 'tz_offset' in launcher_config:
+        if type(launcher_config['tz_offset']) is str:
+            passedIn = launcher_config['tz_offset']
+        else:
+            passedIn = str(launcher_config['tz_offset'])
+    else:
+        passedIn = input("Enter your current timezone offset (enter for default): ")
+
     if 'envVars' not in dir():
         envVars = {}
 

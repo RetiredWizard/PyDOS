@@ -11,7 +11,7 @@ try:
     import fourwire 
 except:
     pass    
-from os import getenv
+import os
 from supervisor import runtime
 try:
     from pydos_ui import Pydos_ui
@@ -38,10 +38,10 @@ if '_display' in envVars.keys():
     display = envVars['_display']
 elif Pydos_display:
     display = Pydos_ui.display
-elif bool(getattr(board,'DISPLAY',False)):
-    display = board.DISPLAY
-elif bool(getattr(runtime,'display',False)):
+elif 'display' in dir(runtime):
     display = runtime.display
+elif 'DISPLAY' in dir(board):
+    display = board.DISPLAY
 else:
     try:
         import framebufferio
@@ -61,7 +61,7 @@ else:
         displayio.release_displays()
 
         if 'TFT_PINS' in dir(board):
-            sWdth = getenv('CIRCUITPY_DISPLAY_WIDTH')
+            sWdth = os.getenv('CIRCUITPY_DISPLAY_WIDTH')
             if sWdth == None:
                 if board.board_id == "makerfabs_tft7":
                     sWdth = input("What is the resolution Width of the touch screen? (1024/800/...): ")
@@ -120,9 +120,19 @@ def playimage(passedIn=""):
     except:
         dispseconds = 15
 
+    pictDir = ""
+    if files[0] == "*.*":
+        files = [f for f in os.listdir() if f[-4:].upper() in [".BMP",".PNG",".JPG",".RLE",".GIF"]]
+        if len(files) == 0:
+            pictDir = '/sd/'
+            files = [f for f in os.listdir('/sd') if f[-4:].upper() in [".BMP",".PNG",".JPG",".RLE",".GIF"]]
+
     singleimage = False
     if len(files) == 1 and files[0][0] != '*':
         singleimage = True
+    elif len(files) == 0:
+        input(f"\n\n\nNo images found in the app folder ({os.getcwd()}) or on the SD card (/sd).\n\nPress 'Enter' to close.\n\n")
+        return
 
     fileindx = 0
     wildindx = 0
@@ -130,11 +140,19 @@ def playimage(passedIn=""):
         fname = files[fileindx]
 
         if fname[0] == '*':
-            wildlist = [f for f in os.listdir() if f[fname.find('.')-len(fname):] == fname[fname.find('.')-len(fname):]]
-            fname = wildlist[wildindx]
-            wildindx = (wildindx +1) % len(wildlist)
-            if wildindx == 0:
+            pictDir = ''
+            wildlist = [f for f in os.listdir() if f[-4:].upper() == fname[-4:].upper()]
+            if len(wildlist) == 0:
+                wildlist = [f for f in os.listdir('/sd') if f[-4:].upper() == fname[-4:].upper()]
+                pictDir = '/sd/'
+            if len(wildlist) == 0:
+                fname = ""
                 fileindx = (fileindx + 1) % len(files)
+            else:
+                fname = wildlist[wildindx]
+                wildindx = (wildindx +1) % len(wildlist)
+                if wildindx == 0:
+                    fileindx = (fileindx + 1) % len(files)
         else:
             fileindx = (fileindx + 1) % len(files)
 
@@ -142,7 +160,7 @@ def playimage(passedIn=""):
         if fname[-4:].upper() in [".BMP",".PNG",".JPG",".RLE"]:
 
             bitmap, palette = adafruit_imageload.load( \
-                fname, bitmap=displayio.Bitmap, palette=displayio.Palette)
+                pictDir+fname, bitmap=displayio.Bitmap, palette=displayio.Palette)
             
             scalefactor = display.width / bitmap.width
             if display.height/bitmap.height < scalefactor:
@@ -205,10 +223,10 @@ def playimage(passedIn=""):
 
         elif fname[-4:].upper() in [".GIF"]:
 
-            odgcc = gifio.OnDiskGif(fname)
+            odgcc = gifio.OnDiskGif(pictDir+fname)
             with odgcc as odg:
 
-                if getenv('PYDOS_DISPLAYIO_COLORSPACE',"").upper() == 'BGR565_SWAPPED':
+                if os.getenv('PYDOS_DISPLAYIO_COLORSPACE',"").upper() == 'BGR565_SWAPPED':
                     colorspace = displayio.Colorspace.BGR565_SWAPPED
                 else:
                     colorspace = displayio.Colorspace.RGB565_SWAPPED
@@ -272,7 +290,7 @@ def playimage(passedIn=""):
             except:
                 pass
 
-        else:
+        elif fname != "":
             print('Unknown filetype')
 
     try:

@@ -64,6 +64,7 @@ If a command argument contains spaces the argument must be enclosed in quotes.
     - PROMPT - The DOS prompt string
     - _scrHeight - The number of lines on the terminal or screen
     - _scrWidth - The number of columns on the terminal or screen
+    - _displayTerm - After running a python program PyDOS will make sure the terminal is restored to an attached displayio display unless _displayTerm is set to "N".  
     - errorlevel - The result code from the previous BAT file or pexec command executed
     - DIRSEP - If set to a backslash (\\) PyDOS will use a backslash as the directory seperator character regardless of the seperator used by the local filesystem (i.e. `os.sep`). If set to anything other than a backslash PyDOS will use a forward slash as the directory seperator character.
 
@@ -305,7 +306,9 @@ After the .UF2 file is copied to the microcontroller board it should re-boot and
 
 **PyDOS install**
 
-To copy PyDOS to the Microcontroller, simply drag the PyDOS directory structure
+*CircuitPython will reboot the microcontroller when it detects files have been changed so by default the microcontroller may restart multiple times during the PyDOS install. This shouln't be a problem, however you can disable the auto-reload feature by updating boot.py. Information and instructions can be found [here](https://learn.adafruit.com/welcome-to-circuitpython/troubleshooting#code-dot-py-restarts-constantly-3108374)*
+
+To copy PyDOS to the microcontroller, simply drag the PyDOS directory structure
 (after removing the **mpython** folder if space is a concern) to the root directory of the device that appears on the host computer.
 
 If the copy is interrupted for any reason you can delete the boot.py

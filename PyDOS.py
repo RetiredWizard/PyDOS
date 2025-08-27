@@ -29,8 +29,8 @@ if implementation.name.upper() == "MICROPYTHON":
     from micropython import mem_info
     imp = "M"
 elif implementation.name.upper() == "CIRCUITPYTHON":
-    if not Pydos_ui:
-        from supervisor import runtime
+    from supervisor import runtime
+    import displayio
     imp = "C"
 
 gc.collect()
@@ -73,7 +73,7 @@ def PyDOS():
     global envVars
     if "envVars" not in globals().keys():
         envVars = {}
-    _VER = "1.52"
+    _VER = "1.53"
     prmpVals = ['>','(',')','&','|','\x1b','\b','<','=',' ',_VER,'\n','$','']
 
     print("Starting Py-DOS...")
@@ -150,6 +150,26 @@ def PyDOS():
                 err.__traceback__ if hasattr(err,'__traceback__') else None)
         except KeyboardInterrupt:
             print("^C")
+
+        if imp == "C":
+            if "_display" not in envVars.keys():
+                if "display" in dir(Pydos_ui):
+                    envVars["_display"] = Pydos_ui.display
+                elif "display" in dir(runtime) and runtime.display is not None:
+                    envVars["_display"] = runtime.display
+                elif "display" in dir(board):
+                    envVars["_display"] = board.display
+
+            # If _displayTerm is set to "N", do not restore terminal to display
+            if "_display" in envVars.keys() and envVars["_display"] is not None \
+                and envVars.get("_displayTerm","Y")[0].upper() != "N":
+
+                if envVars["_display"].root_group != displayio.CIRCUITPYTHON_TERMINAL:
+                    envVars["_display"].root_group = displayio.CIRCUITPYTHON_TERMINAL
+
+                envVars["_display"].auto_refresh = True
+                envVars["_scrHeight"] = envVars["_display"].root_group[0].height
+                envVars["_scrWidth"] = envVars["_display"].root_group[0].width - 1
 
         return
 
@@ -647,7 +667,8 @@ def PyDOS():
             print(f'The current date is: {"MonTueWedThuFriSatSun"[i:i+3]} {localtime()[1]:02}/{localtime()[2]:02}/{localtime()[0]:04}')
 
         elif cmd == "TIME":
-            print(f'The current time is: {localtime()[3]%12}:{localtime()[4]:02}:{localtime()[5]:02} {["AM","PM"][localtime()[3]//12]}')
+            print(f'The current time is: {(localtime()[3]%12) if localtime()[3] not in (0,12)\
+                else 12}:{localtime()[4]:02}:{localtime()[5]:02} {["AM","PM"][localtime()[3]//12]}')            
 
         elif cmd == "MEM":
             gc.collect()

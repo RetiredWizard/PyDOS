@@ -1,3 +1,29 @@
+8/6/202: Most of the changes listed below have been merged into the original version of PyBasic
+and no longer represent changes. The remaining differences are as follows:
+
+* Richpl/PyBasic initializes array elements to zero or space, PyDOS/PyBasic throws an
+error if an array element is used before being set
+* Richpl/PyBasic adds an additional element to arrays in order to support both 0 based and
+1 based indexing, PyDOS/PyBasic wraps arrays so that for an array dimensioned at 10,
+ element 0 and and element 10 point to the same element reducing the memory used by arrays,
+ especially 2 and 3 dimensional arrays
+* Richpl/PyBasic requires a semicolon as print and input element seperators, PyDOS/PyBasic
+also allows commas
+* PyDOS/PyBasic doesn't load the basic program into memory and runs it directly line by
+line from flash, this allows larger programs to be run on micro controllers with limited
+RAM but at a significant speed cost.
+* PyDOS/PyBasic user prompt changed from ">" to ":"
+* The PI, RNDINT, TERNARY, LEFT$, RIGHT$ functions not supported in the PyDOS version
+* The RND function does not take any arguments or even empty parenthesis in the PyDOS version
+* The PyDOS version added a saved index source code option when saving or loading using the
+.PGM extension on a program filename, this vastly speeds up subsequent program load times
+* The PyDOS version added SOUND freq,duration[,volume] command. The Windows code uses the
+winsound library and the Micropython/Circuit Python implementations assumes the
+appropriate speaker circuit is connected to the GPIO pin defined in pydos_bcfg.py
+
+
+----------------------------------------------------------------------------------------
+
 * save and load from text file rather than pickle binary
 * added command line argument functionality (breaks running outside of PyDOS environment)
 * prompt changed from > to :
