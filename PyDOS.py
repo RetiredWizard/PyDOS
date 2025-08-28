@@ -695,7 +695,7 @@ def PyDOS():
                 elif args[1].upper() == 'OFF':
                     batEcho = False
                 else:
-                    print(cmdLine[5:].replace("\e",chr(27)).replace('\x1b',chr(27)).replace("\E",chr(27)).replace('\X1B',chr(27)))
+                    print(cmdLine[5:].replace("<esc>",chr(27)).replace('<Esc>',chr(27)).replace("<ESC>",chr(27)))
 
         elif cmd == "PAUSE":
             anyKey()
