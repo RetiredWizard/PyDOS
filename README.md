@@ -414,4 +414,4 @@ At the REPL prompt type "**import PyDOS*** to start PyDOS and then type **setup*
 - Rename should allow wildcards in filenames, i.e. "rename *.bas *.txt" or "rename code.py *.sav"  
 - Quiet, /Q switches to DEL, RMDIR, COPY, XCOPY commands
 - PgUp/PgDwn support in fileview.py
-- Properly implement edlin cursor position and append command
+- ~~Properly implement edlin cursor position and append command~~
