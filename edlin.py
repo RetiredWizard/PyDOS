@@ -68,8 +68,6 @@ class EdlinEditor:
                 elif cmd_type == 'o':
                     filename = lrange if lrange else None
                     self.open_file(filename)
-                elif cmd_type == 't':
-                    self.show_file_type()
                 elif cmd_type == '.':
                     self.display_and_edit(lrange)
                     
@@ -128,7 +126,7 @@ class EdlinEditor:
         
         first_char = cmd[0]
         
-        if first_char in ['l','a','i','t','q','?']:
+        if first_char in ['l','a','i','q','?']:
             return (first_char, None, None)
         elif first_char == 'd':
             print("Usage: [start],[end] d")
@@ -148,11 +146,15 @@ class EdlinEditor:
         n = len(end_part)
 
         # 1. Capture leading digits
-        digits = ''
         while i < n and end_part[i].isdigit():
-            digits += end_part[i]
             i += 1
 
+        # Only counts as a match if digits exist (like \d+)
+        if i == 0:
+            return None
+
+        digits = end_part[:i]
+        
         # 2. Capture following whitespace
         spaces = ''
         while i < n and end_part[i].isspace():
@@ -162,11 +164,7 @@ class EdlinEditor:
         # 3. Capture the remainder
         remainder = end_part[i:]
 
-        # Only counts as a match if digits exist (like \d+)
-        if digits:
-            return digits, spaces, remainder
-        else:
-            return None
+        return digits, spaces, remainder
 
     def extract_range(self, cmd):
         """Extract line range from beginning of command"""
@@ -209,7 +207,7 @@ class EdlinEditor:
             save = ''
             while save not in ['y','yes','n','no']:
                 save = input("Text modified. Save before quitting? (y/n): ").lower().strip()
-            if save == 'y':
+            if save[0] == 'y':
                 if not self.filename:
                     filename = input("Enter filename: ").strip()
                     if filename:
@@ -236,7 +234,6 @@ class EdlinEditor:
         print("  e [filename]          - Exit and write to file")
         print("  q                     - Quit")
         print("  ?                     - Show this help")
-        print("  t                     - Show file info")
         print("\n[#][,#] specifies either single line # or start,end range")
         print("If a line number or range is not specified, the current line will be used")
         print("Note: * indicates current line pointer")
@@ -320,6 +317,25 @@ class EdlinEditor:
             self.modified = True
             print(f"Inserted {len(new_lines)} lines")
     
+    def delete_lines(self, line_range):
+        """Delete lines in range"""
+        start, end = line_range
+        
+        if 1 <= start <= end <= len(self.lines):
+            deleted_count = end - start + 1
+            del self.lines[start-1:end]
+            self.modified = True
+            print(f"Deleted {deleted_count} lines")
+            
+            if self.current_line > end:
+                self.current_line -= deleted_count
+            elif start <= self.current_line <= end:
+                self.current_line = max(1, start)
+            elif self.current_line > start:
+                self.current_line = start
+        else:
+            print("Invalid line range")
+    
     def process_range(self, parsed_cmd):
         """Perform Replace, Search or List functions"""
 
@@ -400,21 +416,29 @@ class EdlinEditor:
                         response = ''
                         while response not in ['y','yes','n','no','e','end']:
                             if cmd == 's':
-                                response = input(f"Continue search? (Yes/No/End): ").lower().strip()
+                                response = input(f"Continue search? (Yes/No): ").lower().strip()
                             else:
                                 response = input(f"Replace '{search_text}' with '{new_text}'? (Yes/No/End): ").lower().strip()
                         
-                        if response in ['no','n']:
-                            continue
-                        elif response in ['end','e']:
-                            break
-                        elif response in ['yes','y']:
+                        if response[0] == 'n':
+                            if cmd == 's':
+                                self.current_line = i
+                                _count += 1
+                                break
+                        elif response[0] == 'y':
                             if cmd == 'r':
                                 self.lines[i-1] = self.lines[i-1].replace(search_text, new_text)
                                 self.modified = True
                             _count += 1
+                            self.current_line = i
+                        elif response[0] =='e':
+                            if cmd == 's':
+                                self.current_line = i
+                                _count += 1
+                            break
                     else:
                         _count += 1
+                        self.current_line = i
                         if cmd == 's':
                             print(f"{i}: {self.lines[i-1]}")
                             break  # Only show first match in non-confirmation mode
@@ -430,25 +454,6 @@ class EdlinEditor:
             else:
                 print(f"'{search_text}' not found in specified range")
 
-    def delete_lines(self, line_range):
-        """Delete lines in range"""
-        start, end = line_range
-        
-        if 1 <= start <= end <= len(self.lines):
-            deleted_count = end - start + 1
-            del self.lines[start-1:end]
-            self.modified = True
-            print(f"Deleted {deleted_count} lines")
-            
-            if self.current_line > end:
-                self.current_line -= deleted_count
-            elif start <= self.current_line <= end:
-                self.current_line = max(1, start)
-            elif self.current_line > start:
-                self.current_line = start
-        else:
-            print("Invalid line range")
-    
     def write_file(self, filename):
         """Write file to disk"""
         try:
@@ -519,7 +524,7 @@ class EdlinEditor:
             save = ''
             while save not in ["y","yes","n","no"]:
                 save = input("Current file is modified. Save before opening new file? (y/n): ").lower().strip()
-            if save in ['y','yes']:
+            if save[0] =='y':
                 if self.filename:
                     self.write_file(self.filename)
                 else:
@@ -530,21 +535,12 @@ class EdlinEditor:
                         sure = ''
                         while sure not in ["y","yes","n","no"]:
                             sure = input("Current changes will be lost! Are you Sure? (y/n): ")
-                        if sure in ["n","no"]:
+                        if sure[0] =="n":
                             print("Open file aborted")
                             return
         
         self.filename = self._open_text(filename)
     
-    def show_file_type(self):
-        """Show file information"""
-        print(f"Filename: {self.filename if self.filename else '[no name]'}")
-        print(f"Lines: {len(self.lines)}")
-        print(f"Current line: {self.current_line}")
-        print(f"Status: {'Modified' if self.modified else 'Unchanged'}")
-        if self.lines:
-            print(f"First line: {self.lines[0][:50]}..." if len(self.lines[0]) > 50 else f"First line: {self.lines[0]}")
-
 def edlin(passedIn=""):
     editor = EdlinEditor()
     editor.run(passedIn)
