@@ -73,7 +73,7 @@ def PyDOS():
     global envVars
     if "envVars" not in globals().keys():
         envVars = {}
-    _VER = "1.54"
+    _VER = "1.55"
     prmpVals = ['>','(',')','&','|','\x1b','\b','<','=',' ',_VER,'\n','$','']
 
     print("Starting Py-DOS...")
@@ -936,8 +936,11 @@ def PyDOS():
                         else:
                             if newdir in os.listdir(pFmt(tmpDir,False)):
                                 if aFile(tmpDir+newdir):
-                                    os.remove(tmpDir+newdir)
-                                    print((tmpDir+newdir).replace('/',('\\' if envVars.get('DIRSEP','/') == '\\' else '/')),"deleted.")
+                                    try:
+                                        os.remove(tmpDir+newdir)
+                                        print((tmpDir+newdir).replace('/',('\\' if envVars.get('DIRSEP','/') == '\\' else '/')),"deleted.")
+                                    except Exception as err:
+                                        print(f"Unable to delete: {tmpDir+newdir}, Exception: {err}")
                                 else:
                                     ans = input(tmpDir+newdir+sep+"*, Are you sure (y/n)? ").upper()
                                     if ans == "Y":
