@@ -31,6 +31,7 @@ if implementation.name.upper() == "MICROPYTHON":
 elif implementation.name.upper() == "CIRCUITPYTHON":
     from supervisor import runtime
     import displayio
+    import board
     imp = "C"
 
 gc.collect()
@@ -73,7 +74,7 @@ def PyDOS():
     global envVars
     if "envVars" not in globals().keys():
         envVars = {}
-    _VER = "1.55"
+    _VER = "1.58"
     prmpVals = ['>','(',')','&','|','\x1b','\b','<','=',' ',_VER,'\n','$','']
 
     print("Starting Py-DOS...")
@@ -157,8 +158,12 @@ def PyDOS():
                     envVars["_display"] = Pydos_ui.display
                 elif "display" in dir(runtime) and runtime.display is not None:
                     envVars["_display"] = runtime.display
-                elif "display" in dir(board):
-                    envVars["_display"] = board.display
+                else:
+                    try:
+                        if "display" in dir(board):
+                            envVars["_display"] = board.display
+                    except NameError:
+                        pass
 
             # If _displayTerm is set to "N", do not restore terminal to display
             if "_display" in envVars.keys() and envVars["_display"] is not None \
